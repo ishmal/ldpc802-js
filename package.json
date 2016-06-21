@@ -1,0 +1,25 @@
+{
+  "name": "ldpc",
+  "version": "1.0.0",
+  "description": "experimentation with ldpc codes",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ishmal/ldpc.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ishmal/ldpc/issues"
+  },
+  "homepage": "https://github.com/ishmal/ldpc#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-jasmine": "^2.4.0",
+    "gulp-jshint": "^2.0.1",
+    "jshint": "^2.9.2"
+  }
+}
