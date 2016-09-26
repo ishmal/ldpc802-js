@@ -1,7 +1,7 @@
 /* jshint node: true, esnext: true */
 "use strict";
 
-class Ldap {
+class Ldpc {
 
   constructor() {
 
@@ -10,4 +10,5 @@ class Ldap {
 
 }
 
-module.exports = Ldap;
+module.exports = Ldpc;
+
