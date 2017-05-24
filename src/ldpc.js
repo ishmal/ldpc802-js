@@ -338,15 +338,14 @@ class Ldpc {
     }
 
     /**
-     * @param str {string}
+     * @param bytes {array}
      * @param lenStr {string}
      * @param rateStr {string}
      */
-    encode(str, lenStr, rateStr) {
+    encode(bytes, lenStr, rateStr) {
         let code = codes[lenStr];
         let rate = code.rates[rateStr];
         let z = code.z;
-        let bytes = this.strToBytes(str);
         let bits = this.bytesToBits(bytes);
         let pbits = this.padBitsTo(bits, code.length);
         let zbits = this.bitsToZ(pbits, code.z);
@@ -369,6 +368,16 @@ class Ldpc {
         }
         let outbits = this.zToBits(zbitsOut);
         return outbits;
+    }
+
+    /**
+     * @param str {string}
+     * @param lenStr {string}
+     * @param rateStr {string}
+     */
+    encodeString(str, lenStr, rateStr) {
+        let bytes = this.strToBytes(str);
+        return this.encode(bytes, lenStr, rateStr);
     }
 
 }
