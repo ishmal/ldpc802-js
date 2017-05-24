@@ -1,5 +1,5 @@
 /* jshint node: true, esnext: true */
-const  Crc32 = require('./crc32');
+const Crc32 = require('./crc32');
 
 const codes = {
     "648": {
@@ -207,24 +207,42 @@ class Ldpc {
     strToBytes(str) {
         let bytes = [];
         let len = str.length;
-
         for (let i = 0; i < len; i++) {
-            let charCode = str.charCodeAt(i);
-            bytes.push((charCode & 0xFF00) >> 8);
-            bytes.push(charCode & 0xFF);
+            let code = str.codeAt(i);
+            if (code < 0x80) {
+                bytes.push(code);
+            } else if (code < 0x800) {
+                bytes.push(0xc0 | (code >> 6),
+                    0x80 | (code & 0x3f));
+            } else if (code < 0xd800 || code >= 0xe000) {
+                bytes.push(0xe0 | (code >> 12),
+                    0x80 | ((code >> 6) & 0x3f),
+                    0x80 | (code & 0x3f));
+            } else { // surrogate pair
+                i++;
+                // UTF-16 encodes 0x10000-0x10FFFF by
+                // subtracting 0x10000 and splitting the
+                // 20 bits of 0x0-0xFFFFF into two halves
+                code = 0x10000 + (((code & 0x3ff) << 10) |
+                    (str.codeAt(i) & 0x3ff));
+                bytes.push(0xf0 | (code >> 18),
+                    0x80 | ((code >> 12) & 0x3f),
+                    0x80 | ((code >> 6) & 0x3f),
+                    0x80 | (code & 0x3f));
+            }
         }
         return bytes;
     }
 
     wrapBytes(bytes) {
-      let crc = new Crc32();
-      let len = bytes.length + 8;
-      let lenBytes = crc.intToBytes(len);
-      let bytes2 = lenBytes.concat(bytes);
-      let checksum = crc.ofBytes(bytes2);
-      let checksumBytes = crc.intToBytes(checksum);
-      let obytes = bytes2.concat(checksumBytes);
-      return obytes;
+        let crc = new Crc32();
+        let len = bytes.length + 8;
+        let lenBytes = crc.intToBytes(len);
+        let bytes2 = lenBytes.concat(bytes);
+        let checksum = crc.ofBytes(bytes2);
+        let checksumBytes = crc.intToBytes(checksum);
+        let obytes = bytes2.concat(checksumBytes);
+        return obytes;
     }
 
     bytesToBits(bytes) {
@@ -257,7 +275,8 @@ class Ldpc {
     bitsToZ(bits, z) {
         let zarr = [];
         let len = bits.length;
-        let start = 0, end = z;
+        let start = 0,
+            end = z;
         while (start < len) {
             let chunk = bits.slice(start, end);
             zarr.push(chunk);
@@ -270,52 +289,52 @@ class Ldpc {
     zToBits(z) {
         let bits = [];
         let len = z.length;
-        for (let i = 0 ; i < len ; i++) {
-          bits = bits.concat(z[i]);
+        for (let i = 0; i < len; i++) {
+            bits = bits.concat(z[i]);
         }
         return bits;
     }
 
     arrayRotate(arr, n) {
-      return arr.slice(n, arr.length).concat(arr.slice(0, n));
+        return arr.slice(n, arr.length).concat(arr.slice(0, n));
     }
 
     arrayAdd(a, b) {
-      let len = a.length;
-      let arr = new Array(len);
-      for (let i = 0 ; i < len ; i++) {
-        arr[i] = a[i] + b[i];
-      }
-      return arr;
+        let len = a.length;
+        let arr = new Array(len);
+        for (let i = 0; i < len; i++) {
+            arr[i] = a[i] + b[i];
+        }
+        return arr;
     }
 
     arrayXor(a, b) {
-      let len = a.length;
-      let arr = new Array(len);
-      for (let i = 0 ; i < len ; i++) {
-        arr[i] = a[i] ^ b[i];
-      }
-      return arr;
+        let len = a.length;
+        let arr = new Array(len);
+        for (let i = 0; i < len; i++) {
+            arr[i] = a[i] ^ b[i];
+        }
+        return arr;
     }
 
     arrayNew(size) {
-      let a = new Array(size);
-      a.fill(0);
-      return a;
+        let a = new Array(size);
+        a.fill(0);
+        return a;
     }
 
     lambdaI(Hb, zbits, z, kb, i) {
-      let p = this.arrayNew(z);
-      for (let j = 0 ; j < kb ; j++) {
-        let hij = Hb[i][j];
-        if (hij >= 0) {
-          let mz = zbits[j];
-          for (let k = 0 ; k < z ; k++) {
-            p = this.arrayXor(p, this.arrayRotate(mz, hij));
-          }
+        let p = this.arrayNew(z);
+        for (let j = 0; j < kb; j++) {
+            let hij = Hb[i][j];
+            if (hij >= 0) {
+                let mz = zbits[j];
+                for (let k = 0; k < z; k++) {
+                    p = this.arrayXor(p, this.arrayRotate(mz, hij));
+                }
+            }
         }
-      }
-      return p;
+        return p;
     }
 
     /**
@@ -333,20 +352,20 @@ class Ldpc {
         let zbits = this.bitsToZ(pbits, code.z);
         let zbitsOut = zbits.slice(0);
         let Hb = rate.Z;
-        let mb = zbits.length;  //message length in z-blocks
+        let mb = zbits.length; //message length in z-blocks
         let nrParityZ = (code.length - mb * z) / z;
-        let nb = Hb[0].length;  // matrix width in z-blocks
+        let nb = Hb[0].length; // matrix width in z-blocks
         let kb = nb - mb;
         let p0 = this.arrayNew(z);
-        for (let i = 0 ; i < mb ; i++) {
-          let p = this.lambdaI(Hb, zbits, z, kb, i);
-          p0 = this.arrayAdd(p0, p);
+        for (let i = 0; i < mb; i++) {
+            let p = this.lambdaI(Hb, zbits, z, kb, i);
+            p0 = this.arrayAdd(p0, p);
         }
         zbitsOut.push(p0);
-        for (let i = 1; i < nrParityZ ; i++) {
-          let p = this.lambdaI(Hb, zbits, z, kb, i - 1);
-          let nextp = this.arrayAdd(p, this.arrayRotate(p0, 1));
-          zbitsOut.push(nextp);
+        for (let i = 1; i < nrParityZ; i++) {
+            let p = this.lambdaI(Hb, zbits, z, kb, i - 1);
+            let nextp = this.arrayAdd(p, this.arrayRotate(p0, 1));
+            zbitsOut.push(nextp);
         }
         let outbits = this.zToBits(zbitsOut);
         return outbits;
@@ -356,4 +375,3 @@ class Ldpc {
 
 
 module.exports = Ldpc;
-
