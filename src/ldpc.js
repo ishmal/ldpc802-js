@@ -204,7 +204,7 @@ class Ldpc {
         rate.Z = arr;
     }
 
-    strToBytes(str) {
+    stringToBytes(str) {
         let bytes = [];
         let len = str.length;
         for (let i = 0; i < len; i++) {
@@ -232,6 +232,12 @@ class Ldpc {
             }
         }
         return bytes;
+    }
+
+    bytesToString(byteArray) {
+        let encodedString = String.fromCharCode.apply(null, byteArray);
+        let decodedString = decodeURIComponent(escape(encodedString));
+        return decodedString;
     }
 
     wrapBytes(bytes) {
@@ -376,7 +382,7 @@ class Ldpc {
      * @param rateStr {string}
      */
     encodeString(str, lenStr, rateStr) {
-        let bytes = this.strToBytes(str);
+        let bytes = this.stringToBytes(str);
         return this.encode(bytes, lenStr, rateStr);
     }
 
