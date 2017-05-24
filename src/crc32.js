@@ -1,3 +1,4 @@
+/* jshint node: true, esnext: true */
 
 /**
  * Calculates a 4-byte CRC32 of a string or byte array
@@ -45,13 +46,13 @@ class Crc32 {
     }
 
     intToBytes(crc) {
-      let bytes = [
-        (crc >> 24) & 0xff,
-        (crc >> 16) & 0xff,
-        (crc >>  8) & 0xff,
-        (crc      ) & 0xff,
-      ];
-      return bytes;
+        let bytes = [
+            (crc >> 24) & 0xff,
+            (crc >> 16) & 0xff,
+            (crc >> 8) & 0xff,
+            (crc) & 0xff,
+        ];
+        return bytes;
     }
 
 }
