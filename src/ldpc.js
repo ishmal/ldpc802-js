@@ -162,7 +162,7 @@ const codes = {
 
 
 /**
- *
+ * LDPC codec for 802.11n LDPC codes
  */
 class Ldpc {
 
@@ -170,6 +170,9 @@ class Ldpc {
         this.generateTables();
     }
 
+    /**
+     * Generate our encoding and decoding tables
+     */
     generateTables() {
         Object.keys(codes).forEach(k => {
             let code = codes[k];
@@ -180,6 +183,11 @@ class Ldpc {
         });
     }
 
+    /**
+     * Generate the pseudo-cyclic 'Z' table from the code data
+     * @param {*} code name of the code
+     * @param {*} rate code rate for the code
+     */
     generateZ(code, rate) {
         let z = code.z;
         let arr = [];
@@ -204,11 +212,16 @@ class Ldpc {
         rate.Z = arr;
     }
 
+    /**
+     * Convert a string to an array of UTF-8 bytes
+     * @param {string} str 
+     * @return {array} of bytes
+     */
     stringToBytes(str) {
         let bytes = [];
         let len = str.length;
         for (let i = 0; i < len; i++) {
-            let code = str.codeAt(i);
+            let code = str.charCodeAt(i);
             if (code < 0x80) {
                 bytes.push(code);
             } else if (code < 0x800) {
@@ -220,9 +233,11 @@ class Ldpc {
                     0x80 | (code & 0x3f));
             } else { // surrogate pair
                 i++;
-                // UTF-16 encodes 0x10000-0x10FFFF by
-                // subtracting 0x10000 and splitting the
-                // 20 bits of 0x0-0xFFFFF into two halves
+                /**
+                 * UTF-16 encodes 0x10000-0x10FFFF by
+                 * subtracting 0x10000 and splitting the
+                 * 20 bits of 0x0-0xFFFFF into two halves
+                 */
                 code = 0x10000 + (((code & 0x3ff) << 10) |
                     (str.codeAt(i) & 0x3ff));
                 bytes.push(0xf0 | (code >> 18),
@@ -234,12 +249,23 @@ class Ldpc {
         return bytes;
     }
 
+    /**
+     * Convert an array of UTF-8 bytes to a string
+     * @param {array} byteArray 
+     * @return {string}
+     */
     bytesToString(byteArray) {
         let encodedString = String.fromCharCode.apply(null, byteArray);
         let decodedString = decodeURIComponent(escape(encodedString));
         return decodedString;
     }
 
+    /**
+     * Take an array of integers calculate their CRC32 checksum, and append
+     * the result to the end.
+     * @param {array} bytes the array of bytes to seal with a checksum
+     * @return {array} array 'wrapped' with a crc on the end as 4 bytes
+     */
     wrapBytes(bytes) {
         let crc = new Crc32();
         let len = bytes.length + 8;
@@ -251,6 +277,12 @@ class Ldpc {
         return obytes;
     }
 
+    /**
+     * Convert an array of bytes to an array of bits. Bigendian.
+     * The output array is 8x the size of the input, each element a 1 or 0
+     * @param {array} bytes 
+     * @return {array} of bits
+     */
     bytesToBits(bytes) {
         let bits = [];
         let len = bytes.length;
@@ -268,43 +300,58 @@ class Ldpc {
         return bits;
     }
 
-    padBitsTo(inbits, size) {
-        let bits = inbits.slice(0);
-        let len = bits.length;
-        let pad = size - len;
-        for (let i = 0; i < pad; i++) {
-            bits.push(0);
+    /**
+     * Pad an array with zeroes to that its length is a given size
+     * @param {array} inbits input array of bits
+     * @param {*} size the desired size,  >= the length of the array
+     */
+    zeroPadArray(inarr, size) {
+        let arr = inarr.slice(0);
+        let nrZeros = size - arr.length;
+        while (nrZeros--) {
+            arr.push(0);
         }
-        return bits;
+        return arr;
     }
 
-    bitsToZ(bits, z) {
+    /**
+     * Break up a linear array of bits into z-sized subarrays.
+     * NOTE:  this assumes that the input array's length is a multiple of z
+     * @param {array} inbits array of bits to break up
+     * @param {number} size the size of each subarray
+     */
+    bitsToZ(inbits, size) {
+        let bits = inbits.slice(0);
         let zarr = [];
-        let len = bits.length;
-        let start = 0,
-            end = z;
-        while (start < len) {
-            let chunk = bits.slice(start, end);
-            zarr.push(chunk);
-            start = end;
-            end += z;
+        while (bits.length > 0) {
+            zarr.push(bits.splice(0, size));
         }
         return zarr;
     }
 
+    /**
+     * Flatten a Z array (array of arrays of bits) to a single array of bits
+     * @param {array} z the array-of-arrays to flatten
+     */
     zToBits(z) {
-        let bits = [];
-        let len = z.length;
-        for (let i = 0; i < len; i++) {
-            bits = bits.concat(z[i]);
-        }
-        return bits;
+        return z.reduce((acc, child) => acc.concat(child), []);
     }
 
+    /**
+     * Rotate an array N places to the right
+     * @param {array} arr the array of bits to rotate
+     * @param {*} n the number of spaces to rotate
+     */
     arrayRotate(arr, n) {
         return arr.slice(n, arr.length).concat(arr.slice(0, n));
     }
 
+    /**
+     * Sum two arrays of numbers together
+     * @param {array} a 
+     * @param {array} b 
+     * @return {array} sum of the two arrays
+     */
     arrayAdd(a, b) {
         let len = a.length;
         let arr = new Array(len);
@@ -314,6 +361,12 @@ class Ldpc {
         return arr;
     }
 
+    /**
+     * XOR two arrays of numbers together
+     * @param {array} a 
+     * @param {array} b 
+     * @return {array} xor of the two arrays
+     */
     arrayXor(a, b) {
         let len = a.length;
         let arr = new Array(len);
@@ -323,14 +376,16 @@ class Ldpc {
         return arr;
     }
 
-    arrayNew(size) {
-        let a = new Array(size);
-        a.fill(0);
-        return a;
-    }
-
+    /**
+     * Perform one "lambda" operation on a message and matrix row
+     * @param {array[]} Hb the quasi-cyclic matrix
+     * @param {array[]} zbits array of z-sized arrays of bits of message
+     * @param {number} z size of each array
+     * @param {number} kb width of parity bits
+     * @param {number} i index of row in matrix
+     */
     lambdaI(Hb, zbits, z, kb, i) {
-        let p = this.arrayNew(z);
+        let p = new Array(z).fill(0);
         for (let j = 0; j < kb; j++) {
             let hij = Hb[i][j];
             if (hij >= 0) {
@@ -344,16 +399,18 @@ class Ldpc {
     }
 
     /**
-     * @param bytes {array}
-     * @param lenStr {string}
-     * @param rateStr {string}
+     * Encode an array of bytes with the given LDPC code
+     * @param bytes {array} the bytes to encode
+     * @param lenStr {string} the length from the tables above
+     * @param rateStr {string} the rate from the tables above
+     * @return {array} the encoded bits
      */
     encode(bytes, lenStr, rateStr) {
         let code = codes[lenStr];
         let rate = code.rates[rateStr];
         let z = code.z;
         let bits = this.bytesToBits(bytes);
-        let pbits = this.padBitsTo(bits, code.length);
+        let pbits = this.zeroPadArray(bits, code.length);
         let zbits = this.bitsToZ(pbits, code.z);
         let zbitsOut = zbits.slice(0);
         let Hb = rate.Z;
@@ -361,7 +418,7 @@ class Ldpc {
         let nrParityZ = (code.length - mb * z) / z;
         let nb = Hb[0].length; // matrix width in z-blocks
         let kb = nb - mb;
-        let p0 = this.arrayNew(z);
+        let p0 = new Array(z).fill(0);
         for (let i = 0; i < mb; i++) {
             let p = this.lambdaI(Hb, zbits, z, kb, i);
             p0 = this.arrayAdd(p0, p);
@@ -377,13 +434,43 @@ class Ldpc {
     }
 
     /**
-     * @param str {string}
-     * @param lenStr {string}
-     * @param rateStr {string}
+     * Encode a string with the given LDPC code
+     * @param str {string} the string to encode
+     * @param lenStr {string} the length from the tables above
+     * @param rateStr {string} the rate from the tables above
+     * @return {array} the encoded bits
      */
     encodeString(str, lenStr, rateStr) {
         let bytes = this.stringToBytes(str);
         return this.encode(bytes, lenStr, rateStr);
+    }
+
+    /**
+     * Decode an array of LDPC-encoded bits with the given LDPC code
+     * @param {array} inbits array of bits
+     * @param lenStr {string} the length from the tables above
+     * @param rateStr {string} the rate from the tables above
+     * @param {array} the output bytes
+     */
+    decode(inbits, lenStr, rateStr) {
+        let outbytes = [];
+        /**
+         * Step 2 ...  ?
+         */
+        return outbytes;
+    }
+
+    /** 
+     * Decode an array of LDPC-encoded bits with the given LDPC code
+     * @param {array} inbits array of bits
+     * @param lenStr {string} the length from the tables above
+     * @param rateStr {string} the rate from the tables above
+     * @param {string} the output string
+     */
+    decodeString(inbits, lenStr, rateStr) {
+        let outbytes = this.decode(inbits);
+        let str = this.bytesToString(outbytes);
+        return str;
     }
 
 }

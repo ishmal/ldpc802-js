@@ -1,4 +1,4 @@
-/* jshint node: true, esnext: true */
+/* jshint node: true, esversion: 6 */
 /* globals
 describe: false,
 expect: false,
