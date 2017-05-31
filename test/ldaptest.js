@@ -21,7 +21,7 @@ describe("LDPC tests", function () {
   it("should encode a string without exceptions", function () {
     let ldpc = new Ldpc();
     let plain = "the quick brown fox";
-    let res = ldpc.encode(plain, "648", "1/2");
+    let res = ldpc.encode(plain, "1/2", "648");
     assert(res);
   });
 
