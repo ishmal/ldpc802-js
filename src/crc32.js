@@ -1,4 +1,4 @@
-/* jshint node: true, esnext: true */
+/* jshint node: true, esversion: 6 */
 
 /**
  * Calculates a 4-byte CRC32 of a string or byte array
