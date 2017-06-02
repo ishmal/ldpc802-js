@@ -88,10 +88,10 @@ class Crc32 {
      */
     intToBytes(crc) {
         let bytes = [
-            (crc >> 24) & 0xff,
-            (crc >> 16) & 0xff,
-            (crc >> 8) & 0xff,
             (crc) & 0xff,
+            (crc >> 8) & 0xff,
+            (crc >> 16) & 0xff,
+            (crc >> 24) & 0xff
         ];
         return bytes;
     }

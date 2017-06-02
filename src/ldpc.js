@@ -290,12 +290,9 @@ class Ldpc {
      */
     wrapBytes(bytes) {
         let crc = new Crc32();
-        let len = bytes.length + 8;
-        let lenBytes = crc.intToBytes(len);
-        let bytes2 = lenBytes.concat(bytes);
-        let checksum = crc.ofBytes(bytes2);
+        let checksum = crc.ofBytes(bytes);
         let checksumBytes = crc.intToBytes(checksum);
-        let obytes = bytes2.concat(checksumBytes);
+        let obytes = bytes.concat(checksumBytes);
         return obytes;
     }
 
