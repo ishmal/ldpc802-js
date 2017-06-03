@@ -22,7 +22,15 @@ const fullText =
 //# E X A M P L E 1
 //#################################################################
 /* beautify preserve:start */
-  const inputMessage1 = fullText.substr(0, 72);
+const inputMessage1 = fullText.substr(0, 72);
+
+const inputMac1 = [
+      0x04, 0x02, 0x00, 0x2e, 0x00,
+      0x60, 0x08, 0xcd, 0x37, 0xa6,
+      0x00, 0x20, 0xd6, 0x01, 0x3c,
+      0xf1, 0x00, 0x60, 0x08, 0xad,
+      0x3b, 0xaf, 0x00, 0x00
+    ];
 
   /**
    * The message is converted to ASCII; then it is prepended
@@ -439,15 +447,8 @@ describe("LDPC", () => {
 
   it("should convert imputMessage1 to inputBytes1", () => {
     let ldpc = new Ldpc();
-    let mac = [ 
-      0x04, 0x02, 0x00, 0x2e, 0x00, 
-      0x60, 0x08, 0xcd, 0x37, 0xa6,
-      0x00, 0x20, 0xd6, 0x01, 0x3c,
-      0xf1, 0x00, 0x60, 0x08, 0xad,
-      0x3b, 0xaf, 0x00, 0x00
-    ];
     let mbytes = ldpc.stringToBytes(inputMessage1);
-    let inbytes = mac.slice(0);
+    let inbytes = inputMac1.slice(0);
     inbytes = inbytes.concat(mbytes);
     let res = ldpc.wrapBytes(inbytes);
     assert.deepEqual(res, inputBytes1);
