@@ -32,12 +32,12 @@ const inputMac1 = [
       0x3b, 0xaf, 0x00, 0x00
     ];
 
-  /**
-   * The message is converted to ASCII; then it is prepended
-   * with an appropriate MAC header, and a CRC32 is
-   * added. The resulting 100 octets PSDU is shown in Table G.33.
-   */
-  const inputBytes1 = [
+/**
+ * The message is converted to ASCII; then it is prepended
+ * with an appropriate MAC header, and a CRC32 is
+ * added. The resulting 100 octets PSDU is shown in Table G.33.
+ */
+const inputBytes1 = [
     /*  1....5 */
     0x04, 0x02, 0x00, 0x2E, 0x00,
     /*  6...10 */
@@ -88,6 +88,13 @@ const TXVECTOR1 = {
   length: 100,
   stbc: 0
 };
+
+const scrambleBits = [
+   0,0,0,0,1,1,1,0, 1,1,1,1,0,0,1,0, 1,1,0,0,1,0,0,1, 0,0,0,0,0,0,1,0,
+   0,0,1,0,0,1,1,0, 0,0,1,0,1,1,1,0, 1,0,1,1,0,1,1,0, 0,0,0,0,1,1,0,0,
+   1,1,0,1,0,1,0,0, 1,1,1,0,0,1,1,1, 1,0,1,1,0,1,0,0, 0,0,1,0,1,0,1,0,
+   1,1,1,1,1,0,1,0, 0,1,0,1,0,0,0,1, 1,0,1,1,1,0,0,0, 1,1,1,1,1,1,1
+];
 
 /**
  * The transmitted message shown in Table G.33 contains 100 octets,
@@ -436,6 +443,7 @@ describe("LDPC", () => {
       ldpc = new Ldpc();
     });
     assert(ldpc);
+    assert.deepEqual(ldpc.scrambleBits, scrambleBits);
   });
 
   it("should encode a string without exceptions", () => {

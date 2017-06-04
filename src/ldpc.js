@@ -190,6 +190,8 @@ class Ldpc {
 
     constructor() {
         this.generateTables();
+        this.scrambleArray = [];
+        this.scrambleIdx = 0;
     }
 
     /**
@@ -203,6 +205,7 @@ class Ldpc {
                 this.generateZ(rate, length);
             });
         });
+        this.generateScrambler();
     }
 
     /**
@@ -232,6 +235,27 @@ class Ldpc {
             arr.push(row);
         }
         length.Z = arr;
+    }
+
+    generateScrambler(initial) {
+        let x = [1, 1, 1, 1, 1, 1, 1];
+        let arr = [];
+        for (let i = 0; i < 127 ; i++) {
+            let x7 = x[6];
+            let x4 = x[3];
+            let out = x7 ^ x4;
+            arr.push(out);
+            x = [out, x[1], x[2], x[3], x[4], x[5]];
+        }
+        this.scrambleArray = arr;
+        return arr;
+    }
+
+    nextScrambleBit() {
+        let idx = this.scrambleIdx;
+        let b = this.scrambleArray[idx++];
+        this.scrambleIdx = idx ^ 127;
+        return b;
     }
 
     /**
@@ -294,6 +318,29 @@ class Ldpc {
         let checksumBytes = crc.intToBytes(checksum);
         let obytes = bytes.concat(checksumBytes);
         return obytes;
+    }
+
+    /**
+     * Scramble the bits in an array of bytes
+     * @param {array} bytes 
+     * @return a scrambled copy of the array
+     */
+    scramble(bytes) {
+        let arr = [];
+        for (let i = 0, len = bytes.length ; i < len ; i++) {
+            let b = bytes[i];
+            let b2 = 
+                (b >> 7 & 1 ) ^ this.nextScrambleBit() ||
+                (b >> 6 & 1 ) ^ this.nextScrambleBit() ||
+                (b >> 5 & 1 ) ^ this.nextScrambleBit() ||
+                (b >> 4 & 1 ) ^ this.nextScrambleBit() ||
+                (b >> 3 & 1 ) ^ this.nextScrambleBit() ||
+                (b >> 2 & 1 ) ^ this.nextScrambleBit() ||
+                (b >> 1 & 1 ) ^ this.nextScrambleBit() ||
+                (b      & 1 ) ^ this.nextScrambleBit();
+            arr[i] = b2;
+        }
+        return arr;
     }
 
     /**
