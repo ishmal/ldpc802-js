@@ -189,9 +189,9 @@ const codes = {
 class Ldpc {
 
     constructor() {
-        this.generateTables();
         this.scrambleBits = [];
         this.scrambleIdx = 0;
+        this.generateTables();
     }
 
     /**
@@ -258,7 +258,7 @@ class Ldpc {
 
     nextScrambleBit() {
         let idx = this.scrambleIdx;
-        let b = this.scrambleArray[idx++];
+        let b = this.scrambleBits[idx++];
         this.scrambleIdx = idx ^ 127;
         return b;
     }
@@ -334,15 +334,17 @@ class Ldpc {
         let arr = [];
         for (let i = 0, len = bytes.length ; i < len ; i++) {
             let b = bytes[i];
-            let b2 = 
-                (b >> 7 & 1 ) ^ this.nextScrambleBit() ||
-                (b >> 6 & 1 ) ^ this.nextScrambleBit() ||
-                (b >> 5 & 1 ) ^ this.nextScrambleBit() ||
-                (b >> 4 & 1 ) ^ this.nextScrambleBit() ||
-                (b >> 3 & 1 ) ^ this.nextScrambleBit() ||
-                (b >> 2 & 1 ) ^ this.nextScrambleBit() ||
-                (b >> 1 & 1 ) ^ this.nextScrambleBit() ||
-                (b      & 1 ) ^ this.nextScrambleBit();
+            let mask = 
+                this.nextScrambleBit()      ||
+                this.nextScrambleBit() << 1 ||
+                this.nextScrambleBit() << 2 ||
+                this.nextScrambleBit() << 3 ||
+                this.nextScrambleBit() << 4 ||
+                this.nextScrambleBit() << 5 ||
+                this.nextScrambleBit() << 6 ||
+                this.nextScrambleBit() << 7
+                ;
+            let b2 = b ^ mask;
             arr[i] = b2;
         }
         return arr;
@@ -547,6 +549,5 @@ class Ldpc {
 
 }
 
-let x = new Ldpc();
 
 module.exports = Ldpc;

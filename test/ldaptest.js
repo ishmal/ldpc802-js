@@ -443,6 +443,7 @@ describe("LDPC", () => {
       ldpc = new Ldpc();
     });
     assert(ldpc);
+    assert.equal(ldpc.scrambleBits.length, scrambleBits.length);
     assert.deepEqual(ldpc.scrambleBits, scrambleBits);
   });
 
@@ -462,6 +463,8 @@ describe("LDPC", () => {
     assert.deepEqual(res, inputBytes1);
     let res2 = [0, 0].concat(res);
     assert.deepEqual(res2, servicePrepended1);
+    let res3 = ldpc.scramble(res2);
+    assert.deepEqual(res3, scrambled1);
   });
 
 });
