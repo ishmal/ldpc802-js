@@ -190,7 +190,7 @@ class Ldpc {
 
     constructor() {
         this.generateTables();
-        this.scrambleArray = [];
+        this.scrambleBits = [];
         this.scrambleIdx = 0;
     }
 
@@ -241,13 +241,18 @@ class Ldpc {
         let x = [1, 1, 1, 1, 1, 1, 1];
         let arr = [];
         for (let i = 0; i < 127 ; i++) {
-            let x7 = x[6];
+            let x1 = x[0];
+            let x2 = x[1];
+            let x3 = x[2];
             let x4 = x[3];
+            let x5 = x[4];
+            let x6 = x[5];
+            let x7 = x[6];
             let out = x7 ^ x4;
             arr.push(out);
-            x = [out, x[1], x[2], x[3], x[4], x[5]];
+            x = [out, x1, x2, x3, x4, x5, x6];
         }
-        this.scrambleArray = arr;
+        this.scrambleBits = arr;
         return arr;
     }
 
@@ -542,5 +547,6 @@ class Ldpc {
 
 }
 
+let x = new Ldpc();
 
 module.exports = Ldpc;
