@@ -464,6 +464,11 @@ describe("LDPC", () => {
     let res2 = [0, 0].concat(res);
     assert.deepEqual(res2, servicePrepended1);
     let res3 = ldpc.scramble(res2);
+    assert.equal(res3.length, scrambled1.length);
+    for (let i=0 ; i< res3.length ; i++) {
+      console.log(i);
+      assert.equal(res3[i], scrambled1[i]);
+    }
     assert.deepEqual(res3, scrambled1);
   });
 

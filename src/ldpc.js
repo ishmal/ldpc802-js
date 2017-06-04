@@ -335,16 +335,16 @@ class Ldpc {
         for (let i = 0, len = bytes.length ; i < len ; i++) {
             let b = bytes[i];
             let mask = 
-                this.nextScrambleBit()      ||
-                this.nextScrambleBit() << 1 ||
-                this.nextScrambleBit() << 2 ||
-                this.nextScrambleBit() << 3 ||
-                this.nextScrambleBit() << 4 ||
-                this.nextScrambleBit() << 5 ||
-                this.nextScrambleBit() << 6 ||
-                this.nextScrambleBit() << 7
+                (this.nextScrambleBit()) +
+                (this.nextScrambleBit()) << 1 +
+                (this.nextScrambleBit()) << 2 +
+                (this.nextScrambleBit()) << 3 +
+                (this.nextScrambleBit()) << 4 +
+                (this.nextScrambleBit()) << 5 +
+                (this.nextScrambleBit()) << 6 +
+                (this.nextScrambleBit()) << 7
                 ;
-            let b2 = b ^ mask;
+            let b2 = (b ^ mask) & 255;
             arr[i] = b2;
         }
         return arr;
