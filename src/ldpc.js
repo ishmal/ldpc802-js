@@ -205,7 +205,7 @@ class Ldpc {
                 this.generateZ(rate, length);
             });
         });
-        this.generateScrambler();
+        this.generateScrambler(0xff);
     }
 
     /**
@@ -238,28 +238,25 @@ class Ldpc {
     }
 
     generateScrambler(initial) {
-        let x = [1, 1, 1, 1, 1, 1, 1];
+        let x = this.byteToBits(initial).slice(1).reverse();
         let arr = [];
-        for (let i = 0; i < 127 ; i++) {
-            let x1 = x[0];
-            let x2 = x[1];
-            let x3 = x[2];
+        for (let i = 0; i < 127; i++) {
+            let x7 = x[0];
             let x4 = x[3];
-            let x5 = x[4];
-            let x6 = x[5];
-            let x7 = x[6];
             let out = x7 ^ x4;
+            x.shift();
+            x.push(out);
             arr.push(out);
-            x = [out, x1, x2, x3, x4, x5, x6];
         }
         this.scrambleBits = arr;
+        this.scrambleIdx = 0;
         return arr;
     }
 
     nextScrambleBit() {
         let idx = this.scrambleIdx;
         let b = this.scrambleBits[idx++];
-        this.scrambleIdx = idx ^ 127;
+        this.scrambleIdx = idx % 127;
         return b;
     }
 
@@ -325,29 +322,99 @@ class Ldpc {
         return obytes;
     }
 
+    scrambleByte(byte) {
+        let bits = this.byteToBits(byte);
+        let b = [];
+        let b0 = this.nextScrambleBit();
+        let b1 = this.nextScrambleBit();
+        let b2 = this.nextScrambleBit();
+        let b3 = this.nextScrambleBit();
+        let b4 = this.nextScrambleBit();
+        let b5 = this.nextScrambleBit();
+        let b6 = this.nextScrambleBit();
+        let b7 = this.nextScrambleBit();
+        b[0] = bits[7] ^ b0;
+        b[1] = bits[6] ^ b1;
+        b[2] = bits[5] ^ b2;
+        b[3] = bits[4] ^ b3;
+        b[4] = bits[3] ^ b4;
+        b[5] = bits[2] ^ b5;
+        b[6] = bits[1] ^ b6;
+        b[7] = bits[0] ^ b7;
+        let obyte = this.bitsToByte(b);
+        return obyte;
+    }
+
     /**
      * Scramble the bits in an array of bytes
      * @param {array} bytes 
      * @return a scrambled copy of the array
      */
-    scramble(bytes) {
+    scrambleBytes(bytes) {
         let arr = [];
-        for (let i = 0, len = bytes.length ; i < len ; i++) {
-            let b = bytes[i];
-            let mask = 
-                (this.nextScrambleBit()) +
-                (this.nextScrambleBit()) << 1 +
-                (this.nextScrambleBit()) << 2 +
-                (this.nextScrambleBit()) << 3 +
-                (this.nextScrambleBit()) << 4 +
-                (this.nextScrambleBit()) << 5 +
-                (this.nextScrambleBit()) << 6 +
-                (this.nextScrambleBit()) << 7
-                ;
-            let b2 = (b ^ mask) & 255;
-            arr[i] = b2;
+        for (let i = 0, len = bytes.length; i < len; i++) {
+            let inb = bytes[i];
+            let b = this.scrambleByte(inb);
+            arr[i] = b;
         }
         return arr;
+    }
+
+    /**
+     * Bigendian
+     * @param {*} bits 
+     */
+    bitsToByte(bits) {
+        let byte =
+            ((bits[0] << 7) & 128) +
+            ((bits[1] << 6) &  64) +
+            ((bits[2] << 5) &  32) +
+            ((bits[3] << 4) &  16) +
+            ((bits[4] << 3) &   8) +
+            ((bits[5] << 2) &   4) +
+            ((bits[6] << 1) &   2) +
+            ((bits[7]) & 1);
+        return byte;
+    }
+
+    /** 
+     * Assumes bits length is multiple of 8
+     */
+    bitsToBytes(bits) {
+        let len = bits.length;
+        let bytes = [];
+        for (let i = 0 ; i < len ; i += 8) {
+            let b = [
+                bits[i], 
+                bits[i+1],
+                bits[i+2],
+                bits[i+3],
+                bits[i+4],
+                bits[i+5],
+                bits[i+6],
+                bits[i+7]
+            ];
+            let byte = this.bitsToByte(b);
+            bytes.push(byte);
+        }
+        return bytes;
+    }
+
+    /**
+     * Bigendian
+     * @param {*} b 
+     */
+    byteToBits(b) {
+        let bits = [];
+        bits.push((b >> 7) & 1);
+        bits.push((b >> 6) & 1);
+        bits.push((b >> 5) & 1);
+        bits.push((b >> 4) & 1);
+        bits.push((b >> 3) & 1);
+        bits.push((b >> 2) & 1);
+        bits.push((b >> 1) & 1);
+        bits.push((b) & 1);
+        return bits;
     }
 
     /**

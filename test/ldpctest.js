@@ -443,6 +443,11 @@ describe("LDPC", () => {
       ldpc = new Ldpc();
     });
     assert(ldpc);
+  });
+
+  it("should generate scrambling bits correctly", () => {
+    let ldpc = new Ldpc();
+    ldpc.generateScrambler(0xff);
     assert.equal(ldpc.scrambleBits.length, scrambleBits.length);
     assert.deepEqual(ldpc.scrambleBits, scrambleBits);
   });
@@ -454,6 +459,37 @@ describe("LDPC", () => {
     assert(res);
   });
 
+  it("should convert bytes to bits and back correctly", () => {
+    let ldpc = new Ldpc();
+    for (let i = 0 ; i < 256 ; i++) {
+      let bits = ldpc.byteToBits(i);
+      let b = ldpc.bitsToByte(bits);
+      assert.equal(b, i);
+    }
+  });
+
+  it("should scramble correctly", () => {
+    let ldpc = new Ldpc();
+    ldpc.generateScrambler(0x5d);
+    let res = ldpc.scrambleBytes(servicePrepended1);
+    assert.deepEqual(res, scrambled1);
+  });
+
+  it("should pad bits correctly", () => {
+    let ldpc = new Ldpc();
+    let bits = ldpc.bytesToBits(scrambled1);
+    let obits = ldpc.zeroPadArray(bits, 1458);
+    let res = ldpc.bitsToBytes(obits);
+    assert.deepEqual(res, shortened1);  
+  });
+
+  it("should encode correctly", () => {
+    let ldpc = new Ldpc();
+    let bits = ldpc.encode(shortened1, "3/4", "1944");
+    let bytes = ldpc.bitsToBytes(bits);
+    assert.deepEqual(bytes, encoded1);
+  });
+
   it("should convert imputMessage1 to inputBytes1", () => {
     let ldpc = new Ldpc();
     let mbytes = ldpc.stringToBytes(inputMessage1);
@@ -463,12 +499,9 @@ describe("LDPC", () => {
     assert.deepEqual(res, inputBytes1);
     let res2 = [0, 0].concat(res);
     assert.deepEqual(res2, servicePrepended1);
-    let res3 = ldpc.scramble(res2);
+    ldpc.generateScrambler(0x5d);
+    let res3 = ldpc.scrambleBytes(res2);
     assert.equal(res3.length, scrambled1.length);
-    for (let i=0 ; i< res3.length ; i++) {
-      console.log(i);
-      assert.equal(res3[i], scrambled1[i]);
-    }
     assert.deepEqual(res3, scrambled1);
   });
 

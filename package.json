@@ -31,6 +31,7 @@
     "buffer-shims": "^1.0.0",
     "clone-stats": "^1.0.0",
     "core-util-is": "^1.0.2",
-    "isarray": "^2.0.1"
+    "isarray": "^2.0.1",
+    "mocha-cli": "^1.0.1"
   }
 }
