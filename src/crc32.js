@@ -1,28 +1,29 @@
 /* jshint node: true, esversion: 6 */
 
-/**
- * Calculates a 4-byte CRC32 of a string or byte array
- */
-class Crc32 {
-
-    constructor() {
-        let crcTable = [];
+const crcTable = (function() {
+        let table = [];
         for (let n = 0; n < 256; n++) {
             let c = n;
             for (let k = 0; k < 8; k++) {
                 c = ((c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1));
             }
-            crcTable[n] = c;
+            table[n] = c;
         }
-        this.crcTable = crcTable;
-    }
+        return table;
+})();
+
+/**
+ * Calculates a 4-byte CRC32 of a string or byte array
+ */
+class Crc32 {
+
 
     /**
      * Convert a string to an array of UTF-8 bytes
      * @param {string} str string to convert
      * @return {array} of bytes
      */
-    stringToBytes(str) {
+    static stringToBytes(str) {
         let bytes = [];
         let len = str.length;
         for (let i = 0; i < len; i++) {
@@ -59,9 +60,7 @@ class Crc32 {
      * @param {string} str 
      * @return the crc
      */
-    ofString(str) {
-        let crcTable = this.crcTable;
-        let crc = 0 ^ (-1);
+    static ofString(str) {
         let bytes = this.stringToBytes(str);
         return this.ofBytes(bytes);
     }
@@ -71,8 +70,7 @@ class Crc32 {
      * @param {array} array of bytes
      * @return the crc
      */
-    ofBytes(bytes) {
-        let crcTable = this.crcTable;
+    static ofBytes(bytes) {
         let len = bytes.length;
         let crc = 0 ^ (-1);
         for (let i = 0; i < len; i++) {
@@ -86,7 +84,7 @@ class Crc32 {
      * @param {number} the crc to break apart
      * @return the 4 bytes
      */
-    intToBytes(crc) {
+    static intToBytes(crc) {
         let bytes = [
             (crc) & 0xff,
             (crc >> 8) & 0xff,
