@@ -257,17 +257,19 @@ class Ldpc {
      * Flatten a Z array (array of arrays of bits) to a single array of bits
      * @param {array} z the array-of-arrays to flatten
      */
-    zToBits(z) {
+    flatten(z) {
         return z.reduce((acc, child) => acc.concat(child), []);
     }
 
     /**
-     * Rotate an array N places to the right
+     * Rotate an array N places to the right.  This assumes
+     * that n is less than or equalt to the array length.
      * @param {array} arr the array of bits to rotate
      * @param {*} n the number of spaces to rotate
      */
     arrayRotate(arr, n) {
-        return arr.slice(n, arr.length).concat(arr.slice(0, n));
+        let pos = arr.length - n;
+        return arr.slice(pos).concat(arr.slice(0, pos));
     }
 
     /**
@@ -301,22 +303,25 @@ class Ldpc {
     }
 
     /**
-     * Perform one "lambda" operation on a message and matrix row
+     * Perform one "lambda" operation on a message and matrix row.
+     * Iterate through all of the z-sized subarrays of zbits, and
+     * rotate each one right by amount in the associated cell
+     * of the Hb array.
      * @param {array[]} Hb the quasi-cyclic matrix
      * @param {array[]} zbits array of z-sized arrays of bits of message
      * @param {number} z size of each array
      * @param {number} kb width of parity bits
      * @param {number} i index of row in matrix
+     * @return p a z-sized array with the modulo-2 sum of all of the
+     * rotation matrices.
      */
     lambdaI(Hb, zbits, z, kb, i) {
         let p = new Array(z).fill(0);
         for (let j = 0; j < kb; j++) {
-            let hij = Hb[i][j];
+            let hij = Hb[i][j]; //how much to rotate?
             if (hij >= 0) {
                 let mz = zbits[j];
-                for (let k = 0; k < z; k++) {
-                    p = this.arrayXor(p, this.arrayRotate(mz, hij));
-                }
+                p = this.arrayXor(p, this.arrayRotate(mz, hij));
             }
         }
         return p;
@@ -354,7 +359,7 @@ class Ldpc {
             let nextp = this.arrayAdd(p, this.arrayRotate(p0, 1));
             zbitsOut.push(nextp);
         }
-        let outbits = this.zToBits(zbitsOut);
+        let outbits = this.flatten(zbitsOut);
         return outbits;
     }
 
