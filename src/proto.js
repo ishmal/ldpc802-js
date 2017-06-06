@@ -1,6 +1,6 @@
 const Ldpc = require("./ldpc");
 const Util = require("./util");
-const Crc32 = require("{./crc32");
+const Crc32 = require("./crc32");
 
 
 class Proto {
@@ -9,6 +9,7 @@ class Proto {
 		this.scrambleBits = [];
         this.scrambleIdx = 0;
 		this.generateScrambler(0xff);
+		this.ldpc = new Ldpc();
 	}
 
 	generateScrambler(initial) {
@@ -108,31 +109,7 @@ class Proto {
      * @return {array} the encoded bits
      */
     encode(bytes, rateStr, lengthStr) {
-        let rate = codes[rateStr];
-        let length = rate.lengths[lengthStr];
-        let z = length.z;
-        let bits = Util.bytesToBits(bytes);
-        let pbits = this.zeroPadArray(bits, length.length);
-        let zbits = this.bitsToZ(pbits, z);
-        let zbitsOut = zbits.slice(0);
-        let Hb = length.Z;
-        let mb = zbits.length; //message length in z-blocks
-        let nrParityZ = (length.length - mb * z) / z;
-        let nb = Hb[0].length; // matrix width in z-blocks
-        let kb = nb - mb;
-        let p0 = new Array(z).fill(0);
-        for (let i = 0; i < mb; i++) {
-            let p = this.lambdaI(Hb, zbits, z, kb, i);
-            p0 = this.arrayAdd(p0, p);
-        }
-        zbitsOut.push(p0);
-        for (let i = 1; i < nrParityZ; i++) {
-            let p = this.lambdaI(Hb, zbits, z, kb, i - 1);
-            let nextp = this.arrayAdd(p, this.arrayRotate(p0, 1));
-            zbitsOut.push(nextp);
-        }
-        let outbits = this.zToBits(zbitsOut);
-        return outbits;
+		return this.ldpc.encode(bytes, rateStr, lengthStr);
     }
 
     /**
@@ -155,11 +132,7 @@ class Proto {
      * @return {array} the output bytes
      */
     decode(inbits, rateStr, lenStr) {
-        let outbytes = [];
-        /**
-         * Step 2 ...  ?
-         */
-        return outbytes;
+        return this.ldpc.decode(inpits, rateStr, lenStr);
     }
 
     /** 

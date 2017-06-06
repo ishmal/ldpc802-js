@@ -238,7 +238,7 @@ class Ldpc {
     }
 
  
-      /**
+    /**
      * Break up a linear array of bits into z-sized subarrays.
      * NOTE:  this assumes that the input array's length is a multiple of z
      * @param {array} inbits array of bits to break up
@@ -335,7 +335,7 @@ class Ldpc {
         let length = rate.lengths[lengthStr];
         let z = length.z;
         let bits = Util.bytesToBits(bytes);
-        let pbits = this.zeroPadArray(bits, length.length);
+        let pbits = Util.zeroPadArray(bits, length.length);
         let zbits = this.bitsToZ(pbits, z);
         let zbitsOut = zbits.slice(0);
         let Hb = length.Z;

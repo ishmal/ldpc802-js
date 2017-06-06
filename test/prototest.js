@@ -37,15 +37,6 @@ describe("Proto", () => {
     assert(res);
   });
 
-  it("should convert bytes to bits and back correctly", () => {
-    let proto = new Proto();
-    for (let i = 0 ; i < 256 ; i++) {
-      let bits = Util.byteToBits(i);
-      let b = Util.bitsToByte(bits);
-      assert.equal(b, i);
-    }
-  });
-
   it("should scramble correctly", () => {
     let proto = new Proto();
     proto.generateScrambler(0x5d);
@@ -55,22 +46,22 @@ describe("Proto", () => {
 
   it("should pad bits correctly", () => {
     let proto = new Proto();
-    let bits = proto.bytesToBits(Data.scrambled1);
-    let obits = proto.zeroPadArray(bits, 1458);
-    let res = proto.bitsToBytes(obits);
+    let bits = Util.bytesToBits(Data.scrambled1);
+    let obits = Util.zeroPadArray(bits, 1458);
+    let res = Util.bitsToBytes(obits);
     assert.deepEqual(res, Data.shortened1);  
   });
 
-  it("should encode correctly", () => {
+  xit("should encode correctly", () => {
     let proto = new Proto();
     let bits = proto.encode(Data.shortened1, "3/4", "1944");
-    let bytes = proto.bitsToBytes(bits);
+    let bytes = Util.bitsToBytes(bits);
     assert.deepEqual(bytes, Data.encoded1);
   });
 
   it("should convert imputMessage1 to inputBytes1", () => {
     let proto = new Proto();
-    let mbytes = proto.stringToBytes(Data.inputMessage1);
+    let mbytes = Util.stringToBytes(Data.inputMessage1);
     let inbytes = Data.inputMac1.slice(0);
     inbytes = inbytes.concat(mbytes);
     let res = proto.wrapBytes(inbytes);

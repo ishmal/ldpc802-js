@@ -1,8 +1,6 @@
-
-
 class Util {
 
-	/**
+    /**
      * Convert a string to an array of UTF-8 bytes
      * @param {string} str 
      * @return {array} of bytes
@@ -50,19 +48,19 @@ class Util {
         return decodedString;
     }
 
-   /**
+    /**
      * Bigendian
      * @param {*} bits 
      */
-    bitsToByte(bits) {
+    static bitsToByte(bits) {
         let byte =
             ((bits[0] << 7) & 128) +
-            ((bits[1] << 6) &  64) +
-            ((bits[2] << 5) &  32) +
-            ((bits[3] << 4) &  16) +
-            ((bits[4] << 3) &   8) +
-            ((bits[5] << 2) &   4) +
-            ((bits[6] << 1) &   2) +
+            ((bits[1] << 6) & 64) +
+            ((bits[2] << 5) & 32) +
+            ((bits[3] << 4) & 16) +
+            ((bits[4] << 3) & 8) +
+            ((bits[5] << 2) & 4) +
+            ((bits[6] << 1) & 2) +
             ((bits[7]) & 1);
         return byte;
     }
@@ -70,19 +68,19 @@ class Util {
     /** 
      * Assumes bits length is multiple of 8
      */
-    bitsToBytes(bits) {
+    static bitsToBytes(bits) {
         let len = bits.length;
         let bytes = [];
-        for (let i = 0 ; i < len ; i += 8) {
+        for (let i = 0; i < len; i += 8) {
             let b = [
-                bits[i], 
-                bits[i+1],
-                bits[i+2],
-                bits[i+3],
-                bits[i+4],
-                bits[i+5],
-                bits[i+6],
-                bits[i+7]
+                bits[i],
+                bits[i + 1],
+                bits[i + 2],
+                bits[i + 3],
+                bits[i + 4],
+                bits[i + 5],
+                bits[i + 6],
+                bits[i + 7]
             ];
             let byte = this.bitsToByte(b);
             bytes.push(byte);
@@ -130,6 +128,21 @@ class Util {
         return bits;
     }
 
+	/**
+	 * Pad an array with zeroes to that its length is a given size
+	 * @param {array} inbits input array of bits
+	 * @param {*} size the desired size,  >= the length of the array
+	 */
+	static zeroPadArray(inarr, size) {
+		let arr = inarr.slice(0);
+		let nrZeros = size - arr.length;
+		while (nrZeros--) {
+			arr.push(0);
+		}
+		return arr;
+	}
 
 
 }
+
+module.exports = Util;
