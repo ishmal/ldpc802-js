@@ -18,7 +18,6 @@
   "homepage": "https://github.com/ishmal/ldpc#readme",
   "devDependencies": {
     "gulp": "^3.9.1",
-    "gulp-jasmine": "^2.4.0",
     "gulp-jshint": "^2.0.4",
     "gulp-mocha": "^4.3.1",
     "jshint": "^2.9.4",
@@ -27,11 +26,5 @@
   "directories": {
     "test": "test"
   },
-  "dependencies": {
-    "buffer-shims": "^1.0.0",
-    "clone-stats": "^1.0.0",
-    "core-util-is": "^1.0.2",
-    "isarray": "^2.0.1",
-    "mocha-cli": "^1.0.1"
-  }
+  "dependencies": {}
 }

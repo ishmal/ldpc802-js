@@ -322,6 +322,9 @@ class Ldpc {
         return obytes;
     }
 
+    /**
+     * 
+     */
     scrambleByte(byte) {
         let bits = this.byteToBits(byte);
         let b = [];
@@ -381,19 +384,11 @@ class Ldpc {
      * Assumes bits length is multiple of 8
      */
     bitsToBytes(bits) {
-        let len = bits.length;
         let bytes = [];
-        for (let i = 0 ; i < len ; i += 8) {
-            let b = [
-                bits[i], 
-                bits[i+1],
-                bits[i+2],
-                bits[i+3],
-                bits[i+4],
-                bits[i+5],
-                bits[i+6],
-                bits[i+7]
-            ];
+        let next;
+        for (let i = 0, len = bits.length ; i < len ; i = next) {
+            next = i + 8;
+            let b = bits.slice(i, next);
             let byte = this.bitsToByte(b);
             bytes.push(byte);
         }
