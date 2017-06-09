@@ -30,7 +30,7 @@ describe("Proto", () => {
     assert.deepEqual(proto.scrambleBits, scrambleBits);
   });
 
-  it("should encode a string without exceptions", () => {
+  xit("should encode a string without exceptions", () => {
     let proto = new Proto();
     let plain = "the quick brown fox";
     let res = proto.encode(plain, "1/2", "648");

@@ -44,6 +44,9 @@ class Ldpc {
      * @param {*} n the number of spaces to rotate
      */
     arrayRotate(arr, n) {
+        if (!n) {
+            return arr.slice(0);
+        }
         let pos = arr.length - n;
         return arr.slice(pos).concat(arr.slice(0, pos));
     }
@@ -83,21 +86,20 @@ class Ldpc {
      * Iterate through all of the z-sized subarrays of zbits, and
      * rotate each one right by amount in the associated cell
      * of the Hb array.
-     * @param {array[]} Hb the quasi-cyclic matrix
+     * @param {array} row a row in the quasi-cyclic matrix
      * @param {array[]} zbits array of z-sized arrays of bits of message
-     * @param {number} z size of each array
+     * @param {number} z the size of a z-array
      * @param {number} kb width of parity bits
-     * @param {number} i index of row in matrix
      * @return p a z-sized array with the modulo-2 sum of all of the
      * rotation matrices.
      */
-    lambdaI(Hb, zbits, z, kb, i) {
+    lambdaI(row, zbits, z, kb) {
         let p = new Array(z).fill(0);
         for (let j = 0; j < kb; j++) {
-            let hij = Hb[i][j]; //how much to rotate?
-            if (hij >= 0) {
+            let rotation = row[j]; //how much to rotate?
+            if (rotation >= 0) {
                 let mz = zbits[j];
-                p = this.arrayXor(p, this.arrayRotate(mz, hij));
+                p = this.arrayXor(p, this.arrayRotate(mz, rotation));
             }
         }
         return p;
@@ -105,7 +107,6 @@ class Ldpc {
 
     /**
      * Encode an array of bytes with the given LDPC code
-     * TODO: select a length according to the length of the byte array
      * @param bytes {array} the bytes to encode
      * @param rateStr {string} the rate from the tables above
      * @param lengthStr {string} the length from the tables above
@@ -115,25 +116,113 @@ class Ldpc {
         let rate = codes[rateStr];
         let code = rate.lengths[lengthStr];
         let z = code.z;
+        let Hb = code.Hb; //QC table
+        let mb = code.mb; //parity in z-blocks
+        let kb = code.kb; //message length in z-blocks
         let bits = Util.bytesToBits(bytes);
-        let zbits = this.bitsToZ(pbits, z);
-        let zbitsOut = zbits.slice(0);
+        let msgBitLen = kb * z;
+        bits = bits.slice(0, msgBitLen);  //just in case
+        let zbits = this.bitsToZ(bits, z);
+        let parityZbits = [];
+
+        /**
+         * First get parity bits p0
+         * p0 = sum(0..mb-1)lambdaI
+         */
+        let p0 = new Array(z).fill(0);
+        for (let i = 0; i < mb; i++) {
+            let row = Hb[i];
+            let p = this.lambdaI(row, zbits, z, kb);
+            p0 = this.arrayXor(p0, p);
+        }
+        parityZbits.push(p0);
+
+        /**
+         * Now get the remainder of the parity bits
+         * pip0 is p0 shifted 1 position right
+         * p1 = lambdaI(0) + pip0
+         * p2 = lambdaI(1) + pip1
+         */
+        let lastp = p0;
+        for (let i = 0; i < mb - 1; i++) {
+            let row = Hb[i];
+            let lambdai = this.lambdaI(row, zbits, z, kb);
+            let pipN = this.arrayRotate(lastp, 1);
+            let p = this.arrayXor(lambdai, pipN);
+            parityZbits.push(p);
+            lastp = p;
+        }
+
+        /**
+         * Done.  Append parity bits to end of message bits
+         */
+        let outbits = bits.slice(0);
+        parityZbits.forEach((arr) => {
+            outbits = outbits.concat(arr);
+        });
+        return outbits;
+    }
+
+    multiplyQC(row, arr) {
+        let len = arr.length;
+        let sum = new Array(len).fill(0);
+        for (let i = 0 ; i < len ; i++) {
+            let rotate = row[i];
+            let v = arr[i];
+            if (rotate === 0) {
+                sum = this.arrayXor(sum, v);
+            } else if (rotate >= 0) {
+                let rotated = this.arrayRotate(v, rotation);
+                sum = this.arrayXor(sum, rotated);
+            }
+        }
+        return sum;
+    }
+
+   /**
+     * Encode an array of bytes with the given LDPC code
+     * @param bytes {array} the bytes to encode
+     * @param rateStr {string} the rate from the tables above
+     * @param lengthStr {string} the length from the tables above
+     * @return {array} the encoded bits
+     */
+    encode2(bytes, rateStr, lengthStr) {
+        let rate = codes[rateStr];
+        let code = rate.lengths[lengthStr];
+        let z = code.z;
+        let bits = Util.bytesToBits(bytes);
+        let zbits = this.bitsToZ(bits, z);
+        let parityZbits = [];
         let Hb = code.Hb; //QC table
         let mb = code.mb; //message length in z-blocks
         let kb = code.kb; //parity in z-blocks
-        let p0 = new Array(z).fill(0);
-        for (let i = 0; i < mb; i++) {
-            let p = this.lambdaI(Hb, zbits, z, kb, i);
-            p0 = this.arrayAdd(p0, p);
+
+        /**
+         * Step 1:  Compute A x s(T)  and C x s(T)
+         */
+        let AsT = new Array(mb).fill(0);
+        for (let i = 0 ; i < kb - 1 ; i++) {
+            let row = Hb[i];
+            let rowsum = this.multiplyQC(row, zbits);
+            AsT = this.arrayXor(AsT, rowsum);
         }
-        zbitsOut.push(p0);
-        for (let i = 1; i < kb; i++) {
-            let p = this.lambdaI(Hb, zbits, z, kb, i - 1);
-            let nextp = this.arrayAdd(p, this.arrayRotate(p0, 1));
-            zbitsOut.push(nextp);
-        }
-        let outbits = this.flatten(zbitsOut);
-        return outbits;
+        row = Hb[kb - 1];
+        let CsT = this.multiplyQC(row, zbits);
+        
+
+        /**
+         * Step 2: Compute E x (T-1) * A x s(T)
+         */
+
+        /**
+         * Step 3: Compute p1T by p
+         */
+
+        /**
+         * Step 4: 
+         */
+
+        return [];
     }
 
     /**

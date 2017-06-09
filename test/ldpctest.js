@@ -132,8 +132,13 @@ describe("LDPC", () => {
   it("should encode correctly", () => {
     let ldpc = new Ldpc();
     let bits = ldpc.encode(Data.shortened1, "3/4", "1944");
+    assert.equal(bits.length, 1944);
     let bytes = Util.bitsToBytes(bits);
-    assert.deepEqual(bytes, Data.encoded1);
+    //assert.deepEqual(bytes, Data.encoded1);
+    for (let i=0, len= bytes.length ; i < len ; i++) {
+      console.log(i);
+      assert.equal(bytes[i], Data.encoded1[i], "index" + i);
+    }
   });
 
   
