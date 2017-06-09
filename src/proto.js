@@ -1,3 +1,5 @@
+/* jshint esversion: 6 */
+
 const Ldpc = require("./ldpc");
 const Util = require("./util");
 const Crc32 = require("./crc32");

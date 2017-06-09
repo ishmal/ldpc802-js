@@ -1,3 +1,9 @@
+/* jshint esversion: 6 */
+
+
+/**
+ * Various common utilities we needs among several modules
+ */
 class Util {
 
     /**
@@ -135,7 +141,7 @@ class Util {
 	 */
 	static zeroPadArray(inarr, size) {
 		let arr = inarr.slice(0);
-		let nrZeros = size - arr.length;
+		let nrZeros = Math.max(size - arr.length, 0);
 		while (nrZeros--) {
 			arr.push(0);
 		}
