@@ -9,6 +9,7 @@ const codes = {
             "648": {
                 z: 27,
                 length: 648,
+                messageBits: 324,
                 nb: 24,
                 mb: 12,
                 kb: 12,
@@ -44,6 +45,7 @@ const codes = {
             "1296": {
                 z: 54,
                 length: 1296,
+                messageBits: 648,
                 nb: 24,
                 mb: 12,
                 kb: 12,
@@ -79,6 +81,7 @@ const codes = {
             "1944": {
                 z: 81,
                 length: 1944,
+                messageBits: 972,
                 nb: 24,
                 mb: 12,
                 kb: 12,
@@ -118,6 +121,7 @@ const codes = {
             "648": {
                 z: 27,
                 length: 648,
+                messageBits: 432,
                 nb: 24,
                 mb: 8,
                 kb: 16,
@@ -145,6 +149,7 @@ const codes = {
             "1296": {
                 z: 54,
                 length: 1296,
+                messageBits: 864,
                 nb: 24,
                 mb: 8,
                 kb: 16,
@@ -172,6 +177,7 @@ const codes = {
             "1944": {
                 z: 81,
                 length: 1944,
+                messageBits: 1296,
                 nb: 24,
                 mb: 8,
                 kb: 16,
@@ -203,6 +209,7 @@ const codes = {
             "648": {
                 z: 27,
                 length: 648,
+                messageBits: 486,
                 nb: 24,
                 mb: 6,
                 kb: 18,
@@ -226,6 +233,7 @@ const codes = {
             "1296": {
                 z: 54,
                 length: 1296,
+                messageBits: 972,
                 nb: 24,
                 mb: 6,
                 kb: 18,
@@ -249,6 +257,7 @@ const codes = {
             "1944": {
                 z: 81,
                 length: 1944,
+                messageBits: 1458,
     	        nb: 24,
                 mb: 6,
                 kb: 18,
@@ -276,6 +285,7 @@ const codes = {
             "648": {
                 z: 27,
                 length: 648,
+                messageBits: 540,
                 nb: 24,
                 mb: 4,
                 kb: 20,
@@ -295,6 +305,7 @@ const codes = {
             "1296": {
                 z: 54,
                 length: 1296,
+                messageBits: 1080,
                 nb: 24,
                 mb: 4,
                 kb: 20,
@@ -314,6 +325,7 @@ const codes = {
             "1944": {
                 z: 81,
                 length: 1944,
+                messageBits: 1620,
                 nb: 24,
                 mb: 4,
                 kb: 20,

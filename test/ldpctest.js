@@ -137,7 +137,7 @@ describe("LDPC", () => {
     //assert.deepEqual(bytes, Data.encoded1);
     for (let i=0, len= bytes.length ; i < len ; i++) {
       console.log(i);
-      assert.equal(bytes[i], Data.encoded1[i], "index" + i);
+      assert.equal(bytes[i], Data.encoded1[i], "## index ## " + i);
     }
   });
 

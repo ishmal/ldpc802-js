@@ -120,8 +120,7 @@ class Ldpc {
         let mb = code.mb; //parity in z-blocks
         let kb = code.kb; //message length in z-blocks
         let bits = Util.bytesToBits(bytes);
-        let msgBitLen = kb * z;
-        bits = bits.slice(0, msgBitLen);  //just in case
+        bits = bits.slice(0, code.messageBits);  //just in case
         let zbits = this.bitsToZ(bits, z);
         let parityZbits = [];
 

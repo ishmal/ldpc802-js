@@ -10,7 +10,7 @@ gulp.task('lint', function() {
 
 gulp.task('test', () =>
 	gulp.src('test/**/*.js', {read: false})
-	.pipe(mocha({reporter: 'spec'}))
+	.pipe(mocha({reporter: 'landing'}))
 );
 
 gulp.task('default', ['lint', 'test']);
