@@ -337,8 +337,8 @@ class Ldpc {
      */
     encode(bytes, rateStr, lengthStr) {
         let rate = codes[rateStr];
-        let length = rate.lengths[lengthStr];
-        let z = length.z;
+        let code = rate.lengths[lengthStr];
+        let z = code.z;
         let bits = Util.bytesToBits(bytes);
         let pbits = Util.zeroPadArray(bits, length.length);
         let zbits = this.bitsToZ(pbits, z);
