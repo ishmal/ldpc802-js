@@ -12,6 +12,22 @@ class Ldpc {
 
     constructor() {
         this.codes = codes;
+        this.makeTables();
+    }
+
+    getT(code) {
+        let pos = code.kb + 1;
+        let T = [];
+        for (let i = 0; i < code.mb; i++) {
+            let partOfRow = code.Hb[i].slice(pos);
+            T.push(partOfRow);
+        }
+        return T;
+    }
+
+    makeTables() {
+        let code = this.codes["2/3"].lengths["1944"];
+        let T = this.getT(code);
     }
 
     /**
