@@ -10,25 +10,79 @@ const codes = require('./ldpccodes');
  */
 class Ldpc {
 
+    //######################################################
+    //# C O N S T R U C T O R
+    //######################################################
+
     constructor() {
         this.codes = codes;
         this.makeTables();
     }
 
+    makeTables() {
+        Object.keys(codes).forEach(k => {
+            let rate = codes[k];
+            Object.keys(rate).forEach(k2 => {
+                let code = rate.lengths[k2];
+                code.A = this.getA(code);
+                code.B = this.getB(code);
+                code.C = this.getC(code);
+                code.D = this.getD(code);
+                code.E = this.getE(code);
+                code.T = this.getT(code);
+            });
+        });
+    }
+
+    getA(code) {
+        let A = [];
+        for (let i = 0; i < code.mb-1; i++) {
+            let row = code.Hb[i];
+            let val = row.slice(0, kb);
+            A.push(val);
+        }
+        return A;
+    }
+
+    //let's just make this an array rather than array[]
+    getB(code) {
+        let pos = code.kb;
+        let B = [];
+        for (let i = 0; i < code.mb-1; i++) {
+            let val = code.Hb[i][pos];
+            B.push(val);
+        }
+        return B;
+    }
+
+    getC(code) {
+        let C = code.Hb[mb - 1].slice(0, code.kb);
+        return C;
+    }
+
+    getD(code) {
+        let D = [ code.Hb[mb - 1][kb] ];
+        return D;
+    }
+
+    getE(code) {
+        let E = code.Hb[mb - 1].slice(kb + 1);
+        return E;
+    }
+
     getT(code) {
         let pos = code.kb + 1;
         let T = [];
-        for (let i = 0; i < code.mb; i++) {
-            let partOfRow = code.Hb[i].slice(pos);
-            T.push(partOfRow);
+        for (let i = 0; i < code.mb-1; i++) {
+            let row = code.Hb[i];
+            T.push(row.slice(pos));
         }
         return T;
     }
 
-    makeTables() {
-        let code = this.codes["2/3"].lengths["1944"];
-        let T = this.getT(code);
-    }
+    //######################################################
+    //# U T I L I T Y
+    //######################################################
 
     /**
      * Break up a linear array of bits into z-sized subarrays.
@@ -68,6 +122,22 @@ class Ldpc {
     }
 
     /**
+     * Rotate an array N places to the right.  This assumes
+     * that n is less than or equalt to the array length.
+     * @param {array} arr the array of bits to rotate
+     * @param {*} n the number of spaces to rotate
+     */
+    arrayRotateDeep(qcArr, bitsArr) {
+        let arr = [];
+        for (let i=0, len = bitsArr.length ; i < len ; i++) {
+            let rotation = qcArr[i];
+            let rotated = this.arrayRotate(bitsArr[i], rotation);
+            arr[i] = rotated;
+        }
+        return arr;
+    }
+
+   /**
      * Sum two arrays of numbers together
      * @param {array} a 
      * @param {array} b 
@@ -89,10 +159,23 @@ class Ldpc {
      * @return {array} xor of the two arrays
      */
     arrayXor(a, b) {
-        let len = a.length;
-        let arr = new Array(len);
-        for (let i = 0; i < len; i++) {
+        let arr = [];
+        for (let i = 0, len = a.length; i < len; i++) {
             arr[i] = a[i] ^ b[i];
+        }
+        return arr;
+    }
+
+    /**
+     * XOR two arrays of arrays of arrays of numbers together
+     * @param {array[]} a 
+     * @param {array[]} b 
+     * @return {array} xor of the two arrays
+     */
+    arrayXorDeep(a, b) {
+        let arr = []
+        for (let i = 0, len = a.length; i < len; i++) {
+            arr[i] = this.arrayXor(a[i], b[i]);
         }
         return arr;
     }
@@ -111,7 +194,7 @@ class Ldpc {
      */
     lambdaI(row, zbits, z, kb) {
         let p = new Array(z).fill(0);
-        for (let j = 0; j < kb; j++) {
+        for (let j = 0; j < kb ; j++) {
             let rotation = row[j]; //how much to rotate?
             if (rotation >= 0) {
                 let mz = zbits[j];
@@ -215,27 +298,67 @@ class Ldpc {
         /**
          * Step 1:  Compute A x s(T)  and C x s(T)
          */
-        let AsT = new Array(mb).fill(0);
-        for (let i = 0 ; i < kb - 1 ; i++) {
-            let row = Hb[i];
-            let rowsum = this.multiplyQC(row, zbits);
-            AsT = this.arrayXor(AsT, rowsum);
+        let AsT = [];
+        for (let i = 0 ; i < mb - 1 ; i++) {
+            let row = code.A[i];
+            let rotated = this.arrayRotateDeep(row, zbits);
+            AsT.push(rotated);
         }
-        row = Hb[kb - 1];
-        let CsT = this.multiplyQC(row, zbits);
+        row = Hb[mb - 1];
+        let CsT = this.arrayRotateDeep(row, zbits);
         
 
         /**
          * Step 2: Compute E x (T-1) * A x s(T)
          */
+        let ET1xAst = [];
+        for (let i = 0; i < mb - 1 ; i++) {
+            let row = Ast[i];
+            let rowsum = new Array(z).fill(0);
+            for (let j = 0 ; j < kb ; j++) {
+                rowsum = this.arrayXor(rowsum, row[j]);
+            }
+            ET1xAst.push(rowsum);
+        }
 
         /**
          * Step 3: Compute p1T by p
          */
+        let p1 = this.arrayXorDeep(ET1xAst, CsT);
 
         /**
-         * Step 4: 
+         * Step 4: Get Bp1
          */
+        let Bp1 = [];
+        for (let i = 0 ; i < mb -1 ; i++) {
+            let val = code.B[i];
+            let row = [];
+            for (let j = 0 ; j < mb - 1 ; j++) {
+                let pbits = p1[j];
+                let rotated = this.arrayRotate(pbits, val);
+                row.push(rotated);
+            }
+            Bp1.push(row);
+        }
+
+        Tp1 = [];
+        for (let i = 0 ; i < mb - 1 ; i++) {
+            let arow = AsT[i];
+            let brow = Bp1[i];
+            Tp1.push(this.arrayXorDeep(arow, brow));
+        }
+
+        //here is where we need to do back substitution to solve for p2
+        let x = new Array(mb - 1).fill([]);
+        for (let i = mb -1 ; i >= 0 ; i++) {
+            let xi = Tp1[i];
+            for (let j = i ; j < mb-1 ; j++) {
+                let  amount = code.T[i][j];
+                let rot = this.arrayRotate(x[j], code.z - amount);
+                xi = this.arrayXor(xi, rot)
+            }
+            x[i] = x; //no need to scale
+        }
 
         return [];
     }
