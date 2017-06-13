@@ -46,16 +46,16 @@ describe("Proto", () => {
 
   it("should pad bits correctly", () => {
     let proto = new Proto();
-    let bits = Util.bytesToBits(Data.scrambled1);
+    let bits = Util.bytesToBitsBE(Data.scrambled1);
     let obits = Util.zeroPadArray(bits, 1458);
-    let res = Util.bitsToBytes(obits);
+    let res = Util.bitsToBytesBE(obits);
     assert.deepEqual(res, Data.shortened1);  
   });
 
   xit("should encode correctly", () => {
     let proto = new Proto();
     let bits = proto.encode(Data.shortened1, "3/4", "1944");
-    let bytes = Util.bitsToBytes(bits);
+    let bytes = Util.bitsToBytesBE(bits);
     assert.deepEqual(bytes, Data.encoded1);
   });
 

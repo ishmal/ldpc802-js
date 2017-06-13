@@ -90,6 +90,22 @@ describe("LDPC", () => {
         assert.deepEqual(res, exp);
     });
 
+    it("should rotate an array of arrays to the right", () => {
+        let arr = [
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        ];
+        let exp = [
+            [7, 8, 9, 0, 1, 2, 3, 4, 5, 6],
+            [7, 8, 9, 0, 1, 2, 3, 4, 5, 6],
+            [7, 8, 9, 0, 1, 2, 3, 4, 5, 6]
+        ];
+        let rot = [3, 3, 3];
+        let res = ldpc.arrayRotateDeep(rot, arr);
+        assert.deepEqual(res, exp);
+    });
+
     it("should group an array into z-size chunks", () => {
         let arr = [0, 1, 2, 3, 4, 5, 6, 7, 8];
         let exp = [
@@ -128,6 +144,28 @@ describe("LDPC", () => {
         assert.deepEqual(res, exp);
     });
 
+    it("should xor two arrays of arrays", () => {
+        let arr1 = [[0, 1, 1], [0, 0, 1]];
+        let arr2 = [[1, 1, 1], [1, 1, 1]];
+        let exp = [[1, 0, 0], [1, 1, 0]];
+        let res = ldpc.arrayXorDeep(arr1, arr2);
+        assert.deepEqual(res, exp);
+        
+    });
+
+    it("should QC-multiply a row of rotations with an array of z-blocks", () => {
+        let arr = [  // z = 3
+            [0, 1, 1], // 1, 0, 1
+            [1, 1, 0], // 1, 1, 0
+            [1, 1, 0], // 1, 0, 1
+            [1, 1, 1]  // 0, 0, 0
+        ];
+        let exp = [1, 1, 0]; 
+        let rot = [1, 0, 2, -1];
+        let res = ldpc.multiplyQC(rot, arr, 3, 4);
+        assert.deepEqual(res, exp);
+    });
+
     it("should get the first parity bits corretly", () => {
         let exp = [
             1,0,0,1,1,0,
@@ -142,7 +180,7 @@ describe("LDPC", () => {
     it("should encode correctly", () => {
         let bits = ldpc.encode(Data.shortened1, "3/4", "1944");
         assert.equal(bits.length, 1944);
-        let bytes = Util.bitsToBytes(bits);
+        let bytes = Util.bitsToBytesLE(bits);
         //assert.deepEqual(bytes, Data.encoded1);
         for (let i = 0, len = bytes.length; i < len; i++) {
             console.log(i);

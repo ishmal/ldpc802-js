@@ -54,11 +54,16 @@ class Util {
         return decodedString;
     }
 
+    //#########################################################
+    //# B I G   E N D I A N
+    //#########################################################
+    
+
     /**
      * Bigendian
      * @param {*} bits 
      */
-    static bitsToByte(bits) {
+    static bitsToByteBE(bits) {
         let byte =
             ((bits[0] << 7) & 128) +
             ((bits[1] << 6) & 64) +
@@ -74,7 +79,7 @@ class Util {
     /** 
      * Assumes bits length is multiple of 8
      */
-    static bitsToBytes(bits) {
+    static bitsToBytesBE(bits) {
         let len = bits.length;
         let bytes = [];
         for (let i = 0; i < len; i += 8) {
@@ -88,7 +93,7 @@ class Util {
                 bits[i + 6],
                 bits[i + 7]
             ];
-            let byte = this.bitsToByte(b);
+            let byte = this.bitsToByteBE(b);
             bytes.push(byte);
         }
         return bytes;
@@ -98,7 +103,7 @@ class Util {
      * Bigendian
      * @param {*} b 
      */
-    static byteToBits(b) {
+    static byteToBitsBE(b) {
         let bits = [];
         bits.push((b >> 7) & 1);
         bits.push((b >> 6) & 1);
@@ -117,7 +122,7 @@ class Util {
      * @param {array} bytes 
      * @return {array} of bits
      */
-    static bytesToBits(bytes) {
+    static bytesToBitsBE(bytes) {
         let bits = [];
         let len = bytes.length;
         for (let i = 0; i < len; i++) {
@@ -130,6 +135,92 @@ class Util {
             bits.push((b >> 2) & 1);
             bits.push((b >> 1) & 1);
             bits.push((b) & 1);
+        }
+        return bits;
+    }
+
+    //#########################################################
+    //#  L I T T L E    E N D I A N
+    //#########################################################
+    
+
+    /**
+     * Bigendian
+     * @param {*} bits 
+     */
+    static bitsToByteLE(bits) {
+        let byte =
+            ((bits[7] << 7) & 128) +
+            ((bits[6] << 6) & 64) +
+            ((bits[5] << 5) & 32) +
+            ((bits[4] << 4) & 16) +
+            ((bits[3] << 3) & 8) +
+            ((bits[2] << 2) & 4) +
+            ((bits[1] << 1) & 2) +
+            ((bits[0]) & 1);
+        return byte & 0xff;;
+    }
+
+    /** 
+     * Assumes bits length is multiple of 8
+     */
+    static bitsToBytesLE(bits) {
+        let len = bits.length;
+        let bytes = [];
+        for (let i = 0; i < len; i += 8) {
+            let b = [
+                bits[i],
+                bits[i + 1],
+                bits[i + 2],
+                bits[i + 3],
+                bits[i + 4],
+                bits[i + 5],
+                bits[i + 6],
+                bits[i + 7]
+            ];
+            let byte = this.bitsToByteLE(b);
+            bytes.push(byte);
+        }
+        return bytes;
+    }
+
+    /**
+     * Convert a byte to bits in little endian order
+     * @param {*} b 
+     */
+    static byteToBitsLE(b) {
+        b &= 0xff;
+        let bits = [];
+        bits.push((b) & 1);
+        bits.push((b >> 1) & 1);
+        bits.push((b >> 2) & 1);
+        bits.push((b >> 3) & 1);
+        bits.push((b >> 4) & 1);
+        bits.push((b >> 5) & 1);
+        bits.push((b >> 6) & 1);
+        bits.push((b >> 7) & 1);
+        return bits;
+    }
+
+    /**
+     * Convert an array of bytes to an array of bits. Bigendian.
+     * The output array is 8x the size of the input, each element a 1 or 0
+     * @param {array} bytes 
+     * @return {array} of bits
+     */
+    static bytesToBitsLE(bytes) {
+        let bits = [];
+        let len = bytes.length;
+        for (let i = 0; i < len; i++) {
+            let b = bytes[i] & 255;
+            bits.push((b     ) & 1);
+            bits.push((b >> 1) & 1);
+            bits.push((b >> 2) & 1);
+            bits.push((b >> 3) & 1);
+            bits.push((b >> 4) & 1);
+            bits.push((b >> 5) & 1);
+            bits.push((b >> 6) & 1);
+            bits.push((b >> 7) & 1);
         }
         return bits;
     }

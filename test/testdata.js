@@ -141,7 +141,7 @@ const servicePrepended1 = [
  * NOTE—The scrambled entries for the correct CRC32 value are given in bits 784–815.
  */
 const scrambled1 = [
-  // bit#    7-0      15-8     23-16       hex   hex   hex
+  // bit#    0-7      8-15     16-23       hex   hex   hex
   /* 000–023 01101100 00011001 10001001 */ 0x6C, 0x19, 0x89,
   /* 024–047 10001111 01101000 00100001 */ 0x8F, 0x68, 0x21,
   /* 048–071 11110100 10100101 01100001 */ 0xF4, 0xA5, 0x61,
@@ -194,7 +194,7 @@ const scrambled1 = [
  * as zeros in bits 816–1457.
  */
 const shortened1 = [
-  //  bit#      7-0      15-8     23-16      hex    hex   hex
+  //  bit#      0-7      8-15     16-23       hex   hex   hex
   /*  0000–0023 01101100 00011001 10001001 */ 0x6C, 0x19, 0x89,
   /*  0024–0047 10001111 01101000 00100001 */ 0x8F, 0x68, 0x21,
   /*  0048–0071 11110100 10100101 01100001 */ 0xF4, 0xA5, 0x61,

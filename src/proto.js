@@ -15,7 +15,7 @@ class Proto {
 	}
 
 	generateScrambler(initial) {
-		let x = Util.byteToBits(initial).slice(1).reverse();
+		let x = Util.byteToBitsBE(initial).slice(1).reverse();
 		let arr = [];
 		for (let i = 0; i < 127; i++) {
 			let x7 = x[0];
@@ -51,7 +51,7 @@ class Proto {
 	}
 
 	scrambleByte(byte) {
-		let bits = Util.byteToBits(byte);
+		let bits = Util.byteToBitsBE(byte);
 		let b = [];
 		let b0 = this.nextScrambleBit();
 		let b1 = this.nextScrambleBit();
@@ -69,7 +69,7 @@ class Proto {
 		b[5] = bits[2] ^ b5;
 		b[6] = bits[1] ^ b6;
 		b[7] = bits[0] ^ b7;
-		let obyte = Util.bitsToByte(b);
+		let obyte = Util.bitsToByteBE(b);
 		return obyte;
 	}
 
