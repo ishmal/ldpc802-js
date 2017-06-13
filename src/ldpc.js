@@ -36,7 +36,7 @@ class Ldpc {
 
     getA(code) {
         let A = [];
-        for (let i = 0; i < code.mb-1; i++) {
+        for (let i = 0, len = code.mb - 1; i < len; i++) {
             let row = code.Hb[i];
             let val = row.slice(0, kb);
             A.push(val);
@@ -48,7 +48,7 @@ class Ldpc {
     getB(code) {
         let pos = code.kb;
         let B = [];
-        for (let i = 0; i < code.mb-1; i++) {
+        for (let i = 0, len = code.mb - 1; i < len; i++) {
             let val = code.Hb[i][pos];
             B.push(val);
         }
@@ -73,7 +73,7 @@ class Ldpc {
     getT(code) {
         let pos = code.kb + 1;
         let T = [];
-        for (let i = 0; i < code.mb-1; i++) {
+        for (let i = 0, len = code.mb - 1; i < len; i++) {
             let row = code.Hb[i];
             T.push(row.slice(pos));
         }
@@ -293,26 +293,29 @@ class Ldpc {
         let parityZbits = [];
         let Hb = code.Hb; //QC table
         let mb = code.mb; //message length in z-blocks
+        let mb1 = mb - 1;
         let kb = code.kb; //parity in z-blocks
 
         /**
          * Step 1:  Compute A x s(T)  and C x s(T)
+         * AsT is m-1 rows, k columns
+         * Cst is 1 row, k columns
          */
         let AsT = [];
-        for (let i = 0 ; i < mb - 1 ; i++) {
+        for (let i = 0 ; i < mb1 ; i++) {
             let row = code.A[i];
             let rotated = this.arrayRotateDeep(row, zbits);
             AsT.push(rotated);
         }
-        row = Hb[mb - 1];
-        let CsT = this.arrayRotateDeep(row, zbits);
+        let CsT = this.arrayRotateDeep(code.C, zbits);
         
 
         /**
          * Step 2: Compute E x (T-1) * A x s(T)
+         * ET1xAst is m - 1 rows,  k columns
          */
         let ET1xAst = [];
-        for (let i = 0; i < mb - 1 ; i++) {
+        for (let i = 0; i < mb1 ; i++) {
             let row = Ast[i];
             let rowsum = new Array(z).fill(0);
             for (let j = 0 ; j < kb ; j++) {
@@ -328,12 +331,13 @@ class Ldpc {
 
         /**
          * Step 4: Get Bp1
+         * Bp1 is m - 1 rows, k columns
          */
         let Bp1 = [];
-        for (let i = 0 ; i < mb -1 ; i++) {
+        for (let i = 0 ; i < mb1 ; i++) {
             let val = code.B[i];
             let row = [];
-            for (let j = 0 ; j < mb - 1 ; j++) {
+            for (let j = 0 ; j < mb1 ; j++) {
                 let pbits = p1[j];
                 let rotated = this.arrayRotate(pbits, val);
                 row.push(rotated);
@@ -341,26 +345,36 @@ class Ldpc {
             Bp1.push(row);
         }
 
+        /**
+         * Get Tp1 = Ast + Bp1
+         * Tp1 is m - 1 row, k columns
+         */
         Tp1 = [];
-        for (let i = 0 ; i < mb - 1 ; i++) {
+        for (let i = 0 ; i < mb1 ; i++) {
             let arow = AsT[i];
             let brow = Bp1[i];
             Tp1.push(this.arrayXorDeep(arow, brow));
         }
 
-        //here is where we need to do back substitution to solve for p2
-        let x = new Array(mb - 1).fill([]);
-        for (let i = mb -1 ; i >= 0 ; i++) {
+        /**
+         * Use back substitution to solve
+         * Tp1 = AsT + Bp1
+         */
+        let p2 = [];
+        for (let i = mb1 ; i >= 0 ; i--) {
             let xi = Tp1[i];
-            for (let j = i ; j < mb-1 ; j++) {
+            for (let j = i ; j < mb1 ; j++) {
                 let  amount = code.T[i][j];
-                let rot = this.arrayRotate(x[j], code.z - amount);
+                let rot = this.arrayRotate(p2[j], code.z - amount);
                 xi = this.arrayXor(xi, rot)
             }
-            x[i] = x; //no need to scale
+            p2[i] = x; //no need to scale
         }
 
-        return [];
+        let p1bits = this.flatten(p1);
+        let p2bits = this.flatten(p2);
+        let outbits = bit.concat(p1bits).concat(p2bits);
+        return outbits;
     }
 
     /**
