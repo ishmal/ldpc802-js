@@ -89,6 +89,7 @@ class Ldpc {
      * NOTE:  this assumes that the input array's length is a multiple of z
      * @param {array} inbits array of bits to break up
      * @param {number} size the size of each subarray
+     * @return {array[]} array of arrays of bits
      */
     bitsToZ(inbits, size) {
         let zarr = [];
@@ -101,7 +102,8 @@ class Ldpc {
 
     /**
      * Flatten a Z array (array of arrays of bits) to a single array of bits
-     * @param {array} z the array-of-arrays to flatten
+     * @param {array[]} z the array-of-arrays to flatten
+     * @return {array} linear array of bits
      */
     flatten(z) {
         return z.reduce((acc, child) => acc.concat(child), []);
@@ -109,9 +111,11 @@ class Ldpc {
 
     /**
      * Rotate an array N places to the right.  This assumes
-     * that n is less than or equalt to the array length.
+     * that n is less than or equal to the array length.
      * @param {array} arr the array of bits to rotate
-     * @param {*} n the number of spaces to rotate
+     * @param {number} n the number of spaces to rotate
+     * @return {array} a copy of the array rotated n places
+     *     to the right
      */
     arrayRotate(arr, n) {
         if (!n) {
@@ -122,10 +126,14 @@ class Ldpc {
     }
 
     /**
-     * Rotate an array N places to the right.  This assumes
-     * that n is less than or equalt to the array length.
-     * @param {array} arr the array of bits to rotate
-     * @param {*} n the number of spaces to rotate
+     * Rotatethe subarrays of an array N places to the right.  
+     * This assumes that n is less than or equal to the length
+     * of all of the subarrays.
+     * @param {array[]} arr the array of bits to rotate
+     * @param {array} bitsArr an array with each member as the
+     *    number of spaces to rotate
+     * @return {array[]} a clone of the array with each of the
+     * subarrays rotated by the associated number in bitsArr
      */
     arrayRotateDeep(qcArr, bitsArr) {
         let arr = [];
@@ -139,8 +147,8 @@ class Ldpc {
 
    /**
      * Sum two arrays of numbers together
-     * @param {array} a 
-     * @param {array} b 
+     * @param {array} a array of numbers
+     * @param {array} b array of numbers
      * @return {array} sum of the two arrays
      */
     arrayAdd(a, b) {
@@ -167,9 +175,11 @@ class Ldpc {
     }
 
     /**
-     * XOR two arrays of arrays of arrays of numbers together
-     * @param {array[]} a 
-     * @param {array[]} b 
+     * XOR two arrays of arrays of numbers together.  Assumes
+     * that their lengths are the same and that their corresponding
+     * subarrays are the same length.
+     * @param {array[]} a an array of bit arrays
+     * @param {array[]} b an array of bit arrays
      * @return {array} xor of the two arrays
      */
     arrayXorDeep(a, b) {
@@ -207,9 +217,9 @@ class Ldpc {
 
     /**
      * Encode an array of bytes with the given LDPC code
-     * @param bytes {array} the bytes to encode
-     * @param rateStr {string} the rate from the tables above
-     * @param lengthStr {string} the length from the tables above
+     * @param {array} bytes the bytes to encode
+     * @param {string} rateStr the rate from the tables above
+     * @param {string} lengthStr the length from the tables above
      * @return {array} the encoded bits
      */
     encode(bytes, rateStr, lengthStr) {
@@ -268,7 +278,7 @@ class Ldpc {
      * @param {array[number]} row array of rotations
      * @param {array[array[number]]} arr array of z-sized arrays
      * @param {number} z size of each subarray
-     * @return z-sized array of the sum
+     * @return {array} z-sized array of the sum
      */
     multiplyQC(row, arr, z, kb) {
         let sum = new Array(z).fill(0);
@@ -287,9 +297,9 @@ class Ldpc {
 
    /**
      * Encode an array of bytes with the given LDPC code
-     * @param bytes {array} the bytes to encode
-     * @param rateStr {string} the rate from the tables above
-     * @param lengthStr {string} the length from the tables above
+     * @param {array} bytes the bytes to encode
+     * @param {string} rateStr the rate from the tables above
+     * @param {string} lengthStr the length from the tables above
      * @return {array} the encoded bits
      */
     encode2(bytes, rateStr, lengthStr) {
@@ -380,9 +390,9 @@ class Ldpc {
 
     /**
      * Encode a string with the given LDPC code
-     * @param str {string} the string to encode
-     * @param rateStr {string} the rate from the tables above
-     * @param lenStr {string} the length from the tables above
+     * @param {string} str the string to encode
+     * @param {string} rateStr the rate from the tables above
+     * @param {string} lenStr length from the tables above
      * @return {array} the encoded bits
      */
     encodeString(str, rateStr, lenStr) {
@@ -393,8 +403,8 @@ class Ldpc {
     /**
      * Decode an array of LDPC-encoded bits with the given LDPC code
      * @param {array} inbits array of bits
-     * @param rateStr {string} the rate from the tables above
-     * @param lenStr {string} the length from the tables above
+     * @param {string} rateStr the rate from the tables above
+     * @param {string} lenStr the length from the tables above
      * @return {array} the output bytes
      */
     decode(inbits, rateStr, lenStr) {
@@ -408,8 +418,8 @@ class Ldpc {
     /** 
      * Decode an array of LDPC-encoded bits with the given LDPC code
      * @param {array} inbits array of bits
-     * @param rateStr {string} the rate from the tables above
-     * @param lenStr {string} the length from the tables above
+     * @param {string} rateStr the rate from the tables above
+     * @param {string} lenStr the length from the tables above
      * @param {string} the output string
      */
     decodeString(inbits, rateStr, lenStr) {
@@ -419,6 +429,5 @@ class Ldpc {
     }
 
 }
-
 
 module.exports = Ldpc;
