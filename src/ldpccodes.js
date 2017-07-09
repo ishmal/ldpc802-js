@@ -2,6 +2,12 @@
 
 /**
  * LDPC codes from IEEE Std 802.11n-2009
+ * 
+ * Notes:
+ *   1.  obviously nb, kb, and kb are trivial to calculate, but they
+ *     will never change, so why not just state their values?
+ *   2.  both the numerical and text forms of the tables are provided
+ *     so that they maybe be validated.
  */
 const codes = {
     "1/2": {
