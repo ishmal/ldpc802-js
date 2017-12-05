@@ -25,8 +25,7 @@ class Crc32 {
      */
     static stringToBytes(str) {
         let bytes = [];
-        let len = str.length;
-        for (let i = 0; i < len; i++) {
+        for (let i = 0, len = str.length; i < len; i++) {
             let code = str.charCodeAt(i);
             if (code < 0x80) {
                 bytes.push(code);
@@ -71,10 +70,9 @@ class Crc32 {
      * @return the crc
      */
     static ofBytes(bytes) {
-        let len = bytes.length;
         let crc = 0 ^ (-1);
-        for (let i = 0; i < len; i++) {
-            crc = (crc >>> 8) ^ crcTable[(crc ^ bytes[i]) & 0xff];
+        for (let byte of bytes) {
+            crc = (crc >>> 8) ^ crcTable[(crc ^ byte) & 0xff];
         }
         return (crc ^ (-1)) >>> 0;
     }

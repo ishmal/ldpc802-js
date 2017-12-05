@@ -20,8 +20,8 @@
     "gulp": "^3.9.1",
     "gulp-jshint": "^2.0.4",
     "gulp-mocha": "^4.3.1",
-    "jshint": "^2.9.4",
-    "mocha": "^3.4.2"
+    "jshint": "^2.9.5",
+    "mocha": "^4.0.1"
   },
   "directories": {
     "test": "test"

@@ -18,18 +18,16 @@ class Ldpc {
 	}
 
 	makeTables() {
-		Object.keys(codes).forEach(k => {
-			let rate = codes[k];
-			Object.keys(rate.lengths).forEach(k2 => {
-				let code = rate.lengths[k2];
+		for (let rate of Object.values(codes)) {
+			for (let code of Object.values(rate.lengths)) {
 				code.A = this.getA(code);
 				code.B = this.getB(code);
 				code.C = this.getC(code);
 				code.D = this.getD(code);
 				code.E = this.getE(code);
-				code.T = this.getT(code);
-			});
-		});
+				code.T = this.getT(code);				
+			}
+		}
 	}
 
 	getA(code) {
@@ -154,9 +152,8 @@ class Ldpc {
      * @return {array} sum of the two arrays
      */
 	arrayAdd(a, b) {
-		let len = a.length;
 		let arr = new Array(len);
-		for (let i = 0; i < len; i++) {
+		for (let i = 0, len = a.length; i < len; i++) {
 			arr[i] = a[i] + b[i];
 		}
 		return arr;

@@ -13,8 +13,7 @@ class Util {
      */
     static stringToBytes(str) {
         let bytes = [];
-        let len = str.length;
-        for (let i = 0; i < len; i++) {
+        for (let i = 0, len = str.length; i < len; i++) {
             let code = str.charCodeAt(i);
             if (code < 0x80) {
                 bytes.push(code);
@@ -80,9 +79,8 @@ class Util {
      * Assumes bits length is multiple of 8
      */
     static bitsToBytesBE(bits) {
-        let len = bits.length;
         let bytes = [];
-        for (let i = 0; i < len; i += 8) {
+        for (let i = 0, len = bits.length; i < len; i += 8) {
             let b = [
                 bits[i],
                 bits[i + 1],
@@ -124,8 +122,7 @@ class Util {
      */
     static bytesToBitsBE(bytes) {
         let bits = [];
-        let len = bytes.length;
-        for (let i = 0; i < len; i++) {
+        for (let i = 0, len = bytes.length; i < len; i++) {
             let b = bytes[i];
             bits.push((b >> 7) & 1);
             bits.push((b >> 6) & 1);
@@ -165,9 +162,8 @@ class Util {
      * Assumes bits length is multiple of 8
      */
     static bitsToBytesLE(bits) {
-        let len = bits.length;
         let bytes = [];
-        for (let i = 0; i < len; i += 8) {
+        for (let i = 0, len = bits.length; i < len; i += 8) {
             let b = [
                 bits[i],
                 bits[i + 1],
@@ -210,8 +206,7 @@ class Util {
      */
     static bytesToBitsLE(bytes) {
         let bits = [];
-        let len = bytes.length;
-        for (let i = 0; i < len; i++) {
+        for (let i = 0, len = bytes.length; i < len; i++) {
             let b = bytes[i] & 255;
             bits.push((b     ) & 1);
             bits.push((b >> 1) & 1);
@@ -228,7 +223,7 @@ class Util {
 	/**
 	 * Pad an array with zeroes to that its length is a given size
 	 * @param {array} inbits input array of bits
-	 * @param {*} size the desired size,  >= the length of the array
+	 * @param {number} size the desired size,  >= the length of the array
 	 */
 	static zeroPadArray(inarr, size) {
 		let arr = inarr.slice(0);
