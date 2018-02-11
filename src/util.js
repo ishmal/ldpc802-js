@@ -8,7 +8,7 @@ class Util {
 
     /**
      * Convert a string to an array of UTF-8 bytes
-     * @param {string} str 
+     * @param {string} str input string
      * @return {array} of bytes
      */
     static stringToBytes(str) {
@@ -44,7 +44,7 @@ class Util {
 
     /**
      * Convert an array of UTF-8 bytes to a string
-     * @param {array} byteArray 
+     * @param {array} byteArray array of bytes
      * @return {string}
      */
     static bytesToString(byteArray) {
@@ -60,7 +60,8 @@ class Util {
 
     /**
      * Bigendian
-     * @param {*} bits 
+     * @param {array} bits array of bits 
+     * @return {number} byte
      */
     static bitsToByteBE(bits) {
         let byte =
@@ -77,6 +78,8 @@ class Util {
 
     /** 
      * Assumes bits length is multiple of 8
+     * @param {array} bits array of bits
+     * @return {array} of bytes
      */
     static bitsToBytesBE(bits) {
         let bytes = [];
@@ -99,7 +102,8 @@ class Util {
 
     /**
      * Bigendian
-     * @param {*} b 
+     * @param {number} b byte
+     * @return {array} of bits 
      */
     static byteToBitsBE(b) {
         let bits = [];
@@ -117,7 +121,7 @@ class Util {
     /**
      * Convert an array of bytes to an array of bits. Bigendian.
      * The output array is 8x the size of the input, each element a 1 or 0
-     * @param {array} bytes 
+     * @param {array} bytes array of bytes
      * @return {array} of bits
      */
     static bytesToBitsBE(bytes) {
@@ -143,7 +147,8 @@ class Util {
 
     /**
      * Bigendian
-     * @param {*} bits 
+     * @param {array} bits array of bits
+     * @return {number} byte
      */
     static bitsToByteLE(bits) {
         let byte =
@@ -155,11 +160,13 @@ class Util {
             ((bits[2] << 2) & 4) +
             ((bits[1] << 1) & 2) +
             ((bits[0]) & 1);
-        return byte & 0xff;;
+        return byte & 0xff;
     }
 
     /** 
      * Assumes bits length is multiple of 8
+     * @param {array} bits array of bits
+     * @param {array} of bytes
      */
     static bitsToBytesLE(bits) {
         let bytes = [];
@@ -182,7 +189,8 @@ class Util {
 
     /**
      * Convert a byte to bits in little endian order
-     * @param {*} b 
+     * @param {number} b byte
+     * @return {array} of bits 
      */
     static byteToBitsLE(b) {
         b &= 0xff;
@@ -201,7 +209,7 @@ class Util {
     /**
      * Convert an array of bytes to an array of bits. Bigendian.
      * The output array is 8x the size of the input, each element a 1 or 0
-     * @param {array} bytes 
+     * @param {array} bytes array or bytes
      * @return {array} of bits
      */
     static bytesToBitsLE(bytes) {
@@ -224,6 +232,7 @@ class Util {
 	 * Pad an array with zeroes to that its length is a given size
 	 * @param {array} inbits input array of bits
 	 * @param {number} size the desired size,  >= the length of the array
+     * @return {array} of bits
 	 */
 	static zeroPadArray(inarr, size) {
 		let arr = inarr.slice(0);

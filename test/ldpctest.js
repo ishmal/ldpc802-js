@@ -158,7 +158,7 @@ describe("LDPC", () => {
 		assert.deepEqual(res, exp);
 	});
 
-	it("should get the first parity bits corretly", () => {
+	it("should get the first parity bits correctly", () => {
 		let exp = [
 			1,
 			0,

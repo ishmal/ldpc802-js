@@ -17,7 +17,6 @@ const crcTable = (function() {
  */
 class Crc32 {
 
-
     /**
      * Convert a string to an array of UTF-8 bytes
      * @param {string} str string to convert
@@ -56,8 +55,8 @@ class Crc32 {
 
     /**
      * Calculate the crc32 checksum for a string
-     * @param {string} str 
-     * @return the crc
+     * @param {string} str input string
+     * @return {number} the crc
      */
     static ofString(str) {
         let bytes = this.stringToBytes(str);
@@ -66,8 +65,8 @@ class Crc32 {
 
     /**
      * Calculate the crc32 checksum for an array of bytes
-     * @param {array} array of bytes
-     * @return the crc
+     * @param {array} bytes array of bytes
+     * @return {number} the crc
      */
     static ofBytes(bytes) {
         let crc = 0 ^ (-1);
@@ -80,7 +79,7 @@ class Crc32 {
     /**
      * break a 32-bit crc into 4 bytes, so that they can be sent as payload.
      * @param {number} the crc to break apart
-     * @return the 4 bytes
+     * @return {array} the 4 bytes
      */
     static intToBytes(crc) {
         let bytes = [

@@ -4,7 +4,9 @@ const Ldpc = require("./ldpc");
 const Util = require("./util");
 const Crc32 = require("./crc32");
 
-
+/**
+ * Methods supporting the 802.11 data packet
+ */
 class Proto {
 
 	constructor() {
@@ -50,6 +52,11 @@ class Proto {
 		return obytes;
 	}
 
+	/**
+	 * Scramble the bits of a byte
+	 * @param {number} byte byte to be scrambled
+	 * @return {number} the scrambled byte
+	 */
 	scrambleByte(byte) {
 		let bits = Util.byteToBitsBE(byte);
 		let b = [];
@@ -75,8 +82,8 @@ class Proto {
 
 	/**
 	 * Scramble the bits in an array of bytes
-	 * @param {array} bytes 
-	 * @return a scrambled copy of the array
+	 * @param {array} bytes array of bytes
+	 * @return {array} a scrambled copy of the array
 	 */
 	scrambleBytes(bytes) {
 		let arr = [];
@@ -91,7 +98,8 @@ class Proto {
 	/**
 	 * Pad an array with zeroes to that its length is a given size
 	 * @param {array} inbits input array of bits
-	 * @param {*} size the desired size,  >= the length of the array
+	 * @param {number} size the desired size,  >= the length of the array
+	 * @return {array} the input array, zero-padded
 	 */
 	zeroPadArray(inarr, size) {
 		let arr = inarr.slice(0);
@@ -105,9 +113,9 @@ class Proto {
     /**
      * Encode an array of bytes with the given LDPC code
      * TODO: select a length according to the length of the byte array
-     * @param bytes {array} the bytes to encode
-     * @param rateStr {string} the rate from the tables above
-     * @param lengthStr {string} the length from the tables above
+     * @param {array} bytes the bytes to encode
+     * @param {string} rateStr the rate from the tables above
+     * @param {string} lengthStr the length from the tables above
      * @return {array} the encoded bits
      */
     encode(bytes, rateStr, lengthStr) {
@@ -116,9 +124,9 @@ class Proto {
 
     /**
      * Encode a string with the given LDPC code
-     * @param str {string} the string to encode
-     * @param rateStr {string} the rate from the tables above
-     * @param lenStr {string} the length from the tables above
+     * @param {string} str the string to encode
+     * @param {string} rateStr the rate from the tables above
+     * @param {string} lenStr the length from the tables above
      * @return {array} the encoded bits
      */
     encodeString(str, rateStr, lenStr) {
@@ -129,8 +137,8 @@ class Proto {
     /**
      * Decode an array of LDPC-encoded bits with the given LDPC code
      * @param {array} inbits array of bits
-     * @param rateStr {string} the rate from the tables above
-     * @param lenStr {string} the length from the tables above
+     * @param {string} rateStr the rate from the tables above
+     * @param {string} lenStr the length from the tables above
      * @return {array} the output bytes
      */
     decode(inbits, rateStr, lenStr) {
@@ -140,8 +148,8 @@ class Proto {
     /** 
      * Decode an array of LDPC-encoded bits with the given LDPC code
      * @param {array} inbits array of bits
-     * @param rateStr {string} the rate from the tables above
-     * @param lenStr {string} the length from the tables above
+     * @param {string} rateStr the rate from the tables above
+     * @param {string} lenStr the length from the tables above
      * @param {string} the output string
      */
     decodeString(inbits, rateStr, lenStr) {
@@ -149,8 +157,6 @@ class Proto {
         let str = Util.bytesToString(outbytes);
         return str;
     }
-
-
 
 }
 
