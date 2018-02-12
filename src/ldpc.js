@@ -152,8 +152,9 @@ class Ldpc {
      * @return {array} sum of the two arrays
      */
 	arrayAdd(a, b) {
+		let len = a.length;
 		let arr = new Array(len);
-		for (let i = 0, len = a.length; i < len; i++) {
+		for (let i = 0; i < len; i++) {
 			arr[i] = a[i] + b[i];
 		}
 		return arr;
