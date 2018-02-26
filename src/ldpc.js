@@ -119,7 +119,7 @@ class Ldpc {
      */
 	arrayRotate(arr, n) {
 		if (!n) {
-			return arr.slice(0);
+			return arr.slice();
 		}
 		let pos = arr.length - n;
 		return arr.slice(pos).concat(arr.slice(0, pos));
@@ -195,7 +195,8 @@ class Ldpc {
      * Iterate through all of the z-sized subarrays of zbits, and
      * rotate each one right by amount in the associated cell
      * of the Hb array.
-     * @param {array} row a row in the quasi-cyclic matrix
+     * @param {array} row a row in the quasi-cyclic matrix, containing
+	 * 	values in the range (-1) .. (z-1)
      * @param {array[]} zbits array of z-sized arrays of bits of message
      * @param {number} z the size of a z-array
      * @param {number} kb width of parity bits
@@ -203,7 +204,12 @@ class Ldpc {
      * rotation matrices.
      */
 	lambdaI(row, zbits, z, kb) {
-		let p = new Array(z).fill(0);
+		let rowlen = row.length;
+		if (kb > rowLen) {
+			throw new Error("row data too short. rowLen: " + 
+				rowLen + "  kb: " + kb);
+		}
+		let p = new Array(z).fill(0); //carries the sum
 		for (let j = 0; j < kb; j++) {
 			let rotation = row[j]; //how much to rotate?
 			if (rotation >= 0) {
@@ -225,6 +231,10 @@ class Ldpc {
 	encode(bytes, rateStr, lengthStr) {
 		let rate = codes[rateStr];
 		let code = rate.lengths[lengthStr];
+		let nrPad = (code.length >> 3) - bytes.length;
+		for (let i = 0 ; i < nrPad ; i++) {
+			bytes.push(0);
+		}
 		let z = code.z;
 		let Hb = code.Hb; //QC table
 		let mb = code.mb; //parity in z-blocks
@@ -265,7 +275,7 @@ class Ldpc {
 		/**
          * Done.  Append parity bits to end of message bits
          */
-		let outbits = bits.slice(0);
+		let outbits = bits.slice();
 		parityZbits.forEach(arr => {
 			outbits = outbits.concat(arr);
 		});

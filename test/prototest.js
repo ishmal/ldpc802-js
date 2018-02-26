@@ -30,11 +30,14 @@ describe("Proto", () => {
     assert.deepEqual(proto.scrambleBits, scrambleBits);
   });
 
-  xit("should encode a string without exceptions", () => {
+  it("should encode a string without exceptions", () => {
     let proto = new Proto();
     let plain = "the quick brown fox";
-    let res = proto.encode(plain, "1/2", "648");
-    assert(res);
+    function callMe() {
+      debugger;
+      proto.encodeString(plain, "1/2", "648");
+    }
+    assert.doesNotThrow(callMe);
   });
 
   it("should scramble correctly", () => {
@@ -42,14 +45,6 @@ describe("Proto", () => {
     proto.generateScrambler(0x5d);
     let res = proto.scrambleBytes(Data.servicePrepended1);
     assert.deepEqual(res, Data.scrambled1);
-  });
-
-  it("should pad bits correctly", () => {
-    let proto = new Proto();
-    let bits = Util.bytesToBitsBE(Data.scrambled1);
-    let obits = Util.zeroPadArray(bits, 1458);
-    let res = Util.bitsToBytesBE(obits);
-    assert.deepEqual(res, Data.shortened1);  
   });
 
   xit("should encode correctly", () => {

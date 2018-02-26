@@ -1,20 +1,19 @@
-const gulp = require('gulp');
-const mocha = require('gulp-mocha');
-const jshint = require('gulp-jshint');
+const gulp = require("gulp");
+const Mocha = require("./mocha-tool");
+const jshint = require("gulp-jshint");
 
-gulp.task('lint', () => {
-  return gulp.src('src/**/*.js')
+gulp.task("lint", () => {
+  return gulp.src("src/**/*.js")
     .pipe(jshint())
-    .pipe(jshint.reporter('default'));
+    .pipe(jshint.reporter("default"));
 });
 
-gulp.task('test', () => {
-  return gulp.src('test/ldpctest.js', {
-      read: false
-    })
-    .pipe(mocha({
-      reporter: 'nyan'
-    }));
+gulp.task("test", () => {
+  let opts = {
+
+  };
+  let mocha = new Mocha(opts);
+  return mocha.runFiles("./test/ldpctest.js");
 });
 
-gulp.task('default', gulp.series("lint", "test"));
+gulp.task("default", gulp.series("lint", "test"));

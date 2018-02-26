@@ -95,21 +95,6 @@ class Proto {
 		return arr;
 	}
 
-	/**
-	 * Pad an array with zeroes to that its length is a given size
-	 * @param {array} inbits input array of bits
-	 * @param {number} size the desired size,  >= the length of the array
-	 * @return {array} the input array, zero-padded
-	 */
-	zeroPadArray(inarr, size) {
-		let arr = inarr.slice(0);
-		let nrZeros = size - arr.length;
-		while (nrZeros--) {
-			arr.push(0);
-		}
-		return arr;
-	}
-
     /**
      * Encode an array of bytes with the given LDPC code
      * TODO: select a length according to the length of the byte array
@@ -131,7 +116,7 @@ class Proto {
      */
     encodeString(str, rateStr, lenStr) {
         let bytes = Util.stringToBytes(str);
-        return this.encode(bytes, lenStr, rateStr);
+        return this.encode(bytes, rateStr, lenStr);
     }
 
     /**

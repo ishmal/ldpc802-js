@@ -1,16 +1,18 @@
 /* jshint node: true, esversion: 6 */
 
-const crcTable = (function() {
-        let table = [];
-        for (let n = 0; n < 256; n++) {
-            let c = n;
-            for (let k = 0; k < 8; k++) {
-                c = ((c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1));
-            }
-            table[n] = c;
+function createCrcTable() {
+    let table = [];
+    for (let n = 0; n < 256; n++) {
+        let c = n;
+        for (let k = 0; k < 8; k++) {
+            c = ((c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1));
         }
-        return table;
-})();
+        table[n] = c;
+    }
+    return table;
+}
+
+const crcTable = createCrcTable();
 
 /**
  * Calculates a 4-byte CRC32 of a string or byte array
@@ -83,10 +85,10 @@ class Crc32 {
      */
     static intToBytes(crc) {
         let bytes = [
-            (crc) & 0xff,
-            (crc >> 8) & 0xff,
+            (crc >> 24) & 0xff,
             (crc >> 16) & 0xff,
-            (crc >> 24) & 0xff
+            (crc >> 8) & 0xff,
+            (crc) & 0xff
         ];
         return bytes;
     }

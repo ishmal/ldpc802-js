@@ -1,6 +1,7 @@
 
 const Util = require("../src/util");
 const assert = require('assert');
+const Data = require("./testdata");
 
 
 describe("Util", () => {
@@ -34,5 +35,21 @@ describe("Util", () => {
     let res = Util.bitsToBytesLE(bits);
     assert.deepEqual(res, arr);
   });
+
+  it("should pad bytes correctly", () => {
+    let bytes = [ 1, 2, 3, 4, 5, 6];
+    let exp = [ 1, 2, 3, 4, 5, 6, 0, 0, 0];
+    let res = Util.zeroPadArray(bytes, 9);
+    assert.deepEqual(res, exp);
+  });
+
+  it("should pad bits correctly", () => {
+    let bits = Util.bytesToBitsBE(Data.scrambled1);
+    let obits = Util.zeroPadArray(bits, 1458);
+    let res = Util.bitsToBytesBE(obits);
+    assert.deepEqual(res, Data.shortened1);  
+  });
+
+
 
 });
