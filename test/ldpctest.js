@@ -13,8 +13,8 @@ const assert = require("assert");
 
 describe("LDPC Codes", () => {
 	/**
-     * Generate our encoding and decoding tables
-     */
+	 * Generate our encoding and decoding tables
+	 */
 	function validateTables() {
 		Object.keys(codes).forEach(k => {
 			let rate = codes[k];
@@ -44,9 +44,9 @@ describe("LDPC Codes", () => {
 	}
 
 	/**
-     * Generate the pseudo-cyclic 'Hb' table from the code data
-     * @param {object} code one of the blocks in "lengths" in the code table,  for example, "648"
-     */
+	 * Generate the pseudo-cyclic 'Hb' table from the code data
+	 * @param {object} code one of the blocks in "lengths" in the code table,  for example, "648"
+	 */
 	function validateHb(code) {
 		let arr = [];
 		let source = code.source;
@@ -108,13 +108,21 @@ describe("LDPC", () => {
 
 	it("should group an array into z-size chunks", () => {
 		let arr = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-		let exp = [[0, 1, 2], [3, 4, 5], [6, 7, 8]];
+		let exp = [
+			[0, 1, 2],
+			[3, 4, 5],
+			[6, 7, 8]
+		];
 		let res = ldpc.bitsToZ(arr, 3);
 		assert.deepEqual(res, exp);
 	});
 
 	it("should flatten an array of arrays", () => {
-		let arr = [[0, 1, 2], [3, 4, 5], [6, 7, 8, 9]];
+		let arr = [
+			[0, 1, 2],
+			[3, 4, 5],
+			[6, 7, 8, 9]
+		];
 		let exp = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 		let res = ldpc.flatten(arr);
 		assert.deepEqual(res, exp);
@@ -137,9 +145,18 @@ describe("LDPC", () => {
 	});
 
 	it("should xor two arrays of arrays", () => {
-		let arr1 = [[0, 1, 1], [0, 0, 1]];
-		let arr2 = [[1, 1, 1], [1, 1, 1]];
-		let exp = [[1, 0, 0], [1, 1, 0]];
+		let arr1 = [
+			[0, 1, 1],
+			[0, 0, 1]
+		];
+		let arr2 = [
+			[1, 1, 1],
+			[1, 1, 1]
+		];
+		let exp = [
+			[1, 0, 0],
+			[1, 1, 0]
+		];
 		let res = ldpc.arrayXorDeep(arr1, arr2);
 		assert.deepEqual(res, exp);
 	});
@@ -159,89 +176,13 @@ describe("LDPC", () => {
 	});
 
 	it("should get the first parity bits correctly", () => {
+		/* beautify preserve:start */
 		let exp = [
-			1,
-			0,
-			0,
-			1,
-			1,
-			0,
-			0,
-			0,
-			1,
-			1,
-			1,
-			1,
-			0,
-			1,
-			1,
-			0,
-			1,
-			0,
-			1,
-			0,
-			0,
-			1,
-			1,
-			0,
-			0,
-			1,
-			1,
-			1,
-			0,
-			0,
-			0,
-			1,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			1,
-			1,
-			0,
-			1,
-			0,
-			1,
-			1,
-			1,
-			1,
-			0,
-			1,
-			1,
-			0,
-			0,
-			1,
-			0,
-			1,
-			0,
-			0,
-			0,
-			0,
-			1,
-			1,
-			0,
-			1,
-			1,
-			1,
-			0,
-			0,
-			0,
-			1,
-			1,
-			1,
-			0,
-			1,
-			1,
-			1,
-			1,
-			1,
-			1,
-			0,
-			1,
-			0
-		];
+			1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0,
+			0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1,
+			0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1,
+			1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0 ];
+		/* beautify preserve:end */
 	});
 
 	xit("should encode correctly", () => {
@@ -257,14 +198,14 @@ describe("LDPC", () => {
 
 	it("should perform lambdaI correctly", () => {
 		let zbits = [
-			[1,0,1,0], // 0,0,0,0
-			[1,0,1,0], // 1,0,1,0
-			[1,0,1,0], // 1,1,1,1
-			[1,0,1,0], // 0,1,0,1
-			[1,0,1,0]  // 0,0,0,0
+			[1, 0, 1, 0], // 0,0,0,0
+			[1, 0, 1, 0], // 1,0,1,0
+			[1, 0, 1, 0], // 1,1,1,1
+			[1, 0, 1, 0], // 0,1,0,1
+			[1, 0, 1, 0] // 0,0,0,0
 		];
-		let row = [-1,0,1,2,3];
-		let exp = [0,0,0,0];
+		let row = [-1, 0, 1, 2, 3];
+		let exp = [0, 0, 0, 0];
 		let res = ldpc.lambdaI(row, zbits, 4, 5);
 		assert.deepEqual(res, exp);
 	});

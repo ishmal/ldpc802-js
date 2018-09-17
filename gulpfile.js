@@ -10,10 +10,13 @@ gulp.task("lint", () => {
 
 gulp.task("test", () => {
   let opts = {
-
+    colors: true
   };
+  let files = [
+    "./test/*.js"
+  ];
   let mocha = new Mocha(opts);
-  return mocha.runFiles("./test/ldpctest.js");
+  return mocha.runFiles(files);
 });
 
-gulp.task("default", gulp.series("lint", "test"));
+gulp.task("default", gulp.parallel("lint", "test"));
