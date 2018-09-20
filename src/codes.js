@@ -242,12 +242,13 @@ class Codes {
 				const z = code.z;
 				const A = this.getA(code);
 				code.A = this.qcMatrixToSparse(A, z)
-				code.B = this.getB(code);
+				const B = this.getB(code);
+				code.B = this.qcMatrixToSparse(B, z)
 				const C = this.getC(code);
 				code.C = this.qcMatrixToSparse(C, z)
 				code.D = this.getD(code);
 				code.E = this.getE(code);
-				code.T = this.getT(code);				
+				code.T = this.getT(code);			
 			}
 		}
 	}
@@ -277,6 +278,46 @@ class Codes {
 				for (let i = 0 ; i < z ; i++) {
 					const bitIndex = colIdx + (qc + i) % z;
 					rows[i].push(bitIndex);
+				}
+			}
+			allRows = allRows.concat(rows);
+		}
+		return allRows;
+	}
+
+	
+	/**
+	 * Convert a matrix of qc description integers into rows of 1's and 0's.
+	 * @param {array<array>} qcMatrix rows/columns of 1 and 0
+	 * @param {number} z the size of the square qc block
+	 */
+	qcMatrixToBinary(qcMatrix, z) {
+		let allRows = [];
+		const qcRows = qcMatrix.length;
+		const qcCols = qcMatrix[0].length;
+		console.log(`qc: ${qcCols} z:${z}`);
+		for (let qcRowIdx = 0 ; qcRowIdx < qcRows ; qcRowIdx++) {
+			const rows = [];
+			for (let i = 0 ; i < z ; i++) {
+				rows[i] = new Array();
+			}
+			const qcRow = qcMatrix[qcRowIdx];
+			for (let qcColIdx = 0, colIdx = 0 ; qcColIdx < qcCols ; qcColIdx++, colIdx += z) {
+				const qc = qcRow[qcColIdx];
+				if (qc < 0) {
+					for (let i = 0 ; i < z ; i++) {
+						for (let j = 0; j < z ; j++) {
+							rows[i].push(0);
+						}
+					}
+				} else {
+					for (let i = 0 ; i < z ; i++) {
+						const bitIndex = ((qc + i) % z);
+						for (let j = 0 ; j < z ; j++) {
+							const v = (j === bitIndex) ? 1 : 0;
+							rows[i].push(v);
+						}
+					}
 				}
 			}
 			allRows = allRows.concat(rows);

@@ -2,6 +2,7 @@
 
 const Codes = require("../src/codes");
 const assert = require("assert");
+const math = require("mathjs");
 
 const rawCodes = {
     "1/2": {
@@ -217,4 +218,28 @@ describe("LDPC Codes", () => {
 		const res = codes.qcMatrixToSparse(qc, z);
 		assert.deepEqual(exp, res);
 	});
+
+	function printMatrix(arr) {
+		console.log("size: " + arr.length);
+		arr.forEach((row, i) => {
+			process.stdout.write(i.toString().padStart(2) + ":");
+			row.forEach(col => {
+				process.stdout.write(col.toString().padStart(2));
+			});
+			process.stdout.write("\n");
+		});
+	}
+
+	it("does stuff", () => {
+		const codes = new Codes();
+		const code = codes.codes["5/6"]["648"];
+		console.log("T:" + JSON.stringify(code.T, null, 2));
+		const arr = codes.qcMatrixToBinary(code.T, code.z);
+		printMatrix(arr);
+		const matrix = math.matrix(arr);
+		//console.log("mtx: " + matrix.toString());
+		const inv = math.inv(matrix);
+		printMatrix(inv.toArray());
+	});
+
 });
