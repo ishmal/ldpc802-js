@@ -1,8 +1,7 @@
 /* jshint node: true, esversion: 6 */
 
-const Crc32 = require("./crc32");
 const Util = require("./util");
-const codes = require("./ldpccodes");
+const Codes = require("./codes");
 
 /**
  * LDPC codec for 802.11n LDPC codes
@@ -13,13 +12,13 @@ class Ldpc {
 	//######################################################
 
 	constructor() {
-		this.codes = codes;
+		this.codes = new Codes().codes;
 		this.makeTables();
 	}
 
 	makeTables() {
-		for (let rate of Object.values(codes)) {
-			for (let code of Object.values(rate.lengths)) {
+		for (let rate of Object.values(this.codes)) {
+			for (let code of Object.values(rate)) {
 				code.A = this.getA(code);
 				code.B = this.getB(code);
 				code.C = this.getC(code);
@@ -204,7 +203,7 @@ class Ldpc {
      * rotation matrices.
      */
 	lambdaI(row, zbits, z, kb) {
-		let rowlen = row.length;
+		let rowLen = row.length;
 		if (kb > rowLen) {
 			throw new Error("row data too short. rowLen: " + 
 				rowLen + "  kb: " + kb);
@@ -229,7 +228,7 @@ class Ldpc {
      * @return {array} the encoded bits
      */
 	encode(bytes, rateStr, lengthStr) {
-		let rate = codes[rateStr];
+		let rate = this.codes[rateStr];
 		let code = rate.lengths[lengthStr];
 		let nrPad = (code.length >> 3) - bytes.length;
 		for (let i = 0 ; i < nrPad ; i++) {
@@ -313,8 +312,8 @@ class Ldpc {
      * @return {array} the encoded bits
      */
 	encode2(bytes, rateStr, lengthStr) {
-		let rate = codes[rateStr];
-		let code = rate.lengths[lengthStr];
+		let rate = this.codes[rateStr];
+		let code = rate[lengthStr];
 		let z = code.z;
 		let bits = Util.bytesToBitsBE(bytes);
 		bits = bits.slice(0, code.messageBits); //just in case

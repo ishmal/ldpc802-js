@@ -7,7 +7,7 @@ const Crc32 = require("./crc32");
 /**
  * Methods supporting the 802.11 data packet
  */
-class Proto {
+class Codec {
 
 	constructor() {
 		this.scrambleBits = [];
@@ -146,4 +146,4 @@ class Proto {
 }
 
 
-module.exports = Proto;
+module.exports = Codec;

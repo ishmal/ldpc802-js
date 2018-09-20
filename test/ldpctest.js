@@ -8,73 +8,8 @@ it: false
 const Ldpc = require("../src/ldpc");
 const Util = require("../src/util");
 const Data = require("./testdata");
-const codes = require("../src/ldpccodes");
-const assert = require("assert");
+const assert = require('assert');
 
-describe("LDPC Codes", () => {
-	/**
-	 * Generate our encoding and decoding tables
-	 */
-	function validateTables() {
-		Object.keys(codes).forEach(k => {
-			let rate = codes[k];
-			Object.keys(rate.lengths).forEach(k2 => {
-				let code = rate.lengths[k2];
-				validateHb(code);
-			});
-		});
-	}
-
-	function printHb(Hb) {
-		console.log("Hb: [");
-		for (let i = 0; i < Hb.length; i++) {
-			let row = Hb[i];
-			let s = "\t[ ";
-			s += row
-				.map(n => {
-					let ns = "  " + n.toString();
-					ns = ns.substr(ns.length - 2);
-					return ns;
-				})
-				.join(", ");
-			s += " ],";
-			console.log(s);
-		}
-		console.log("]");
-	}
-
-	/**
-	 * Generate the pseudo-cyclic 'Hb' table from the code data
-	 * @param {object} code one of the blocks in "lengths" in the code table,  for example, "648"
-	 */
-	function validateHb(code) {
-		let arr = [];
-		let source = code.source;
-		let qcRows = source.length;
-		for (let i = 0; i < qcRows; i++) {
-			let row = [];
-			let str = source[i].trim();
-			let vals = str.split(/\s+/);
-			let vlen = vals.length;
-			for (let j = 0; j < vlen; j++) {
-				let val = vals[j];
-				if (val === "-") {
-					row.push(-1);
-				} else {
-					let shift = parseInt(val, 10);
-					row.push(shift);
-				}
-			}
-			arr.push(row);
-		}
-		//printHb(arr);
-		assert.deepEqual(code.Hb, arr);
-	}
-
-	it("should have valid tables", () => {
-		validateTables();
-	});
-});
 
 describe("LDPC", () => {
 	let ldpc;

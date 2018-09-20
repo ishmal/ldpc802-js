@@ -243,6 +243,37 @@ class Util {
 		return arr;
 	}
 
+	/**
+	 * Multiply a sparse binary array with a normal binary array
+	 * @param {array} sparseArr an array of integer indices to the 1's of the
+	 * sparse row vector
+	 * @param {array} arr column vector 
+	 */
+	static multiplySparse(sparseArr,  arr) {
+		let len = sparseArr.length;
+		let sum = 0;
+		for (let i = 0 ; i < len; i++) {
+			const idx = sparseArr[i];
+			sum ^= arr[idx];
+		}
+		return sum;
+	}
+
+
+	/**
+	 * Takes a normal binary array and creates an array of indices
+	 * @param {array} array of 1's and 0's
+	 * @return {array} list of indices of the 1's
+	 */
+	static arrayToSparse(arr) {
+		const indices = [];
+		for (let i = 0, len = arr.length ; i < len ; i++) {
+			if (arr[i]) {
+				indices.push(i);
+			}
+		}
+		return indices;
+	}
 
 }
 
