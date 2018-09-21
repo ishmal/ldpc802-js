@@ -127,3 +127,5 @@ const rawCodes = {
 		]
 	}
 };
+
+module.exports = rawCodes;

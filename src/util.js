@@ -261,6 +261,37 @@ class Util {
 
 
 	/**
+	 * Perform binary back substitution on an array.  
+	 * @param {array} sparseArr an array of integer indices to the 1's of the
+	 * sparse row vector.  Assume lower diagonal.
+	 * @param {array} arr column vector 
+	 */
+	static substituteSparse(sparseArr,  arr) {
+		let arr = [];
+		for (let i = 0, len = arr.len; i < len ; i++) {
+			let sum = arr[i];
+			for (let j = 0, slen = sparseArr.length ; j < slen ; j++) {
+				let idx = sparseArr[j];
+				sum ^= arr[idx];
+			}
+			arr.push(sum);
+		}
+		return arr;
+	}
+
+	/**
+	 * Perform binary back substitution on an matrix.  
+	 * @param {array} sparseArr an array of integer indices to the 1's of the
+	 * sparse row vector.  Assume lower diagonal.
+	 * @param {array} matrix rows of a matrix  
+	 */
+	static substituteSparseMatrix(sparseArr,  matrix) {
+		let out = matrix.map(row => Util.substituteSparse(sparseArr, row));
+		return out;
+	}
+
+
+	/**
 	 * Takes a normal binary array and creates an array of indices
 	 * @param {array} array of 1's and 0's
 	 * @return {array} list of indices of the 1's

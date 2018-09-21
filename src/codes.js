@@ -241,14 +241,18 @@ class Codes {
 			for (let code of Object.values(rate)) {
 				const z = code.z;
 				const A = this.getA(code);
-				code.A = this.qcMatrixToSparse(A, z)
+				code.A = this.qcMatrixToSparse(A, z);
 				const B = this.getB(code);
-				code.B = this.qcMatrixToSparse(B, z)
+				code.B = this.qcMatrixToSparse(B, z);
+				code.Bdense = this.qcMatrixToDense(B, z);
 				const C = this.getC(code);
-				code.C = this.qcMatrixToSparse(C, z)
-				code.D = this.getD(code);
-				code.E = this.getE(code);
-				code.T = this.getT(code);			
+				code.C = this.qcMatrixToSparse(C, z);
+				const D = this.getD(code);
+				code.D = this.qcMatrixToSparse(D, z);
+				const E = this.getE(code);
+				code.E = this.qcMatrixToSparse(E, z);
+				const T = this.getT(code);			
+				code.T = this.qcMatrixToSparse(T, z);
 			}
 		}
 	}
@@ -291,7 +295,7 @@ class Codes {
 	 * @param {array<array>} qcMatrix rows/columns of 1 and 0
 	 * @param {number} z the size of the square qc block
 	 */
-	qcMatrixToBinary(qcMatrix, z) {
+	qcMatrixToDense(qcMatrix, z) {
 		let allRows = [];
 		const qcRows = qcMatrix.length;
 		const qcCols = qcMatrix[0].length;
