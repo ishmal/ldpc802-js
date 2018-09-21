@@ -13,7 +13,8 @@ gulp.task("test", () => {
     colors: true
   };
   let files = [
-    "./test/*.js"
+    "./test/*[tT]est.js",
+    "./test/*[sS]pec.js"
   ];
   let mocha = new Mocha(opts);
   return mocha.runFiles(files);

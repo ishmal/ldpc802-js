@@ -1,6 +1,7 @@
 /* jshint esversion: 6 */
 
-const Ldpc = require("./ldpc");
+const LdpcEncoder = require("./ldpcEncoder");
+const Codes = require("./codes");
 const Util = require("./util");
 const Crc32 = require("./crc32");
 
@@ -10,10 +11,28 @@ const Crc32 = require("./crc32");
 class Codec {
 
 	constructor() {
+		this.codes = new Codes().codes;
+		this.code = null;
+		this.ldpcEncoder = null;
 		this.scrambleBits = [];
         this.scrambleIdx = 0;
 		this.generateScrambler(0xff);
-		this.ldpc = new Ldpc();
+		this.selectCode("1/2", "648");
+	}
+
+	/**
+	 * Select rate and length of code
+     * @param {string} rateStr the rate from the tables
+     * @param {string} lenStr the length from the tables
+	 */
+	selectCode(rateStr, lengthStr) {
+		const rate = this.codes[rateStr];
+		const code = rate ? rate[lengthStr] : undefined;
+		if (!code) {
+			throw new Error(`encoder: code ${rateStr}/${lengthStr} not found`);
+		}
+		this.code = code;
+		this.ldpcEncoder = new LdpcEncoder(code);
 	}
 
 	generateScrambler(initial) {
@@ -96,27 +115,26 @@ class Codec {
 	}
 
     /**
-     * Encode an array of bytes with the given LDPC code
+     * Encode an array of bytes with the current LDPC code
      * TODO: select a length according to the length of the byte array
      * @param {array} bytes the bytes to encode
-     * @param {string} rateStr the rate from the tables above
-     * @param {string} lengthStr the length from the tables above
      * @return {array} the encoded bits
      */
-    encode(bytes, rateStr, lengthStr) {
-		return this.ldpc.encode(bytes, rateStr, lengthStr);
+    encode(bytes) {
+		if (!this.ldpcEncoder) {
+			throw new Error(`ldpcEncoder has not been selected`);
+		}
+		return this.ldpcEncoder.encode(bytes);
     }
 
     /**
      * Encode a string with the given LDPC code
      * @param {string} str the string to encode
-     * @param {string} rateStr the rate from the tables above
-     * @param {string} lenStr the length from the tables above
      * @return {array} the encoded bits
      */
-    encodeString(str, rateStr, lenStr) {
+    encodeString(str) {
         let bytes = Util.stringToBytes(str);
-        return this.encode(bytes, rateStr, lenStr);
+        return this.encode(bytes);
     }
 
     /**

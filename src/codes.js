@@ -244,7 +244,6 @@ class Codes {
 				code.A = this.qcMatrixToSparse(A, z);
 				const B = this.getB(code);
 				code.B = this.qcMatrixToSparse(B, z);
-				code.Bdense = this.qcMatrixToDense(B, z);
 				const C = this.getC(code);
 				code.C = this.qcMatrixToSparse(C, z);
 				const D = this.getD(code);

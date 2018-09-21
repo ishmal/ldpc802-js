@@ -45,7 +45,7 @@ describe("LDPC Codes", () => {
 	 */
 	function validateHb(code, rate, length) {
 		let arr = [];
-		console.log("rate: " + rate);
+		//console.log("rate: " + rate);
 		let source = rawCodes[rate][length];
 		let qcRows = source.length;
 		for (let i = 0; i < qcRows; i++) {
@@ -109,13 +109,9 @@ describe("LDPC Codes", () => {
 	it("does stuff", () => {
 		const codes = new Codes();
 		const code = codes.codes["5/6"]["648"];
-		console.log("T:" + JSON.stringify(code.T, null, 2));
-		const arr = codes.qcMatrixToBinary(code.T, code.z);
-		printMatrix(arr);
-		const matrix = math.matrix(arr);
-		//console.log("mtx: " + matrix.toString());
-		const inv = math.inv(matrix);
-		printMatrix(inv.toArray());
+		//console.log("T:" + JSON.stringify(code.T, null, 2));
+		const arr = codes.qcMatrixToDense(code.T, code.z);
+		//printMatrix(arr);
 	});
 
 });

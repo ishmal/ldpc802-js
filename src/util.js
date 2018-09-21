@@ -259,52 +259,40 @@ class Util {
 		return sum;
 	}
 
-
 	/**
-	 * Perform binary back substitution on an array.  
+	 * Perform back substitution sparse binary array with a normal binary array.
+	 * Assume sparse is lower diagonal
 	 * @param {array} sparseArr an array of integer indices to the 1's of the
-	 * sparse row vector.  Assume lower diagonal.
+	 * sparse row vector
 	 * @param {array} arr column vector 
 	 */
 	static substituteSparse(sparseArr,  arr) {
-		let arr = [];
-		for (let i = 0, len = arr.len; i < len ; i++) {
+		const out = [];
+		for (let i = 0, alen = arr.length; i < alen; i++) {
 			let sum = arr[i];
 			for (let j = 0, slen = sparseArr.length ; j < slen ; j++) {
-				let idx = sparseArr[j];
-				sum ^= arr[idx];
+				const idx = sparseArr[j];
+				sum += arr[idx];
 			}
-			arr.push(sum);
+			out.push(sum);
 		}
-		return arr;
-	}
-
-	/**
-	 * Perform binary back substitution on an matrix.  
-	 * @param {array} sparseArr an array of integer indices to the 1's of the
-	 * sparse row vector.  Assume lower diagonal.
-	 * @param {array} matrix rows of a matrix  
-	 */
-	static substituteSparseMatrix(sparseArr,  matrix) {
-		let out = matrix.map(row => Util.substituteSparse(sparseArr, row));
 		return out;
 	}
 
-
-	/**
-	 * Takes a normal binary array and creates an array of indices
-	 * @param {array} array of 1's and 0's
-	 * @return {array} list of indices of the 1's
-	 */
-	static arrayToSparse(arr) {
-		const indices = [];
-		for (let i = 0, len = arr.length ; i < len ; i++) {
-			if (arr[i]) {
-				indices.push(i);
+	static addMatrix(a, b) {
+		const mat = [];
+		for (let i=0, rows = a.length; i < rows; i++) {
+			const row = [];
+			const rowA = a[i];
+			const rowB = b[i];
+			for (let j=0, cols = rowA.length; j < cols ; j++) {
+				row.push(rowA[i] ^ rowB[i]);
 			}
+			mat.push(row);
 		}
-		return indices;
+		return mat;
 	}
+	
 
 }
 
