@@ -6,7 +6,7 @@ const substituteSparse = Util.substituteSparse;
 
 function add(a, b) {
 	const arr = [];
-	for (i=0, len = a.length; i < len ; i++) {
+	for (let i=0, len = a.length; i < len ; i++) {
 		arr[i] = a[i] ^ b[i];
 	}
 	return arr;
@@ -40,6 +40,7 @@ class LdpcEncoder {
 		const p2 = substituteSparse(this.code.T, AstBp1);
 		// step 5
 		const x = s.concat(p1).concat(p2);
+		return x;
 	}
 
 	/**

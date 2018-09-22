@@ -237,8 +237,8 @@ class Codes {
 	}
 	
 	makeTables() {
-		for (let rate of Object.values(codes)) {
-			for (let code of Object.values(rate)) {
+		Object.values(codes).forEach(rate => {
+			Object.values(rate).forEach(code => {
 				const z = code.z;
 				const A = this.getA(code);
 				code.A = this.qcMatrixToSparse(A, z);
@@ -252,8 +252,10 @@ class Codes {
 				code.E = this.qcMatrixToSparse(E, z);
 				const T = this.getT(code);			
 				code.T = this.qcMatrixToSparse(T, z);
-			}
-		}
+				const H = code.Hb;			
+				code.H = this.qcMatrixToSparse(H, z);
+			});
+		});
 	}
 
 	/**
@@ -298,7 +300,7 @@ class Codes {
 		let allRows = [];
 		const qcRows = qcMatrix.length;
 		const qcCols = qcMatrix[0].length;
-		console.log(`qc: ${qcCols} z:${z}`);
+		// console.log(`qc: ${qcCols} z:${z}`);
 		for (let qcRowIdx = 0 ; qcRowIdx < qcRows ; qcRowIdx++) {
 			const rows = [];
 			for (let i = 0 ; i < z ; i++) {

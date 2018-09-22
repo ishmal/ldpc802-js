@@ -1,4 +1,3 @@
-const Codes = require("./codes");
 
 /**
  * Decoder for LDBC codewords
@@ -11,6 +10,37 @@ class LdpcDecoder {
 	 */
 	constructor(code) {
 		this.code = code;
+		this.createCheckNodes();
+	}
+
+	/**
+	 * Set up the variable and check nodes,
+	 * make the links between them.
+	 */
+	createCheckNodes() {
+		const code = this.code;
+		const M = code.mb * code.z;
+		const N = code.length;
+		const variableNodes = [];
+		for (let i = 0; i < N ; i++) {
+			variableNodes[i] = {
+				cn: [],
+				value: 0
+			};
+		}
+		const checkNodes = [];
+		const H = code.H;
+		for (let i = 0; i < M ; i++) {
+			const row = H[i];
+			checkNodes[i] = {
+				vn: row,
+				value: 0
+			};
+			for (let j = 0, len = row.length; j < len ; j++) {
+				const idx = row[j];
+				variableNodes[idx] = j;
+			}
+		}
 	}
 
 	/**
@@ -31,3 +61,5 @@ class LdpcDecoder {
 		return bits;
 	}
 }
+
+module.exports = LdpcDecoder;

@@ -1,11 +1,12 @@
 const gulp = require("gulp");
 const Mocha = require("./mocha-tool");
-const jshint = require("gulp-jshint");
+const eslint = require("gulp-eslint");
 
 gulp.task("lint", () => {
-  return gulp.src("src/**/*.js")
-    .pipe(jshint())
-    .pipe(jshint.reporter("default"));
+    return gulp.src(["src/*.js"])
+        .pipe(eslint())
+        .pipe(eslint.format())
+        .pipe(eslint.failAfterError());
 });
 
 gulp.task("test", () => {

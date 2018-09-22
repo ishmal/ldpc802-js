@@ -1,6 +1,7 @@
 /* jshint esversion: 6 */
 
 const LdpcEncoder = require("./ldpcEncoder");
+const LdpcDecoder = require("./ldpcDecoder");
 const Codes = require("./codes");
 const Util = require("./util");
 const Crc32 = require("./crc32");
@@ -14,6 +15,7 @@ class Codec {
 		this.codes = new Codes().codes;
 		this.code = null;
 		this.ldpcEncoder = null;
+		this.ldpcDecoder = null;
 		this.scrambleBits = [];
         this.scrambleIdx = 0;
 		this.generateScrambler(0xff);
@@ -33,6 +35,7 @@ class Codec {
 		}
 		this.code = code;
 		this.ldpcEncoder = new LdpcEncoder(code);
+		this.ldpcDecoder = new LdpcDecoder(code);
 	}
 
 	generateScrambler(initial) {
@@ -122,7 +125,7 @@ class Codec {
      */
     encode(bytes) {
 		if (!this.ldpcEncoder) {
-			throw new Error(`ldpcEncoder has not been selected`);
+			throw new Error(`ldpcEncoder code has not been selected`);
 		}
 		return this.ldpcEncoder.encode(bytes);
     }
@@ -140,22 +143,21 @@ class Codec {
     /**
      * Decode an array of LDPC-encoded bits with the given LDPC code
      * @param {array} inbits array of bits
-     * @param {string} rateStr the rate from the tables above
-     * @param {string} lenStr the length from the tables above
      * @return {array} the output bytes
      */
-    decode(inbits, rateStr, lenStr) {
-        return this.ldpc.decode(inpits, rateStr, lenStr);
-    }
-
+    decode(inbits) {
+		if (!this.ldpcDecoder) {
+			throw new Error(`ldpcDecoder code has not been selected`);
+		}
+        return this.ldpcDecoder.decode(inbits);
+	}
+	
     /** 
      * Decode an array of LDPC-encoded bits with the given LDPC code
      * @param {array} inbits array of bits
-     * @param {string} rateStr the rate from the tables above
-     * @param {string} lenStr the length from the tables above
      * @param {string} the output string
      */
-    decodeString(inbits, rateStr, lenStr) {
+    decodeString(inbits) {
         let outbytes = this.decode(inbits);
         let str = Util.bytesToString(outbytes);
         return str;
