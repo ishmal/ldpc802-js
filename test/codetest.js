@@ -90,7 +90,7 @@ describe("LDPC Codes", () => {
 			[1, 5],
 			[2, 3],
 		];
-		const codes = new Codes();
+		const codes = new CodeTable();
 		const res = codes.qcMatrixToSparse(qc, z);
 		assert.deepEqual(exp, res);
 	});
@@ -107,7 +107,7 @@ describe("LDPC Codes", () => {
 	}
 
 	it("does stuff", () => {
-		const codes = new Codes();
+		const codes = new CodeTable();
 		const code = codes.codes["5/6"]["648"];
 		//console.log("T:" + JSON.stringify(code.T, null, 2));
 		const arr = codes.qcMatrixToDense(code.T, code.z);

@@ -11,7 +11,7 @@ class LdpcDecoder {
 	constructor(code) {
 		this.code = code;
 		this.M = code.M
-		this.N = code.const name = new type(arguments);;
+		this.N = code.N;
 		this.createCheckNodes();
 		this.decode = this.decodeHard;
 	}

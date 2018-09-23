@@ -22,11 +22,11 @@ code = {
 
 describe("LDPC Decoder", () => {
 	it("should construct without exception", () => {
-		assert(() => new LdpcDecoder(code)).doesNoThrow();
+		assert.doesNotThrow(() => new LdpcDecoder(code));
 	});
 
 	it("should create tanner tables", () => {
 		const dec = new LdpcDecoder(code);
-		assert(dec.M).toEqual(code.M);
+		assert.equal(dec.M, code.M);
 	});
 });
