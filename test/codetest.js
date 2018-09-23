@@ -1,6 +1,6 @@
 
 
-const Codes = require("../src/codes");
+const CodeTable = require("../src/codetable");
 const assert = require("assert");
 const math = require("mathjs");
 const rawCodes = require("./rawcodes");
@@ -11,7 +11,7 @@ describe("LDPC Codes", () => {
 	 * Generate our encoding and decoding tables
 	 */
 	function validateTables() {
-		const codes = new Codes().codes;
+		const codes = new CodeTable().codes;
 		Object.keys(codes).forEach(rate => {
 			let rateObj = codes[rate];
 			Object.keys(rateObj).forEach(length => {

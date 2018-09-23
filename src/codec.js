@@ -2,7 +2,7 @@
 
 const LdpcEncoder = require("./ldpcEncoder");
 const LdpcDecoder = require("./ldpcDecoder");
-const Codes = require("./codes");
+const CodeTable = require("./codetable");
 const Util = require("./util");
 const Crc32 = require("./crc32");
 
@@ -12,7 +12,7 @@ const Crc32 = require("./crc32");
 class Codec {
 
 	constructor() {
-		this.codes = new Codes().codes;
+		this.codes = new CodeTable().codes;
 		this.code = null;
 		this.ldpcEncoder = null;
 		this.ldpcDecoder = null;

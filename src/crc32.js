@@ -1,7 +1,7 @@
 /* jshint node: true, esversion: 6 */
 
 function createCrcTable() {
-    let table = [];
+    const table = [];
     for (let n = 0; n < 256; n++) {
         let c = n;
         for (let k = 0; k < 8; k++) {

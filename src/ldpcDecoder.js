@@ -10,7 +10,10 @@ class LdpcDecoder {
 	 */
 	constructor(code) {
 		this.code = code;
+		this.M = code.mb * code.z;
+		this.N = code.length;
 		this.createCheckNodes();
+		this.decode = this.decodeHard;
 	}
 
 	/**
@@ -19,8 +22,8 @@ class LdpcDecoder {
 	 */
 	createCheckNodes() {
 		const code = this.code;
-		const M = code.mb * code.z;
-		const N = code.length;
+		const M = this.M;
+		const N = this.N;
 		const variableNodes = [];
 		for (let i = 0; i < N ; i++) {
 			variableNodes[i] = {
@@ -48,7 +51,35 @@ class LdpcDecoder {
 	 * @param {array} bits message array of 1's and 0's
 	 * @return decoded array of 1's and zeroes
 	 */
-	decode(bits) {
+	decodeHard(bits) {
+		const M = this.M;
+		const checkNodes = this.checkNodes;
+		const variableNodes = this.variableNodes;
+		for (let i = 0, len = this.N; i < len ; i++) {
+			const b = bits[i];
+			b = b > 0.5 ? 1 : 0;
+			variableNodes[i] = b;
+		}
+		for (let keepGoing = true ; keepGoing ;) {
+			const checkFails = [];
+			for (let i=0 ; i < M ; i++) {
+				const checkNode = checkNodes[i];
+				let vn = checkNode.vn;
+				let sum = 0;
+				for (let j = 0 , len = vn.length ; j < len ; j++) {
+					const idx = vn[j];
+					sum ^= variableNodes[idx].value;
+				}
+				if (sum) {
+					checkFails.push(i);
+				}
+			}
+			if (checkFails.length === 0) {
+				keepGoing = false;
+			} else {
+				
+			}
+		}
 		return bits;
 	}
 
