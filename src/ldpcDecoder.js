@@ -10,8 +10,8 @@ class LdpcDecoder {
 	 */
 	constructor(code) {
 		this.code = code;
-		this.M = code.mb * code.z;
-		this.N = code.length;
+		this.M = code.M
+		this.N = code.const name = new type(arguments);;
 		this.createCheckNodes();
 		this.decode = this.decodeHard;
 	}
@@ -77,7 +77,7 @@ class LdpcDecoder {
 			if (checkFails.length === 0) {
 				keepGoing = false;
 			} else {
-				
+
 			}
 		}
 		return bits;

@@ -11,7 +11,8 @@ const codes = {
     "1/2": {
 		"648": {
 			z: 27,
-			length: 648,
+			M: 324,
+			N: 648,
 			messageBits: 324,
 			nb: 24,
 			mb: 12,
@@ -33,7 +34,8 @@ const codes = {
 		},
 		"1296": {
 			z: 54,
-			length: 1296,
+			M: 648,
+			N: 1296,
 			messageBits: 648,
 			nb: 24,
 			mb: 12,
@@ -55,7 +57,8 @@ const codes = {
 		},
 		"1944": {
 			z: 81,
-			length: 1944,
+			M: 972,
+			N: 1944,
 			messageBits: 972,
 			nb: 24,
 			mb: 12,
@@ -79,7 +82,8 @@ const codes = {
     "2/3": {
 		"648": {
 			z: 27,
-			length: 648,
+			M: 216,
+			N: 648,
 			messageBits: 432,
 			nb: 24,
 			mb: 8,
@@ -97,7 +101,8 @@ const codes = {
 		},
 		"1296": {
 			z: 54,
-			length: 1296,
+			M: 432,
+			N: 1296,
 			messageBits: 864,
 			nb: 24,
 			mb: 8,
@@ -115,7 +120,8 @@ const codes = {
 		},
 		"1944": {
 			z: 81,
-			length: 1944,
+			M: 648,
+			N: 1944,
 			messageBits: 1296,
 			nb: 24,
 			mb: 8,
@@ -135,7 +141,8 @@ const codes = {
     "3/4": {
 		"648": {
 			z: 27,
-			length: 648,
+			M: 162,
+			N: 648,
 			messageBits: 486,
 			nb: 24,
 			mb: 6,
@@ -151,7 +158,8 @@ const codes = {
 		},
 		"1296": {
 			z: 54,
-			length: 1296,
+			M: 324,
+			N: 1296,
 			messageBits: 972,
 			nb: 24,
 			mb: 6,
@@ -167,7 +175,8 @@ const codes = {
 		},
 		"1944": {
 			z: 81,
-			length: 1944,
+			M: 486,
+			N: 1944,
 			messageBits: 1458,
 			nb: 24,
 			mb: 6,
@@ -185,7 +194,8 @@ const codes = {
     "5/6": {
 		"648": {
 			z: 27,
-			length: 648,
+			M: 108,
+			N: 648,
 			messageBits: 540,
 			nb: 24,
 			mb: 4,
@@ -199,7 +209,8 @@ const codes = {
 		},
 		"1296": {
 			z: 54,
-			length: 1296,
+			M: 216,
+			N: 1296,
 			messageBits: 1080,
 			nb: 24,
 			mb: 4,
@@ -213,7 +224,8 @@ const codes = {
 		},
 		"1944": {
 			z: 81,
-			length: 1944,
+			M: 324,
+			N: 1944,
 			messageBits: 1620,
 			nb: 24,
 			mb: 4,
