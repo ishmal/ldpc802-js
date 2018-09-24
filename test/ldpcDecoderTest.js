@@ -1,6 +1,7 @@
 
 const LdpcDecoder = require("../src/ldpcDecoder");
-const assert = require("assert");
+const LdpcEncoder = require("../src/ldpcEncoder");
+const CodeTable = require("../src/codetable");
 
 /*
 0 1 0 1 1 0 0 1
@@ -28,5 +29,23 @@ describe("LDPC Decoder", () => {
 	it("should create tanner tables", () => {
 		const dec = new LdpcDecoder(code);
 		expect(dec.M).toEqual(code.M);
+	});
+
+	it("should decode what the encoder encodes", () => {
+		debugger;
+		const table = new CodeTable();
+		const code = table.codes["1/2"]["648"];
+		let mbits = code.messageBits;
+		const msg = [];
+		for (let i = 0 ; i < mbits ; i++) {
+			const toss = Math.random();
+			msg[i] = toss > 0.5 ? 1 : 0;
+		}
+		const enc = new LdpcEncoder(code);
+		const codeword = enc.encodeBits(msg);
+		expect(codeword.length).toEqual(code.N);
+		const dec = new LdpcDecoder(code);
+		const res = dec.decode(codeword);
+		expect(res).toEqual(msg);
 	});
 });

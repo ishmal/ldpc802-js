@@ -93,6 +93,21 @@ class Crc32 {
         return bytes;
     }
 
+    /**
+     * break a 32-bit crc into 4 bytes, so that they can be sent as payload.
+     * @param {number} the crc to break apart
+     * @return {array} the 4 bytes
+     */
+    static intToBytesLE(crc) {
+        let bytes = [
+            (crc) & 0xff,
+            (crc >> 8) & 0xff,
+            (crc >> 16) & 0xff,
+            (crc >> 24) & 0xff
+        ];
+        return bytes;
+    }
+
 }
 
 module.exports = Crc32;

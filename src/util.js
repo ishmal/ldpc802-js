@@ -249,7 +249,7 @@ class Util {
 	 * sparse row vector
 	 * @param {array} arr column vector 
 	 */
-	static multiplySparse(sparseArr,  arr) {
+	static multiplySparseVector(sparseArr,  arr) {
 		let len = sparseArr.length;
 		let sum = 0;
 		for (let i = 0 ; i < len; i++) {
@@ -257,6 +257,26 @@ class Util {
 			sum ^= arr[idx];
 		}
 		return sum;
+	}
+
+	/**
+	 * Multiply a sparse binary matrix with a normal binary array
+	 * @param {array} sparseMatrix an array of integer indices to the 1's of the
+	 * sparse row vector
+	 * @param {array} arr column vector 
+	 */
+	static multiplySparse(sparseMatrix,  arr) {
+		const out = [];
+		for (let i = 0, slen = sparseMatrix.length ; i < slen ; i++) {
+			const row = sparseMatrix[i];
+			let sum = 0;
+			for (let j = 0, rlen = row.length ; j < rlen ; j++) {
+					const idx = row[i];
+					sum ^= arr[idx];
+				}
+			out[i] = sum;
+		}
+		return out;
 	}
 
 	/**

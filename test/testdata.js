@@ -260,7 +260,7 @@ const shortened1 = [
 
 /**
  * The DATA with shortening bits are LDPC encoded as a 
- * single (NCW = 1) codeword (LLDPC = 944; R = 3/4) as
+ * single (NCW = 1) codeword (LLDPC = 1944; R = 3/4) as
  * prescribed by paragraph (c) of 20.3.11.6.5. The results
  * are given in Table G.37.
  * 

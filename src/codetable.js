@@ -112,7 +112,6 @@ class CodeTables {
 		return A;
 	}
 	
-	// let's just make this an array rather than array[]
 	getB(code) {
 		const pos = code.kb;
 		const B = [];
@@ -124,17 +123,17 @@ class CodeTables {
 	}
 	
 	getC(code) {
-		const C = code.Hb[code.mb - 1].slice(0, code.kb);
+		const C = [ code.Hb[code.mb - 1].slice(0, code.kb) ];
 		return C;
 	}
 	
 	getD(code) {
-		const D = [code.Hb[code.mb - 1][code.kb]];
+		const D = [ [ code.Hb[code.mb - 1][code.kb] ]];
 		return D;
 	}
 	
 	getE(code) {
-		const E = code.Hb[code.mb - 1].slice(code.kb + 1);
+		const E = [ code.Hb[code.mb - 1].slice(code.kb + 1) ];
 		return E;
 	}
 	

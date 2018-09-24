@@ -13,7 +13,7 @@ class LdpcDecoder {
 		this.M = code.M;
 		this.N = code.N;
 		this.createCheckNodes();
-		this.decode = this.decodeHard;
+		this.decode = this.decodeSumProduct;
 	}
 
 	/**
@@ -44,6 +44,8 @@ class LdpcDecoder {
 				variableNodes[idx] = j;
 			}
 		}
+		this.checkNodes = checkNodes;
+		this.variableNodes = variableNodes;
 	}
 
 	/**
@@ -51,7 +53,7 @@ class LdpcDecoder {
 	 * @param {array} inBits message array of 1's and 0's
 	 * @return decoded array of 1's and zeroes
 	 */
-	decodeHard(inBits) {
+	decodeSumProduct(inBits) {
 		const M = this.M;
 		const checkNodes = this.checkNodes;
 		const variableNodes = this.variableNodes;

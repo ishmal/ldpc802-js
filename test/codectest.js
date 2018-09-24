@@ -19,6 +19,19 @@ describe("Codec", () => {
 		expect(codec).toBeDefined();
 	});
 
+	it("should wrap in a crc-32", () => {
+		const codec = new Codec();
+		const inBytes = [
+			0x01, 0x02, 0x03, 0x04, 0x05
+		];
+		const exp = [
+			0x01, 0x02, 0x03, 0x04, 0x05,
+			0xF4, 0x99, 0x0B, 0x47 
+		];
+		const res = codec.wrapBytes(inBytes);
+		expect(res).toEqual(exp);
+	});
+
 	it("should generate scrambling bits correctly", () => {
 		const codec = new Codec();
 		const scrambleBits = Data.scrambleBits;
@@ -36,9 +49,11 @@ describe("Codec", () => {
 
 	it("should convert inputMessage1 to inputBytes1", () => {
 		const codec = new Codec();
-		const mbytes = Util.stringToBytes(Data.inputMessage1);
-		let inbytes = Data.inputMac1.slice(0);
-		inbytes = inbytes.concat(mbytes);
+		const messageBytes = Util.stringToBytes(Data.inputMessage1);
+		const inputMacBytes = Data.inputMac1.slice();
+		const inbytes = inputMacBytes.concat(messageBytes);
+		const inputBytes1Short = Data.inputBytes1.slice(0, 96);
+		expect(inbytes).toEqual(inputBytes1Short);
 		const res = codec.wrapBytes(inbytes);
 		expect(res).toEqual(Data.inputBytes1);
 		const res2 = [0, 0].concat(res);
