@@ -1,7 +1,6 @@
 
 
 const CodeTable = require("../src/codetable");
-const assert = require("assert");
 const math = require("mathjs");
 const rawCodes = require("./rawcodes");
 
@@ -13,9 +12,9 @@ describe("LDPC Codes", () => {
 	function validateTables() {
 		const codes = new CodeTable().codes;
 		Object.keys(codes).forEach(rate => {
-			let rateObj = codes[rate];
+			const rateObj = codes[rate];
 			Object.keys(rateObj).forEach(length => {
-				let code = rateObj[length];
+				const code = rateObj[length];
 				validateHb(code, rate, length);
 			});
 		});
@@ -24,7 +23,7 @@ describe("LDPC Codes", () => {
 	function printHb(Hb) {
 		console.log("Hb: [");
 		for (let i = 0; i < Hb.length; i++) {
-			let row = Hb[i];
+			const row = Hb[i];
 			let s = "\t[ ";
 			s += row
 				.map(n => {
@@ -44,28 +43,28 @@ describe("LDPC Codes", () => {
 	 * @param {object} code one of the blocks in "lengths" in the code table,  for example, "648"
 	 */
 	function validateHb(code, rate, length) {
-		let arr = [];
+		const arr = [];
 		//console.log("rate: " + rate);
-		let source = rawCodes[rate][length];
-		let qcRows = source.length;
+		const source = rawCodes[rate][length];
+		const qcRows = source.length;
 		for (let i = 0; i < qcRows; i++) {
-			let row = [];
-			let str = source[i].trim();
-			let vals = str.split(/\s+/);
-			let vlen = vals.length;
+			const row = [];
+			const str = source[i].trim();
+			const vals = str.split(/\s+/);
+			const vlen = vals.length;
 			for (let j = 0; j < vlen; j++) {
-				let val = vals[j];
+				const val = vals[j];
 				if (val === "-") {
 					row.push(-1);
 				} else {
-					let shift = parseInt(val, 10);
+					const shift = parseInt(val, 10);
 					row.push(shift);
 				}
 			}
 			arr.push(row);
 		}
 		//printHb(arr);
-		assert.deepEqual(code.Hb, arr);
+		expect(code.Hb).toEqual(arr);
 	}
 
 	it("should have valid tables", () => {
@@ -92,7 +91,7 @@ describe("LDPC Codes", () => {
 		];
 		const codes = new CodeTable();
 		const res = codes.qcMatrixToSparse(qc, z);
-		assert.deepEqual(exp, res);
+		expect(exp).toEqual(res);
 	});
 
 	function printMatrix(arr) {

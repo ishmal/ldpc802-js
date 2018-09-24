@@ -9,7 +9,7 @@ const assert = require("assert");
 1 0 0 1 1 0 1 0
 */
 
-code = {
+const code = {
 	M: 4,
 	N: 8,
 	H: [
@@ -22,11 +22,11 @@ code = {
 
 describe("LDPC Decoder", () => {
 	it("should construct without exception", () => {
-		assert.doesNotThrow(() => new LdpcDecoder(code));
+		expect(() => new LdpcDecoder(code)).not.toThrow();
 	});
 
 	it("should create tanner tables", () => {
 		const dec = new LdpcDecoder(code);
-		assert.equal(dec.M, code.M);
+		expect(dec.M).toEqual(code.M);
 	});
 });

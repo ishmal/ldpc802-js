@@ -426,15 +426,15 @@ const final1 = [
 
 
 module.exports = {
-	fullText: fullText,
-	inputMessage1: inputMessage1,
-	inputMac1: inputMac1,
-	inputBytes1: inputBytes1,
-	TXVECTOR1: TXVECTOR1,
-	scrambleBits: scrambleBits,
-	servicePrepended1: servicePrepended1,
-	scrambled1: scrambled1,
-	shortened1: shortened1,
-	encoded1: encoded1,
-	final1: final1
+    encoded1,
+    final1,
+    fullText,
+    inputBytes1,
+    inputMac1,
+    inputMessage1,
+    scrambleBits,
+    scrambled1,
+    servicePrepended1,
+    shortened1,
+    TXVECTOR1
 };

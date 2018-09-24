@@ -4,7 +4,7 @@
   "description": "experimentation with ldpc codes",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -21,6 +21,7 @@
     "gulp": "^4.0.0",
     "gulp-eslint": "^5.0.0",
     "gulp-mocha": "^6.0.0",
+    "jest": "^23.6.0",
     "mathjs": "^5.1.2",
     "mocha": "^5.2.0"
   },

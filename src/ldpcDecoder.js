@@ -10,7 +10,7 @@ class LdpcDecoder {
 	 */
 	constructor(code) {
 		this.code = code;
-		this.M = code.M
+		this.M = code.M;
 		this.N = code.N;
 		this.createCheckNodes();
 		this.decode = this.decodeHard;
@@ -48,15 +48,15 @@ class LdpcDecoder {
 
 	/**
 	 * Decode codeword bits to message bits
-	 * @param {array} bits message array of 1's and 0's
+	 * @param {array} inBits message array of 1's and 0's
 	 * @return decoded array of 1's and zeroes
 	 */
-	decodeHard(bits) {
+	decodeHard(inBits) {
 		const M = this.M;
 		const checkNodes = this.checkNodes;
 		const variableNodes = this.variableNodes;
 		for (let i = 0, len = this.N; i < len ; i++) {
-			const b = bits[i];
+			let b = inBits[i];
 			b = b > 0.5 ? 1 : 0;
 			variableNodes[i] = b;
 		}
@@ -64,9 +64,9 @@ class LdpcDecoder {
 			const checkFails = [];
 			for (let i=0 ; i < M ; i++) {
 				const checkNode = checkNodes[i];
-				let vn = checkNode.vn;
+				const vn = checkNode.vn;
 				let sum = 0;
-				for (let j = 0 , len = vn.length ; j < len ; j++) {
+				for (let j = 0, len = vn.length ; j < len ; j++) {
 					const idx = vn[j];
 					sum ^= variableNodes[idx].value;
 				}
@@ -77,10 +77,11 @@ class LdpcDecoder {
 			if (checkFails.length === 0) {
 				keepGoing = false;
 			} else {
-
+				//do something
 			}
 		}
-		return bits;
+		const outBits = variableNodes.map(v => v.value);
+		return outBits;
 	}
 
 	/**
