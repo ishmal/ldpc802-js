@@ -12,7 +12,7 @@ class LdpcDecoder {
 		this.code = code;
 		this.M = code.M;
 		this.N = code.N;
-		this.createCheckNodes();
+		this.createTanner();
 		this.decode = this.decodeSumProduct;
 	}
 
@@ -20,7 +20,7 @@ class LdpcDecoder {
 	 * Set up the variable and check nodes,
 	 * make the links between them.
 	 */
-	createCheckNodes() {
+	createTanner() {
 		const code = this.code;
 		const M = this.M;
 		const N = this.N;

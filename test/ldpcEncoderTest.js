@@ -15,8 +15,9 @@ describe("LDPC Encoder", () => {
 		const code = codes["3/4"]["1944"];
 		const enc = new LdpcEncoder(code);
 		const outBits = enc.encode(Data.shortened1);
-		const res = Util.bitsToBytesBE(outBits).slice(0, 182);
-		const exp = Data.encoded1.slice(0, 182);
+		debugger
+		const res = Util.bitsToBytesBE(outBits).slice(0);
+		const exp = Data.encoded1.slice();
 		expect(res).toEqual(exp);
 	});
 });
