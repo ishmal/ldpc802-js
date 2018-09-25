@@ -33,7 +33,7 @@ describe("Util", () => {
 		const res = Util.bitsToBytesLE(bits);
 		expect(res).toEqual(arr);
 	});
-	
+
 	it("should pad bytes correctly", () => {
 		let bytes = [1, 2, 3, 4, 5, 6];
 		const exp = [1, 2, 3, 4, 5, 6, 0, 0, 0];
@@ -46,6 +46,53 @@ describe("Util", () => {
 		const obits = Util.zeroPadArray(bits, 1458);
 		const res = Util.bitsToBytesBE(obits);
 		expect(res).toEqual(Data.shortened1);
+	});
+
+	it("should multiply with a sparse matrix properly", () => {
+		// a 4x4 matrix of 1's in sparse notation
+		/**
+		 * 1 0 1 1
+		 * 0 1 0 1
+		 * 1 1 0 0
+		 * 1 1 1 1
+		 */
+		const matrix = [
+			[0, 2, 3],
+			[1, 3],
+			[0, 1],
+			[0, 1, 2, 3],
+		]
+		const v = [ 1, 0, 1, 0];
+		const res = Util.multiplySparse(matrix, v);
+		const exp = [ 0, 0, 1, 0];
+		expect(res).toEqual(exp);
+	});
+
+
+	it("should back substitute with a sparse matrix properly", () => {
+		// lower triangular matrix
+		/**
+		 * 1 0 0 0 0
+		 * 0 1 0 0 0
+		 * 1 1 1 0 0
+		 * 1 0 1 1 0
+		 * 0 1 1 0 1
+		 */
+		const matrix = [
+			[0],
+			[1],
+			[0, 1, 2],
+			[0, 2, 3],
+			[1, 2, 4]
+		]
+		const v = [ 1, 0, 1, 0, 1];
+		const res1 = Util.multiplySparse(matrix, v);
+		const exp1 = [1, 0, 0, 0, 0];
+		expect(res1).toEqual(exp1);
+		debugger;
+		const res2 = Util.substituteSparse(matrix, res1);
+		const exp2 = v;
+		expect(res2).toEqual(exp2);
 	});
 
 

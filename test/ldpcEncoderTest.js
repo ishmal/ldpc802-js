@@ -9,7 +9,7 @@ describe("LDPC Encoder", () => {
 		expect(() => new CodeTable()).not.toThrow();
 	})
 
-	it("should encode properly", () => {
+	xit("should encode properly", () => {
 		const table = new CodeTable();
 		const codes = table.codes;
 		const code = codes["3/4"]["1944"];

@@ -271,8 +271,8 @@ class Util {
 			const row = sparseMatrix[i];
 			let sum = 0;
 			for (let j = 0, rlen = row.length ; j < rlen ; j++) {
-					const idx = row[i];
-					sum ^= (arr[idx] ^ 1);
+					const idx = row[j];
+					sum ^= arr[idx];
 				}
 			out[i] = sum;
 		}
@@ -288,13 +288,14 @@ class Util {
 	 */
 	static substituteSparse(sparseArr,  arr) {
 		const out = [];
+		let sum = 0;
 		for (let i = 0, alen = arr.length; i < alen; i++) {
-			let sum = arr[i];
+			//let sum = 0;
 			for (let j = 0, slen = sparseArr.length ; j < slen ; j++) {
 				const idx = sparseArr[j];
-				sum ^= (arr[idx] ^ 1);
+				sum ^= arr[idx];
 			}
-			out.push(sum);
+			out[i] = arr[i] ^ sum;
 		}
 		return out;
 	}
