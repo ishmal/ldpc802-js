@@ -272,7 +272,7 @@ class Util {
 			let sum = 0;
 			for (let j = 0, rlen = row.length ; j < rlen ; j++) {
 					const idx = row[i];
-					sum ^= arr[idx];
+					sum ^= (arr[idx] ^ 1);
 				}
 			out[i] = sum;
 		}
@@ -292,7 +292,7 @@ class Util {
 			let sum = arr[i];
 			for (let j = 0, slen = sparseArr.length ; j < slen ; j++) {
 				const idx = sparseArr[j];
-				sum += arr[idx];
+				sum ^= (arr[idx] ^ 1);
 			}
 			out.push(sum);
 		}
