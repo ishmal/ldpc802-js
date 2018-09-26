@@ -86,13 +86,11 @@ describe("Util", () => {
 			[1, 2, 4]
 		]
 		const v = [ 1, 0, 1, 0, 1];
-		const res1 = Util.multiplySparse(matrix, v);
+		const x = Util.multiplySparse(matrix, v);
 		const exp1 = [1, 0, 0, 0, 0];
-		expect(res1).toEqual(exp1);
-		debugger;
-		const res2 = Util.substituteSparse(matrix, res1);
-		const exp2 = v;
-		expect(res2).toEqual(exp2);
+		expect(x).toEqual(exp1);
+		const y = Util.substituteSparse(matrix, x);
+		expect(y).toEqual(v);
 	});
 
 

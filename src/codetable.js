@@ -117,7 +117,7 @@ class CodeTables {
 		const B = [];
 		for (let i = 0, len = code.mb - 1; i < len; i++) {
 			const val = code.Hb[i][pos];
-			B.push(val);
+			B.push([ val ]);
 		}
 		return B;
 	}

@@ -9,15 +9,14 @@ describe("LDPC Encoder", () => {
 		expect(() => new CodeTable()).not.toThrow();
 	})
 
-	xit("should encode properly", () => {
+	it("should encode properly", () => {
 		const table = new CodeTable();
 		const codes = table.codes;
 		const code = codes["3/4"]["1944"];
 		const enc = new LdpcEncoder(code);
 		const outBits = enc.encode(Data.shortened1);
-		debugger
-		const res = Util.bitsToBytesBE(outBits).slice(0);
-		const exp = Data.encoded1.slice();
+		const res = Util.bitsToBytesBE(outBits);
+		const exp = Data.encoded1;
 		expect(res).toEqual(exp);
 	});
 });

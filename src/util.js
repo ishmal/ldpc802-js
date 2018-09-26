@@ -282,22 +282,23 @@ class Util {
 	/**
 	 * Perform back substitution sparse binary array with a normal binary array.
 	 * Assume sparse is lower diagonal
+	 * y[i] = T[i,1]y[1] + T[i,2]y[2] + · · · + T[i,i−1]y[i−1] + x[i]
 	 * @param {array} sparseArr an array of integer indices to the 1's of the
 	 * sparse row vector
 	 * @param {array} arr column vector 
 	 */
 	static substituteSparse(sparseArr,  arr) {
-		const out = [];
-		let sum = 0;
-		for (let i = 0, alen = arr.length; i < alen; i++) {
-			//let sum = 0;
-			for (let j = 0, slen = sparseArr.length ; j < slen ; j++) {
-				const idx = sparseArr[j];
-				sum ^= arr[idx];
+		const y = [arr[0]];
+		for (let i = 1, slen = sparseArr.length; i < slen; i++) {
+			const row = sparseArr[i];
+			let sum = 0;
+			for (let j = 0, rlen = row.length ; j < rlen ; j++) {
+				const idx = row[j];
+				sum ^= y[idx];
 			}
-			out[i] = arr[i] ^ sum;
+			y[i] = sum ^ arr[i];
 		}
-		return out;
+		return y;
 	}
 
 	static addMatrix(a, b) {
