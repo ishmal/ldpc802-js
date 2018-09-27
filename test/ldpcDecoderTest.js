@@ -22,6 +22,16 @@ const code = {
 };
 
 describe("LDPC Decoder", () => {
+
+	function makeMessage(size) {
+		const msg = [];
+		for (let i = 0 ; i < size ; i++) {
+			const toss = Math.random();
+			msg[i] = toss > 0.5 ? 1 : 0;
+		}
+		return msg;
+	}
+
 	it("should construct without exception", () => {
 		expect(() => new LdpcDecoder(code)).not.toThrow();
 	});
@@ -31,16 +41,10 @@ describe("LDPC Decoder", () => {
 		expect(dec.M).toEqual(code.M);
 	});
 
-	xit("should decode what the encoder encodes", () => {
-		debugger;
+	it("should decode what the encoder encodes", () => {
 		const table = new CodeTable();
 		const code = table.codes["1/2"]["648"];
-		let mbits = code.messageBits;
-		const msg = [];
-		for (let i = 0 ; i < mbits ; i++) {
-			const toss = Math.random();
-			msg[i] = toss > 0.5 ? 1 : 0;
-		}
+		const msg = makeMessage(code.messageBits);
 		const enc = new LdpcEncoder(code);
 		const codeword = enc.encodeBits(msg);
 		expect(codeword.length).toEqual(code.N);

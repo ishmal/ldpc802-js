@@ -1,4 +1,6 @@
 
+const Util = require("../src/util");
+const multiplySparse = Util.multiplySparse;
 /**
  * Decoder for LDBC codewords
  */
@@ -15,6 +17,46 @@ class LdpcDecoder {
 		this.createTanner();
 		this.decode = this.decodeSumProduct;
 	}
+
+	/**
+	 * Check is the codeword passes check.
+	 * @param {array} codeword the word to check
+	 * @return {boolean} true if passes 
+	 */
+	check(codeword) {
+		const code = this.code;
+		const checkVal = multiplySparse(code.H, codeword);
+		for (let i = 0, len = this.code.messageBits; i < len ; i++) {
+			if (checkVal[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Check is the codeword passes check.  Fails early
+	 * for speed.
+	 * @param {array} codeword the word to check
+	 * @return {boolean} true if passes 
+	 */
+	checkFast(codeword) {
+		const H = this.code.H;
+		for (let i = 0, hlen = H.length ; i < hlen ; i++) {
+			const row = H[i];
+			let sum = 0;
+			for (let j = 0, rlen = row.length ; j < rlen ; j++) {
+					const idx = row[j];
+					sum ^= codeword[idx];
+				}
+			if (sum) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+
 
 	/**
 	 * Set up the variable and check nodes,
@@ -54,6 +96,9 @@ class LdpcDecoder {
 	 * @return decoded array of 1's and zeroes
 	 */
 	decodeSumProduct(inBits) {
+		if (this.checkFast(inBits)) {
+			return inBits.slice(0, this.code.messageBits);
+		}
 		const M = this.M;
 		const checkNodes = this.checkNodes;
 		const variableNodes = this.variableNodes;
