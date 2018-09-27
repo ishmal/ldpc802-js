@@ -25,7 +25,7 @@ class LdpcEncoder {
 		this.code = code;
 	}
 
-	encodeBits(s) {
+	encode(s) {
 		// step 1
 		const Ast = multiplySparse(this.code.A, s);
 		const Cst = multiplySparse(this.code.C, s);
@@ -48,10 +48,10 @@ class LdpcEncoder {
 	 * @param {array} bytes an array of bytes to encode 
 	 * @return encoded message bits
 	 */
-	encode(bytes) {
+	encodeBytes(bytes) {
 		let bits = Util.bytesToBitsBE(bytes);
 		bits = bits.slice(0, this.code.messageBits); //just in case
-		return this.encodeBits(bits);
+		return this.encode(bits);
 	}
 
 

@@ -5,6 +5,8 @@ const LdpcDecoder = require("./ldpcDecoder");
 const CodeTable = require("./codetable");
 const Util = require("./util");
 const Crc32 = require("./crc32");
+const assert = require("assert");
+const Data = require("../test/testdata");
 
 /**
  * Methods supporting the 802.11 data packet
@@ -18,7 +20,7 @@ class Codec {
 		this.ldpcDecoder = null;
 		this.scrambleBits = [];
         this.scrambleIdx = 0;
-		this.generateScrambler(0xff);
+		this.generateScrambler(0x5d);
 		this.selectCode("1/2", "648");
 	}
 
@@ -54,12 +56,6 @@ class Codec {
 		return arr;
 	}
 
-	nextScrambleBit() {
-		let idx = this.scrambleIdx;
-		const b = this.scrambleBits[idx++];
-		this.scrambleIdx = idx % 127;
-		return b;
-	}
 
 	/**
 	 * Take an array of integers calculate their CRC32 checksum, and append
@@ -75,46 +71,41 @@ class Codec {
 	}
 
 	/**
-	 * Scramble the bits of a byte
-	 * @param {number} byte byte to be scrambled
-	 * @return {number} the scrambled byte
+	 * Assume array length is multiple of 8
+	 * @param {array} bits 
 	 */
-	scrambleByte(byte) {
-		const bits = Util.byteToBitsBE(byte);
-		const b = [];
-		const b0 = this.nextScrambleBit();
-		const b1 = this.nextScrambleBit();
-		const b2 = this.nextScrambleBit();
-		const b3 = this.nextScrambleBit();
-		const b4 = this.nextScrambleBit();
-		const b5 = this.nextScrambleBit();
-		const b6 = this.nextScrambleBit();
-		const b7 = this.nextScrambleBit();
-		b[0] = bits[7] ^ b0;
-		b[1] = bits[6] ^ b1;
-		b[2] = bits[5] ^ b2;
-		b[3] = bits[4] ^ b3;
-		b[4] = bits[3] ^ b4;
-		b[5] = bits[2] ^ b5;
-		b[6] = bits[1] ^ b6;
-		b[7] = bits[0] ^ b7;
-		const obyte = Util.bitsToByteBE(b);
-		return obyte;
+	scramble(bits) {
+		const scrambleBits = this.scrambleBits;
+		let idx = this.scrambleIdx;
+		const out = [];
+		for (let i = 0, len = bits.length; i < len ; i+= 8) {
+			out[i] = bits[i + 7] ^ scrambleBits[idx]; idx = (idx + 1) % 127;
+			out[i+1] = bits[i + 6] ^ scrambleBits[idx]; idx = (idx + 1) % 127;
+			out[i+2] = bits[i + 5] ^ scrambleBits[idx]; idx = (idx + 1) % 127;
+			out[i+3] = bits[i + 4] ^ scrambleBits[idx]; idx = (idx + 1) % 127;
+			out[i+4] = bits[i + 3] ^ scrambleBits[idx]; idx = (idx + 1) % 127;
+			out[i+5] = bits[i + 2] ^ scrambleBits[idx]; idx = (idx + 1) % 127;
+			out[i+6] = bits[i + 1] ^ scrambleBits[idx]; idx = (idx + 1) % 127;
+			out[i+7] = bits[i] ^ scrambleBits[idx]; idx = (idx + 1) % 127;
+		}
+		this.scrambleIdx = idx;
+		return out;
 	}
 
-	/**
-	 * Scramble the bits in an array of bytes
-	 * @param {array} bytes array of bytes
-	 * @return {array} a scrambled copy of the array
-	 */
-	scrambleBytes(bytes) {
-		const arr = [];
-		for (let i = 0, len = bytes.length; i < len; i++) {
-			const inb = bytes[i];
-			const b = this.scrambleByte(inb);
-			arr[i] = b;
-		}
-		return arr;
+
+	padForShortening(bits) {
+		const len = bits.length;
+		let padLength = this.code.messageBits - len;
+		const pad = new Array(padLength).fill(0);
+		const obits = bits.concat(pad);
+		return obits;
+	}
+
+	shorten(bits, originalLength) {
+		const front = bits.slice(0, originalLength);
+		const back = bits.slice(this.code.messageBits);
+		const ret = front.concat(back);
+		return ret;
 	}
 
     /**
@@ -127,7 +118,36 @@ class Codec {
 		if (!this.ldpcEncoder) {
 			throw new Error(`ldpcEncoder code has not been selected`);
 		}
-		return this.ldpcEncoder.encode(bytes);
+		/**
+		 * Bytes
+		 */
+		const macHeader = [
+			0x04, 0x02, 0x00, 0x2e, 0x00,
+			0x60, 0x08, 0xcd, 0x37, 0xa6,
+			0x00, 0x20, 0xd6, 0x01, 0x3c,
+			0xf1, 0x00, 0x60, 0x08, 0xad,
+			0x3b, 0xaf, 0x00, 0x00
+		];
+		const inputBytes = macHeader.concat(bytes);
+		const wrapped = this.wrapBytes(inputBytes);
+		const serviceBits = [ 0, 0 ];
+		const servicePrepended = serviceBits.concat(wrapped);
+		/**
+		 * Bits
+		 */
+		const bits = Util.bytesToBitsBE(servicePrepended);
+		//assert.deepEqual(bits, Util.bytesToBitsBE(Data.servicePrepended1) );
+		//so ar so good.
+		this.scrambleIdx = 0;
+		const scrambled = this.scramble(bits);
+		//assert.deepEqual(scrambled, Util.bytesToBitsBE(Data.scrambled1));
+		const shortened = this.padForShortening(scrambled);
+		//assert.deepEqual(shortened, Util.bytesToBitsBE(Data.shortened1));
+		const encoded = this.ldpcEncoder.encode(shortened);
+		debugger;
+		let final = this.shorten(encoded, scrambled.length);
+		//final = final.slice(0, final.length-54);
+		return final;
     }
 
     /**

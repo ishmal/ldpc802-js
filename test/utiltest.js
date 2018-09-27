@@ -20,6 +20,54 @@ describe("Util", () => {
 		}
 	});
 
+	it("should convert a byte to big endian bits", () => {
+		let arr = [173,  89,  217,  135];
+		let exp = [
+			[1,0,1,0,1,1,0,1], 
+			[0,1,0,1,1,0,0,1], 
+			[1,1,0,1,1,0,0,1],
+			[1,0,0,0,0,1,1,1]
+		]
+		for (let i = 0 ; i < arr.length ; i++) {
+			const bits = Util.byteToBitsBE(arr[i]);
+			expect(bits).toEqual(exp[i]);
+		}
+	});
+
+	it("should convert an array of bytes to big endian bits", () => {
+		let arr = [173,  89,  217,  135];
+		let exp = [
+			1,0,1,0,1,1,0,1, 
+			0,1,0,1,1,0,0,1, 
+			1,1,0,1,1,0,0,1,
+			1,0,0,0,0,1,1,1
+		]
+		const bits = Util.bytesToBitsBE(arr);
+		expect(bits).toEqual(exp);
+	});
+
+	it("should convert an array of bytes to big endian bits 2", () => {
+		let arr = [0,  0,  4,  2];
+		let exp = [
+			0,0,0,0,0,0,0,0, 
+			0,0,0,0,0,0,0,0, 
+			0,0,0,0,0,1,0,0, 
+			0,0,0,0,0,0,1,0 
+		]
+		const bits = Util.bytesToBitsBE(arr);
+		expect(bits).toEqual(exp);
+	});
+
+	it("should convert an array of bytes to big endian bits", () => {
+		let arr = [173,  89,  217,  135];
+		let exp = [
+			0b10101101, 0b01011001, 0b11011001, 0b10000111
+		]
+		const bits = Util.bytesToBitsBE(arr);
+		const res = Util.bitsToBytesBE(bits);
+		expect(res).toEqual(arr);
+	});
+
 	it("should convert an array of bytes to big endian bits and back", () => {
 		let arr = [0, 1, 2, 3, 4, 5, 6];
 		const bits = Util.bytesToBitsBE(arr);

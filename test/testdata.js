@@ -14,7 +14,11 @@ const fullText =
 //# E X A M P L E 1
 //#################################################################
 /* beautify preserve:start */
-const inputMessage1 = fullText.substr(0, 72);
+
+const inputMessage1 = [];
+for (let i = 0; i < 72 ; i++) {
+	inputMessage1[i] = fullText.charCodeAt(i);
+}
 
 const inputMac1 = [
       0x04, 0x02, 0x00, 0x2e, 0x00,

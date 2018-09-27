@@ -46,7 +46,7 @@ describe("LDPC Decoder", () => {
 		const code = table.codes["1/2"]["648"];
 		const msg = makeMessage(code.messageBits);
 		const enc = new LdpcEncoder(code);
-		const codeword = enc.encodeBits(msg);
+		const codeword = enc.encode(msg);
 		expect(codeword.length).toEqual(code.N);
 		const dec = new LdpcDecoder(code);
 		const res = dec.decode(codeword);

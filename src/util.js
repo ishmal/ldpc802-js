@@ -12,7 +12,7 @@ class Util {
      * @return {array} of bytes
      */
     static stringToBytes(str) {
-        let bytes = [];
+        const bytes = [];
         for (let i = 0, len = str.length; i < len; i++) {
             let code = str.charCodeAt(i);
             if (code < 0x80) {
@@ -48,8 +48,8 @@ class Util {
      * @return {string}
      */
     static bytesToString(byteArray) {
-        let encodedString = String.fromCharCode.apply(null, byteArray);
-        let decodedString = decodeURIComponent(escape(encodedString));
+        const encodedString = String.fromCharCode.apply(null, byteArray);
+        const decodedString = decodeURIComponent(escape(encodedString));
         return decodedString;
     }
 
@@ -64,7 +64,7 @@ class Util {
      * @return {number} byte
      */
     static bitsToByteBE(bits) {
-        let byte =
+        const byte =
             ((bits[0] << 7) & 128) +
             ((bits[1] << 6) & 64) +
             ((bits[2] << 5) & 32) +
@@ -82,9 +82,9 @@ class Util {
      * @return {array} of bytes
      */
     static bitsToBytesBE(bits) {
-        let bytes = [];
+        const bytes = [];
         for (let i = 0, len = bits.length; i < len; i += 8) {
-            let b = [
+            const b = [
                 bits[i],
                 bits[i + 1],
                 bits[i + 2],
@@ -94,7 +94,7 @@ class Util {
                 bits[i + 6],
                 bits[i + 7]
             ];
-            let byte = this.bitsToByteBE(b);
+            const byte = this.bitsToByteBE(b);
             bytes.push(byte);
         }
         return bytes;
@@ -106,15 +106,16 @@ class Util {
      * @return {array} of bits 
      */
     static byteToBitsBE(b) {
-        let bits = [];
-        bits.push((b >> 7) & 1);
-        bits.push((b >> 6) & 1);
-        bits.push((b >> 5) & 1);
-        bits.push((b >> 4) & 1);
-        bits.push((b >> 3) & 1);
-        bits.push((b >> 2) & 1);
-        bits.push((b >> 1) & 1);
-        bits.push((b) & 1);
+        const bits = [
+			(b >> 7) & 1,
+			(b >> 6) & 1,
+			(b >> 5) & 1,
+			(b >> 4) & 1,
+			(b >> 3) & 1,
+			(b >> 2) & 1,
+			(b >> 1) & 1,
+			(b) & 1
+		];
         return bits;
     }
 
@@ -125,9 +126,9 @@ class Util {
      * @return {array} of bits
      */
     static bytesToBitsBE(bytes) {
-        let bits = [];
+        const bits = [];
         for (let i = 0, len = bytes.length; i < len; i++) {
-            let b = bytes[i];
+            const b = bytes[i];
             bits.push((b >> 7) & 1);
             bits.push((b >> 6) & 1);
             bits.push((b >> 5) & 1);
@@ -151,7 +152,7 @@ class Util {
      * @return {number} byte
      */
     static bitsToByteLE(bits) {
-        let byte =
+        const byte =
             ((bits[7] << 7) & 128) +
             ((bits[6] << 6) & 64) +
             ((bits[5] << 5) & 32) +
@@ -169,9 +170,9 @@ class Util {
      * @param {array} of bytes
      */
     static bitsToBytesLE(bits) {
-        let bytes = [];
+        const bytes = [];
         for (let i = 0, len = bits.length; i < len; i += 8) {
-            let b = [
+            const b = [
                 bits[i],
                 bits[i + 1],
                 bits[i + 2],
@@ -181,7 +182,7 @@ class Util {
                 bits[i + 6],
                 bits[i + 7]
             ];
-            let byte = this.bitsToByteLE(b);
+            const byte = this.bitsToByteLE(b);
             bytes.push(byte);
         }
         return bytes;
@@ -194,15 +195,16 @@ class Util {
      */
     static byteToBitsLE(b) {
         b &= 0xff;
-        let bits = [];
-        bits.push((b) & 1);
-        bits.push((b >> 1) & 1);
-        bits.push((b >> 2) & 1);
-        bits.push((b >> 3) & 1);
-        bits.push((b >> 4) & 1);
-        bits.push((b >> 5) & 1);
-        bits.push((b >> 6) & 1);
-        bits.push((b >> 7) & 1);
+        const bits = [
+			(b) & 1,
+			(b >> 1) & 1,
+			(b >> 2) & 1,
+			(b >> 3) & 1,
+			(b >> 4) & 1,
+			(b >> 5) & 1,
+			(b >> 6) & 1,
+			(b >> 7) & 1
+		];
         return bits;
     }
 
@@ -213,9 +215,9 @@ class Util {
      * @return {array} of bits
      */
     static bytesToBitsLE(bytes) {
-        let bits = [];
+        const bits = [];
         for (let i = 0, len = bytes.length; i < len; i++) {
-            let b = bytes[i] & 255;
+            const b = bytes[i] & 255;
             bits.push((b     ) & 1);
             bits.push((b >> 1) & 1);
             bits.push((b >> 2) & 1);
@@ -235,7 +237,7 @@ class Util {
      * @return {array} of bits
 	 */
 	static zeroPadArray(inarr, size) {
-		let arr = inarr.slice(0);
+		const arr = inarr.slice(0);
 		let nrZeros = Math.max(size - arr.length, 0);
 		while (nrZeros--) {
 			arr.push(0);
@@ -250,9 +252,8 @@ class Util {
 	 * @param {array} arr column vector 
 	 */
 	static multiplySparseVector(sparseArr,  arr) {
-		let len = sparseArr.length;
 		let sum = 0;
-		for (let i = 0 ; i < len; i++) {
+		for (let i = 0, len = sparseArr.length; i < len; i++) {
 			const idx = sparseArr[i];
 			sum ^= arr[idx];
 		}
