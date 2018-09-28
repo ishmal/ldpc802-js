@@ -1,4 +1,3 @@
-
 const Util = require("../src/util");
 const multiplySparse = Util.multiplySparse;
 /**
@@ -26,7 +25,7 @@ class LdpcDecoder {
 	check(codeword) {
 		const code = this.code;
 		const checkVal = multiplySparse(code.H, codeword);
-		for (let i = 0, len = this.code.messageBits; i < len ; i++) {
+		for (let i = 0, len = this.code.messageBits; i < len; i++) {
 			if (checkVal[i]) {
 				return false;
 			}
@@ -42,13 +41,13 @@ class LdpcDecoder {
 	 */
 	checkFast(codeword) {
 		const H = this.code.H;
-		for (let i = 0, hlen = H.length ; i < hlen ; i++) {
+		for (let i = 0, hlen = H.length; i < hlen; i++) {
 			const row = H[i];
 			let sum = 0;
-			for (let j = 0, rlen = row.length ; j < rlen ; j++) {
-					const idx = row[j];
-					sum ^= codeword[idx];
-				}
+			for (let j = 0, rlen = row.length; j < rlen; j++) {
+				const idx = row[j];
+				sum ^= codeword[idx];
+			}
 			if (sum) {
 				return false;
 			}
@@ -67,7 +66,7 @@ class LdpcDecoder {
 		const M = this.M;
 		const N = this.N;
 		const variableNodes = [];
-		for (let i = 0; i < N ; i++) {
+		for (let i = 0; i < N; i++) {
 			variableNodes[i] = {
 				cn: [],
 				value: 0
@@ -75,13 +74,13 @@ class LdpcDecoder {
 		}
 		const checkNodes = [];
 		const H = code.H;
-		for (let i = 0; i < M ; i++) {
+		for (let i = 0; i < M; i++) {
 			const row = H[i];
 			checkNodes[i] = {
 				vn: row,
 				value: 0
 			};
-			for (let j = 0, len = row.length; j < len ; j++) {
+			for (let j = 0, len = row.length; j < len; j++) {
 				const idx = row[j];
 				variableNodes[idx] = j;
 			}
@@ -95,38 +94,55 @@ class LdpcDecoder {
 	 * @param {array} inBits message array of 1's and 0's
 	 * @return decoded array of 1's and zeroes
 	 */
-	decodeSumProduct(inBits) {
+	decode(inBits) {
 		if (this.checkFast(inBits)) {
 			return inBits.slice(0, this.code.messageBits);
 		}
+		for (let i = 0; i < 20; i++) {
+			const result = this.decodeSumProduct(inBits);
+			if (result) {
+				return result.slice(0, this.code.messageBits);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Decode codeword bits to message bits
+	 * @param {array} inBits message array of 1's and 0's
+	 * @return decoded array of 1's and zeroes
+	 */
+	decodeSumProduct(inBits) {
 		const M = this.M;
 		const checkNodes = this.checkNodes;
 		const variableNodes = this.variableNodes;
-		for (let i = 0, len = this.N; i < len ; i++) {
+		for (let i = 0, len = this.N; i < len; i++) {
 			let b = inBits[i];
 			b = b > 0.5 ? 1 : 0;
 			variableNodes[i] = b;
 		}
-		for (let keepGoing = true ; keepGoing ;) {
+		for (let iter = 0; iter < 100; iter++) {
 			const checkFails = [];
-			for (let i=0 ; i < M ; i++) {
+			for (let i = 0; i < M; i++) {
 				const checkNode = checkNodes[i];
 				const vn = checkNode.vn;
 				let sum = 0;
-				for (let j = 0, len = vn.length ; j < len ; j++) {
+				for (let j = 0, len = vn.length; j < len; j++) {
 					const idx = vn[j];
 					sum ^= variableNodes[idx].value;
-				}
+				} // for j
 				if (sum) {
 					checkFails.push(i);
 				}
-			}
+			} // for i
 			if (checkFails.length === 0) {
 				keepGoing = false;
 			} else {
 				//do something
 			}
-		}
+		} // for iter
+
+
 		const outBits = variableNodes.map(v => v.value);
 		return outBits;
 	}
