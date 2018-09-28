@@ -14,7 +14,6 @@ class LdpcDecoder {
 		this.M = code.M;
 		this.N = code.N;
 		this.createTanner();
-		this.decode = this.decodeSumProduct;
 	}
 
 	/**
@@ -98,13 +97,8 @@ class LdpcDecoder {
 		if (this.checkFast(inBits)) {
 			return inBits.slice(0, this.code.messageBits);
 		}
-		for (let i = 0; i < 20; i++) {
-			const result = this.decodeSumProduct(inBits);
-			if (result) {
-				return result.slice(0, this.code.messageBits);
-			}
-		}
-		return null;
+		const result = this.decodeSumProduct(inBits);
+		return result;
 	}
 
 	/**
@@ -136,24 +130,28 @@ class LdpcDecoder {
 				}
 			} // for i
 			if (checkFails.length === 0) {
-				keepGoing = false;
+				const outBits = variableNodes.map(v => v.value);
+				return outBits;
 			} else {
 				//do something
 			}
 		} // for iter
 
-
-		const outBits = variableNodes.map(v => v.value);
-		return outBits;
+		return null;
 	}
 
 	/**
-	 * Decode codeword bits to message bits
+	 * Decode codeword bits to message bytes
 	 * @param {array} bits message array of 1's and 0's
-	 * @return decoded array of bytes
+	 * @return decoded array of bytes if decoding works, else null.
 	 */
 	decodeToBytes(bits) {
-		return bits;
+		const outbits = this.decode(bits);
+		if (!outbits) {
+			return null;
+		}
+		const bytes = Util.bitsToBytesBE(outbits);
+		return bytes;
 	}
 }
 
