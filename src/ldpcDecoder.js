@@ -1,5 +1,25 @@
 const Util = require("../src/util");
 const multiplySparse = Util.multiplySparse;
+
+function calcVariance(samples) {
+	const n = samples.length;
+	let m = 0;
+	let s = 0;
+	for (let k = 0; k < n; k++) {
+		const x = samples[k];
+		const oldM = m;
+		m = m + (x - m) / k;
+		s = s + (x - m) * (x - oldM);
+	}
+  return s / (n - 1);
+}
+
+function calcPhi(x) {
+	const phi = Math.log((Math.exp(x) + 1) / (Math.exp(x) - 1));
+	return phi;
+}
+
+
 /**
  * Decoder for LDBC codewords
  */
@@ -75,13 +95,14 @@ class LdpcDecoder {
 		const H = code.H;
 		for (let i = 0; i < M; i++) {
 			const row = H[i];
-			checkNodes[i] = {
-				vn: row,
-				value: 0
+			const cnode = {
+				vn: row.map(idx => variableNodes[idx]),
 			};
-			for (let j = 0, len = row.length; j < len; j++) {
-				const idx = row[j];
-				variableNodes[idx] = j;
+			checkNodes[i] = cnode;
+			for (let r = 0, len = row.length; r < len; r++) {
+				const idx = row[r];
+				const vnode = variableNodes[idx];
+				vnode.cn.push(cnode);
 			}
 		}
 		this.checkNodes = checkNodes;
@@ -110,23 +131,41 @@ class LdpcDecoder {
 		const M = this.M;
 		const checkNodes = this.checkNodes;
 		const variableNodes = this.variableNodes;
+
+		/**
+		 * Step 1.  Initialization of c(ij) and q(ij)
+		 */
+		const variance = calcVariance(inBits);
+		const weight = 2 / variance;
 		for (let i = 0, len = this.N; i < len; i++) {
-			let b = inBits[i];
-			b = b > 0.5 ? 1 : 0;
-			variableNodes[i] = b;
+			const vnode = variableNodes[i];
+			const b = inBits[i];
+			vnode.c = b;
+			vnode.q = b * weight;
 		}
+
+
 		for (let iter = 0; iter < 100; iter++) {
 			const checkFails = [];
-			for (let i = 0; i < M; i++) {
-				const checkNode = checkNodes[i];
+
+			/**
+			 * Step 2. update r(ji)
+			 */
+			//for each check node
+			const r = [];
+			for (let m = 0; i < M; i++) {
+				const checkNode = checkNodes[m];
 				const vn = checkNode.vn;
 				let sum = 0;
-				for (let j = 0, len = vn.length; j < len; j++) {
-					const idx = vn[j];
-					sum ^= variableNodes[idx].value;
-				} // for j
-				if (sum) {
-					checkFails.push(i);
+
+				for (let v = 0, len = vn.length; v < len; v++) {
+					const vnode = vn[v];
+					const q = vnode.q;
+					const alpha = Math.sign(q);
+					for (let v2 = 0; v2 < len; v2++) {
+						const beta = Math.abs(q);
+
+					}
 				}
 			} // for i
 			if (checkFails.length === 0) {
