@@ -130,6 +130,7 @@ class LdpcDecoder {
 	 */
 	decodeSumProduct(inBits) {
 		const M = this.M;
+		const N = this.N;
 		const checkNodes = this.checkNodes;
 		const variableNodes = this.variableNodes;
 
@@ -187,8 +188,14 @@ class LdpcDecoder {
 			/**
 			 * Step 3.  Update qij
 			 */
-			for (let m = 0; m < M; m++) {
-
+			for (let n = 0; n < N; m++) {
+				const vnode = variableNodes[n];
+				let total = vnode.c;
+				const cn = vnode.cn;
+				const clen = cn.length;
+				for (let c = 0; c < clen; c++) {
+					
+				}
 			}
 
 			/**
