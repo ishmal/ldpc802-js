@@ -95,13 +95,14 @@ class LdpcDecoder {
 		const H = code.H;
 		for (let i = 0; i < M; i++) {
 			const row = H[i];
+			const vn = row.map(idx => variableNodes[idx]);
 			const cnode = {
-				vn: row.map(idx => variableNodes[idx]),
+				vn,
+				r: 0
 			};
 			checkNodes[i] = cnode;
-			for (let r = 0, len = row.length; r < len; r++) {
-				const idx = row[r];
-				const vnode = variableNodes[idx];
+			for (let v = 0, len = vn.length; v < len; v++) {
+				const vnode = vn[v];
 				vnode.cn.push(cnode);
 			}
 		}
@@ -139,41 +140,82 @@ class LdpcDecoder {
 		const weight = 2 / variance;
 		for (let i = 0, len = this.N; i < len; i++) {
 			const vnode = variableNodes[i];
-			const b = inBits[i];
-			vnode.c = b;
-			vnode.q = b * weight;
+			const Lci = inBits[i] * weight;
+			vnode.c = Lci;
+			vnode.q = Lci;
 		}
 
 
 		for (let iter = 0; iter < 100; iter++) {
-			const checkFails = [];
 
 			/**
 			 * Step 2. update r(ji)
 			 */
-			//for each check node
-			const r = [];
-			for (let m = 0; i < M; i++) {
+			for (let m = 0; m < M; m++) {
 				const checkNode = checkNodes[m];
 				const vn = checkNode.vn;
-				let sum = 0;
+				const vlen = vn.length;
 
-				for (let v = 0, len = vn.length; v < len; v++) {
-					const vnode = vn[v];
-					const q = vnode.q;
-					const alpha = Math.sign(q);
-					for (let v2 = 0; v2 < len; v2++) {
-						const beta = Math.abs(q);
+				const rj = [];
+				r[m] = rj;
+				for (let i = 0; i < vlen ; i++) {
+					const prod = 1;
+					for (let v = 0; v < vlen; v++) {
+						if (v === i) {
+							continue;
+						}
+						const vnode = vn[v];
+						const q = vnode.q;
+						const alpha = Math.sign(q);
+						let phiSum = 0;
+						for (let v2 = 0; v2 < vlen; v2++) {
+							if (v2 === i) {
+								continue;
+							}
+							const beta = Math.abs(q);
+							const phi = calcPhi(beta);
+							phiSum += phi;
+						}
+						const phiPhiSum = calcPhi(phiSum);
+						prod *= alpha * phiPhiSum;
+					}
+					rj[i] = prod;
 
+				}
+			}
+
+			/**
+			 * Step 3.  Update qij
+			 */
+			for (let m = 0; m < M; m++) {
+
+			}
+
+			/**
+			 * Step 4.  Update Qi
+			 */
+			const Q = [];
+			for (let m = 0; m < M ; m++) {
+				const checkNode = checkNodes[i];
+				const vn = checkNode.vn;
+				const vlen = vn.length;
+				for (let v = 0 ; v < vlen ; v++) {
+					let total = vn.c;
+					for (let r = 0 ; r < vlen ; r++) {
+						totel += r[i];
 					}
 				}
-			} // for i
-			if (checkFails.length === 0) {
-				const outBits = variableNodes.map(v => v.value);
-				return outBits;
-			} else {
-				//do something
 			}
+
+			/**
+			 * Step 5.  Check syndrome
+			 */
+			const c = Q.map(q => q < 0 ? 1 : 0);
+			if (this.checkFast(c)) {
+				return c.slice(0, this.code.messageBits);
+			}
+
+
 		} // for iter
 
 		return null;
