@@ -1,12 +1,13 @@
-const Util = require("../src/util");
+const Util = require("./util");
 const multiplySparse = Util.multiplySparse;
+const calcPhi = require("./calcphi");
 
 function calcVariance(samples) {
 	const n = samples.length;
 	let m = 0;
 	let s = 0;
-	for (let k = 0; k < n; k++) {
-		const x = samples[k];
+	for (let k = 0; k < n; ) {
+		const x = samples[k++];
 		const oldM = m;
 		m = m + (x - m) / k;
 		s = s + (x - m) * (x - oldM);
@@ -14,14 +15,10 @@ function calcVariance(samples) {
   return s / (n - 1);
 }
 
-function calcPhi(x) {
-	const phi = Math.log((Math.exp(x) + 1) / (Math.exp(x) - 1));
-	return phi;
-}
-
 
 /**
  * Decoder for LDBC codewords
+ * @see "Introduction to LDPC Codes" by William E Ryan
  */
 class LdpcDecoder {
 
@@ -31,10 +28,9 @@ class LdpcDecoder {
 	 */
 	constructor(code) {
 		this.code = code;
-		this.M = code.M;
-		this.N = code.N;
 		this.createTanner();
 	}
+
 
 	/**
 	 * Check is the codeword passes check.
@@ -80,30 +76,79 @@ class LdpcDecoder {
 	 * Set up the variable and check nodes,
 	 * make the links between them.
 	 */
-	createTanner() {
+	createTanner2() {
 		const code = this.code;
 		const M = this.M;
 		const N = this.N;
 		const variableNodes = [];
 		for (let i = 0; i < N; i++) {
 			variableNodes[i] = {
-				cn: [],
-				value: 0
+				clinks: [],
+				c: 0
 			};
 		}
 		const checkNodes = [];
 		const H = code.H;
 		for (let i = 0; i < M; i++) {
 			const row = H[i];
-			const vn = row.map(idx => variableNodes[idx]);
+			const vlinks = row.map(idx => {
+				return {
+					v: variableNodes[idx],
+					r: 0
+				};
+			});
 			const cnode = {
-				vn,
-				r: 0
+				vlinks
 			};
 			checkNodes[i] = cnode;
 			for (let v = 0, len = vn.length; v < len; v++) {
-				const vnode = vn[v];
-				vnode.cn.push(cnode);
+				const vnode = vlinks[v].v;
+				const clink = {
+					c: cnode,
+					q: 0
+				}
+				vnode.clinks.push(clink);
+			}
+		}
+		this.checkNodes = checkNodes;
+		this.variableNodes = variableNodes;
+	}
+
+	createTanner() {
+		const M = this.code.M;
+		const N = this.code.N;
+		const H = this.code.H;
+		const checkNodes = [];
+		const links = [];
+		const variableNodes = [];
+
+		for (let i = 0; i < M; i++) {
+			checkNodes[i] = {
+				links: []
+			}
+		}
+		for (let i = 0; i < N; i++) {
+			variableNodes[i] = {
+				links: [],
+				ci: 0
+			}
+		}
+		for (let i = 0 ; i < M; i++) {
+			const row = H[i];
+			const cnode = checkNodes[i];
+			const rlen = row.length;
+			for (let j = 0; j < rlen; j++) {
+				const idx = row[j];
+				const vnode = variableNodes[idx];
+				const link = {
+					c: cnode,
+					v: vnode,
+					q: 0,
+					r: 0,
+				}
+				cnode.links.push(link);
+				vnode.links.push(link);
+				links.push(link);
 			}
 		}
 		this.checkNodes = checkNodes;
@@ -129,8 +174,8 @@ class LdpcDecoder {
 	 * @return decoded array of 1's and zeroes
 	 */
 	decodeSumProduct(inBits) {
-		const M = this.M;
-		const N = this.N;
+		const M = this.code.M;
+		const N = this.code.N;
 		const checkNodes = this.checkNodes;
 		const variableNodes = this.variableNodes;
 
@@ -139,11 +184,17 @@ class LdpcDecoder {
 		 */
 		const variance = calcVariance(inBits);
 		const weight = 2 / variance;
-		for (let i = 0, len = this.N; i < len; i++) {
+		for (let i = 0; i < N; i++) {
 			const vnode = variableNodes[i];
 			const Lci = inBits[i] * weight;
-			vnode.c = Lci;
-			vnode.q = Lci;
+			vnode.ci = Lci;
+			const links = vnode.links;
+			const llen = links.len;
+			for (let j = 0; j < llen ; j++) {
+				const link = links[j];
+				link.r = 0;				
+				link.q = Lci;				
+			}
 		}
 
 
@@ -154,22 +205,21 @@ class LdpcDecoder {
 			 */
 			for (let m = 0; m < M; m++) {
 				const checkNode = checkNodes[m];
-				const vn = checkNode.vn;
-				const vlen = vn.length;
+				const links = checkNode.links;
+				const llen = links.length;
 
-				const rj = [];
-				r[m] = rj;
-				for (let i = 0; i < vlen ; i++) {
-					const prod = 1;
-					for (let v = 0; v < vlen; v++) {
+				for (let i = 0; i < llen ; i++) {
+					const link = links[i];
+					let prod = 1;
+					for (let v = 0; v < llen; v++) {
 						if (v === i) {
 							continue;
 						}
-						const vnode = vn[v];
-						const q = vnode.q;
+						const link2 = links[v]
+						const q = link2.q;
 						const alpha = Math.sign(q);
 						let phiSum = 0;
-						for (let v2 = 0; v2 < vlen; v2++) {
+						for (let v2 = 0; v2 < llen; v2++) {
 							if (v2 === i) {
 								continue;
 							}
@@ -180,21 +230,27 @@ class LdpcDecoder {
 						const phiPhiSum = calcPhi(phiSum);
 						prod *= alpha * phiPhiSum;
 					}
-					rj[i] = prod;
-
+					link.r = prod;
 				}
 			}
 
 			/**
 			 * Step 3.  Update qij
 			 */
-			for (let n = 0; n < N; m++) {
+			for (let n = 0; n < N; n++) {
 				const vnode = variableNodes[n];
-				let total = vnode.c;
-				const cn = vnode.cn;
-				const clen = cn.length;
-				for (let c = 0; c < clen; c++) {
-					
+				const links = vnode.links;
+				const llen = links.length;
+				for (let c = 0; c < llen; c++) {
+					const link = links[c];
+					let sum = 0;
+					for (let ci = 0; ci < llen; ci++) {
+						if (ci !== c) {
+							const clink = links[ci];
+							sum += clink.r;
+						}
+					}
+					link.q = vnode.ci + sum;
 				}
 			}
 
@@ -202,16 +258,16 @@ class LdpcDecoder {
 			 * Step 4.  Update Qi
 			 */
 			const Q = [];
-			for (let m = 0; m < M ; m++) {
-				const checkNode = checkNodes[i];
-				const vn = checkNode.vn;
-				const vlen = vn.length;
-				for (let v = 0 ; v < vlen ; v++) {
-					let total = vn.c;
-					for (let r = 0 ; r < vlen ; r++) {
-						totel += r[i];
-					}
+			for (let i = 0; i < N ; i++) {
+				const variableNode = variableNodes[i];
+				const links = variableNode.links;
+				const llen = links.length;
+				let sum = variableNode.ci;
+				for (let v = i ; v < llen ; v++) {
+					const link = links[v];
+					sum += link.q;
 				}
+				Q[i] = sum;
 			}
 
 			/**

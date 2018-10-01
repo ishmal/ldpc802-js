@@ -144,7 +144,6 @@ class Codec {
 		const shortened = this.padForShortening(scrambled);
 		//assert.deepEqual(shortened, Util.bytesToBitsBE(Data.shortened1));
 		const encoded = this.ldpcEncoder.encode(shortened);
-		debugger;
 		let final = this.shorten(encoded, scrambled.length);
 		//final = final.slice(0, final.length-54);
 		return final;

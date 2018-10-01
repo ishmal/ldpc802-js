@@ -46,7 +46,9 @@ describe("LDPC Decoder", () => {
 
 	it("should create tanner tables", () => {
 		const dec = new LdpcDecoder(code);
-		expect(dec.M).toEqual(code.M);
+		expect(dec.code).toEqual(code);
+		expect(dec.checkNodes).toBeDefined();
+		expect(dec.variableNodes).toBeDefined();
 	});
 
 	it("should decode what the encoder encodes", () => {
