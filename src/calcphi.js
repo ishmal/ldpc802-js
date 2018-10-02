@@ -16,7 +16,7 @@ function calcPhi(x) {
 	if (x >= 7) {
 		return 0;
 	}
-	const idx = (x * 142) | 0;
+	const idx = (x * 142.8) | 0;
 	return phiTable[idx];
 }
 
