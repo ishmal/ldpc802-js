@@ -161,9 +161,9 @@ class LdpcDecoder {
 	 * @return decoded array of 1's and zeroes
 	 */
 	decode(inBits) {
-		if (this.checkFast(inBits)) {
-			return inBits.slice(0, this.code.messageBits);
-		}
+		//if (this.checkFast(inBits)) {
+		//	return inBits.slice(0, this.code.messageBits);
+		//s}
 		const result = this.decodeSumProduct(inBits);
 		return result;
 	}

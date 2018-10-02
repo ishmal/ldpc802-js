@@ -32,12 +32,22 @@ describe("LDPC Decoder", () => {
 		return msg;
 	}
 
-	function addNoise(message, nrBits) {
+	function addErrors(message, nrBits) {
 		const len = message.length;
 		for (let i = 0; i < nrBits; i++) {
 			let index = (Math.random() * len) | 0; //make sure it is an int
 			message[index] = message[index] ^ 1;
 		}
+	}
+
+	function addNoise(message, level) {
+		const out = [];
+		const len = message.length;
+		for (let i = 0; i < len; i++) {
+			const noise = (Math.random() - 0.5) * level;
+			out[i] = message[i] * noise;
+		}
+		return out;
 	}
 
 	it("should construct without exception", () => {
@@ -70,9 +80,9 @@ describe("LDPC Decoder", () => {
 		const enc = new LdpcEncoder(code);
 		const codeword = enc.encode(msg);
 		expect(codeword.length).toEqual(code.N);
-		addNoise(codeword, 5); //here we go
+		const received = addNoise(codeword, 0.1); //here we go
 		const dec = new LdpcDecoder(code);
-		const res = dec.decode(codeword);
+		const res = dec.decode(received);
 		expect(res).toEqual(msg);
 	});
 });
