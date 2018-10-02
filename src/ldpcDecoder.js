@@ -9,8 +9,8 @@ function calcVariance(samples) {
 	for (let k = 0; k < n; ) {
 		const x = samples[k++];
 		const oldM = m;
-		m = m + (x - m) / k;
-		s = s + (x - m) * (x - oldM);
+		m += (x - m) / k;
+		s += (x - m) * (x - oldM);
 	}
   return s / (n - 1);
 }
@@ -70,8 +70,6 @@ class LdpcDecoder {
 		return true;
 	}
 
-
-
 	/**
 	 * Set up the variable and check nodes,
 	 * make the links between them.
@@ -91,22 +89,20 @@ class LdpcDecoder {
 		const H = code.H;
 		for (let i = 0; i < M; i++) {
 			const row = H[i];
-			const vlinks = row.map(idx => {
-				return {
+			const vlinks = row.map(idx => ({
 					v: variableNodes[idx],
 					r: 0
-				};
-			});
+			}));
 			const cnode = {
 				vlinks
 			};
 			checkNodes[i] = cnode;
-			for (let v = 0, len = vn.length; v < len; v++) {
+			for (let v = 0, len = vlinks.length; v < len; v++) {
 				const vnode = vlinks[v].v;
 				const clink = {
 					c: cnode,
 					q: 0
-				}
+				};
 				vnode.clinks.push(clink);
 			}
 		}
@@ -125,13 +121,13 @@ class LdpcDecoder {
 		for (let i = 0; i < M; i++) {
 			checkNodes[i] = {
 				links: []
-			}
+			};
 		}
 		for (let i = 0; i < N; i++) {
 			variableNodes[i] = {
 				links: [],
 				ci: 0
-			}
+			};
 		}
 		for (let i = 0 ; i < M; i++) {
 			const row = H[i];
@@ -145,7 +141,7 @@ class LdpcDecoder {
 					v: vnode,
 					q: 0,
 					r: 0,
-				}
+				};
 				cnode.links.push(link);
 				vnode.links.push(link);
 				links.push(link);
@@ -173,6 +169,7 @@ class LdpcDecoder {
 	 * @param {array} inBits message array of 1's and 0's
 	 * @return decoded array of 1's and zeroes
 	 */
+	/* eslint-disable max-lines-per-function */
 	decodeSumProduct(inBits) {
 		const M = this.code.M;
 		const N = this.code.N;
@@ -215,7 +212,7 @@ class LdpcDecoder {
 						if (v === i) {
 							continue;
 						}
-						const link2 = links[v]
+						const link2 = links[v];
 						const q = link2.q;
 						const alpha = Math.sign(q);
 						let phiSum = 0;
@@ -273,6 +270,7 @@ class LdpcDecoder {
 			/**
 			 * Step 5.  Check syndrome
 			 */
+			/* eslint-disable-next-line no-confusing-arrow */
 			const c = Q.map(q => q < 0 ? 1 : 0);
 			if (this.checkFast(c)) {
 				return c.slice(0, this.code.messageBits);
@@ -283,6 +281,7 @@ class LdpcDecoder {
 
 		return null;
 	}
+	/* eslint-enable */
 
 	/**
 	 * Decode codeword bits to message bytes

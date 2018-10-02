@@ -5,8 +5,6 @@ const LdpcDecoder = require("./ldpcDecoder");
 const CodeTable = require("./codetable");
 const Util = require("./util");
 const Crc32 = require("./crc32");
-const assert = require("assert");
-const Data = require("../test/testdata");
 
 /**
  * Methods supporting the 802.11 data packet
@@ -19,15 +17,15 @@ class Codec {
 		this.ldpcEncoder = null;
 		this.ldpcDecoder = null;
 		this.scrambleBits = [];
-        this.scrambleIdx = 0;
+		this.scrambleIdx = 0;
 		this.generateScrambler(0x5d);
 		this.selectCode("1/2", "648");
 	}
 
 	/**
 	 * Select rate and length of code
-     * @param {string} rateStr the rate from the tables
-     * @param {string} lenStr the length from the tables
+	 * @param {string} rateStr the rate from the tables
+	 * @param {string} lenStr the length from the tables
 	 */
 	selectCode(rateStr, lengthStr) {
 		const rate = this.codes[rateStr];
@@ -78,15 +76,23 @@ class Codec {
 		const scrambleBits = this.scrambleBits;
 		let idx = this.scrambleIdx;
 		const out = [];
-		for (let i = 0, len = bits.length; i < len ; i+= 8) {
-			out[i] = bits[i + 7] ^ scrambleBits[idx]; idx = (idx + 1) % 127;
-			out[i+1] = bits[i + 6] ^ scrambleBits[idx]; idx = (idx + 1) % 127;
-			out[i+2] = bits[i + 5] ^ scrambleBits[idx]; idx = (idx + 1) % 127;
-			out[i+3] = bits[i + 4] ^ scrambleBits[idx]; idx = (idx + 1) % 127;
-			out[i+4] = bits[i + 3] ^ scrambleBits[idx]; idx = (idx + 1) % 127;
-			out[i+5] = bits[i + 2] ^ scrambleBits[idx]; idx = (idx + 1) % 127;
-			out[i+6] = bits[i + 1] ^ scrambleBits[idx]; idx = (idx + 1) % 127;
-			out[i+7] = bits[i] ^ scrambleBits[idx]; idx = (idx + 1) % 127;
+		for (let i = 0, len = bits.length; i < len; i += 8) {
+			out[i] = bits[i + 7] ^ scrambleBits[idx];
+			idx = (idx + 1) % 127;
+			out[i + 1] = bits[i + 6] ^ scrambleBits[idx];
+			idx = (idx + 1) % 127;
+			out[i + 2] = bits[i + 5] ^ scrambleBits[idx];
+			idx = (idx + 1) % 127;
+			out[i + 3] = bits[i + 4] ^ scrambleBits[idx];
+			idx = (idx + 1) % 127;
+			out[i + 4] = bits[i + 3] ^ scrambleBits[idx];
+			idx = (idx + 1) % 127;
+			out[i + 5] = bits[i + 2] ^ scrambleBits[idx];
+			idx = (idx + 1) % 127;
+			out[i + 6] = bits[i + 1] ^ scrambleBits[idx];
+			idx = (idx + 1) % 127;
+			out[i + 7] = bits[i] ^ scrambleBits[idx];
+			idx = (idx + 1) % 127;
 		}
 		this.scrambleIdx = idx;
 		return out;
@@ -108,13 +114,13 @@ class Codec {
 		return ret;
 	}
 
-    /**
-     * Encode an array of bytes with the current LDPC code
-     * TODO: select a length according to the length of the byte array
-     * @param {array} bytes the bytes to encode
-     * @return {array} the encoded bits
-     */
-    encode(bytes) {
+	/**
+	 * Encode an array of bytes with the current LDPC code
+	 * TODO: select a length according to the length of the byte array
+	 * @param {array} bytes the bytes to encode
+	 * @return {array} the encoded bits
+	 */
+	encode(bytes) {
 		if (!this.ldpcEncoder) {
 			throw new Error(`ldpcEncoder code has not been selected`);
 		}
@@ -130,7 +136,7 @@ class Codec {
 		];
 		const inputBytes = macHeader.concat(bytes);
 		const wrapped = this.wrapBytes(inputBytes);
-		const serviceBits = [ 0, 0 ];
+		const serviceBits = [0, 0];
 		const servicePrepended = serviceBits.concat(wrapped);
 		/**
 		 * Bits
@@ -147,40 +153,40 @@ class Codec {
 		let final = this.shorten(encoded, scrambled.length);
 		//final = final.slice(0, final.length-54);
 		return final;
-    }
+	}
 
-    /**
-     * Encode a string with the given LDPC code
-     * @param {string} str the string to encode
-     * @return {array} the encoded bits
-     */
-    encodeString(str) {
-        const bytes = Util.stringToBytes(str);
-        return this.encode(bytes);
-    }
+	/**
+	 * Encode a string with the given LDPC code
+	 * @param {string} str the string to encode
+	 * @return {array} the encoded bits
+	 */
+	encodeString(str) {
+		const bytes = Util.stringToBytes(str);
+		return this.encode(bytes);
+	}
 
-    /**
-     * Decode an array of LDPC-encoded bits with the given LDPC code
-     * @param {array} inbits array of bits
-     * @return {array} the output bytes
-     */
-    decode(inbits) {
+	/**
+	 * Decode an array of LDPC-encoded bits with the given LDPC code
+	 * @param {array} inbits array of bits
+	 * @return {array} the output bytes
+	 */
+	decode(inbits) {
 		if (!this.ldpcDecoder) {
 			throw new Error(`ldpcDecoder code has not been selected`);
 		}
-        return this.ldpcDecoder.decode(inbits);
+		return this.ldpcDecoder.decode(inbits);
 	}
-	
-    /** 
-     * Decode an array of LDPC-encoded bits with the given LDPC code
-     * @param {array} inbits array of bits
-     * @param {string} the output string
-     */
-    decodeString(inbits) {
-        const outbytes = this.decode(inbits);
-        const str = Util.bytesToString(outbytes);
-        return str;
-    }
+
+	/** 
+	 * Decode an array of LDPC-encoded bits with the given LDPC code
+	 * @param {array} inbits array of bits
+	 * @param {string} the output string
+	 */
+	decodeString(inbits) {
+		const outbytes = this.decode(inbits);
+		const str = Util.bytesToString(outbytes);
+		return str;
+	}
 
 }
 
