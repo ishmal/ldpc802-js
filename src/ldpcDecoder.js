@@ -220,7 +220,9 @@ class LdpcDecoder {
 							if (v2 === i) {
 								continue;
 							}
-							const beta = Math.abs(q);
+							const link3 = links[v2];
+							const qb = link3.q;
+							const beta = Math.abs(qb);
 							const phi = calcPhi(beta);
 							phiSum += phi;
 						}
@@ -234,8 +236,8 @@ class LdpcDecoder {
 			/**
 			 * Step 3.  Update qij
 			 */
-			for (let n = 0; n < N; n++) {
-				const vnode = variableNodes[n];
+			for (let i = 0; i < N; i++) {
+				const vnode = variableNodes[i];
 				const links = vnode.links;
 				const llen = links.length;
 				for (let c = 0; c < llen; c++) {
@@ -256,15 +258,15 @@ class LdpcDecoder {
 			 */
 			const Q = [];
 			for (let i = 0; i < N ; i++) {
-				const variableNode = variableNodes[i];
-				const links = variableNode.links;
+				const vnode = variableNodes[i];
+				const links = vnode.links;
 				const llen = links.length;
-				let sum = variableNode.ci;
-				for (let v = i ; v < llen ; v++) {
+				let sum = 0;
+				for (let v = 0 ; v < llen ; v++) {
 					const link = links[v];
-					sum += link.q;
+					sum += link.r;
 				}
-				Q[i] = sum;
+				Q[i] = vnode.ci + sum;
 			}
 
 			/**

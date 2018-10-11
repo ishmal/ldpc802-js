@@ -1,3 +1,9 @@
+
+/**
+ * Calculates the 'phi' function:
+ * phi(x) = log((exp(x) + 1) / (exp(x) - 1))
+ */
+
 function makePhiTable(size) {
 	const delta = 7 / size;
 	const table = [];
@@ -19,8 +25,6 @@ function calcPhi(x) {
 	const idx = (x * 142.8) | 0;
 	return phiTable[idx];
 }
-
-//console.log(calcPhi(5));
 
 module.exports = calcPhi;
 
