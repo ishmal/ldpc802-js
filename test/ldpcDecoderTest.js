@@ -2,6 +2,7 @@
 const LdpcDecoder = require("../src/ldpcDecoder");
 const LdpcEncoder = require("../src/ldpcEncoder");
 const CodeTable = require("../src/codetable");
+const math = require("mathjs")
 
 /*
 0 1 0 1 1 0 0 1
@@ -45,13 +46,21 @@ describe("LDPC Decoder", () => {
 		const len = message.length;
 		for (let i = 0; i < len; i++) {
 			const noise = (Math.random() - 0.5) * level;
-			out[i] = message[i] * noise;
+			out[i] = message[i] + noise;
 		}
 		return out;
 	}
 
 	it("should construct without exception", () => {
 		expect(() => new LdpcDecoder(code)).not.toThrow();
+	});
+
+	it("should calculate variance properly", () => {
+		const rawmsg = makeMessage(1000);
+		const msg = addNoise(rawmsg, 0.1);
+		const variance = LdpcDecoder.calcVariance(msg);
+		const exp = math.var(msg);
+		expect(variance).toBeCloseTo(exp, 7);
 	});
 
 	it("should create tanner tables", () => {

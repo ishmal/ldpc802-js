@@ -2,18 +2,6 @@ const Util = require("./util");
 const multiplySparse = Util.multiplySparse;
 const calcPhi = require("./calcphi");
 
-function calcVariance(samples) {
-	const n = samples.length;
-	let m = 0;
-	let s = 0;
-	for (let k = 0; k < n; ) {
-		const x = samples[k++];
-		const oldM = m;
-		m += (x - m) / k;
-		s += (x - m) * (x - oldM);
-	}
-  return s / (n - 1);
-}
 
 
 /**
@@ -28,8 +16,22 @@ class LdpcDecoder {
 	 */
 	constructor(code) {
 		this.code = code;
-		this.createTanner();
+		this.createSPGraph();
 	}
+
+	static calcVariance(samples) {
+		const n = samples.length;
+		let m = 0;
+		let s = 0;
+		for (let k = 0; k < n; ) {
+			const x = samples[k++];
+			const oldM = m;
+			m += (x - m) / k;
+			s += (x - m) * (x - oldM);
+		}
+	  return s / (n - 1);
+	}
+	
 
 
 	/**
@@ -74,7 +76,7 @@ class LdpcDecoder {
 	 * Set up the variable and check nodes,
 	 * make the links between them.
 	 */
-	createTanner2() {
+	createTanner() {
 		const code = this.code;
 		const M = this.M;
 		const N = this.N;
@@ -110,7 +112,10 @@ class LdpcDecoder {
 		this.variableNodes = variableNodes;
 	}
 
-	createTanner() {
+	/**
+	 * Create an empty
+	 */
+	createSPGraph() {
 		const M = this.code.M;
 		const N = this.code.N;
 		const H = this.code.H;
@@ -171,6 +176,7 @@ class LdpcDecoder {
 	 */
 	/* eslint-disable max-lines-per-function */
 	decodeSumProduct(inBits) {
+		// localize some values
 		const M = this.code.M;
 		const N = this.code.N;
 		const checkNodes = this.checkNodes;
@@ -179,8 +185,8 @@ class LdpcDecoder {
 		/**
 		 * Step 1.  Initialization of c(ij) and q(ij)
 		 */
-		const variance = calcVariance(inBits);
-		const weight = 2 / variance;
+		const variance = LdpcDecoder.calcVariance(inBits);
+		const weight = 1;  //2 / variance;
 		for (let i = 0; i < N; i++) {
 			const vnode = variableNodes[i];
 			const Lci = inBits[i] * weight;
