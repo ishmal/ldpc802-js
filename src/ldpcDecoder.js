@@ -78,8 +78,8 @@ class LdpcDecoder {
 	 */
 	createTanner() {
 		const code = this.code;
-		const M = this.M;
-		const N = this.N;
+		const M = code.M;
+		const N = code.N;
 		const variableNodes = [];
 		for (let i = 0; i < N; i++) {
 			variableNodes[i] = {
@@ -116,13 +116,16 @@ class LdpcDecoder {
 	 * Create an empty
 	 */
 	createSPGraph() {
-		const M = this.code.M;
-		const N = this.code.N;
-		const H = this.code.H;
+		const code = this.code;
+		const M = code.M;
+		const N = code.N;
+		const H = code.H;
 		const checkNodes = [];
-		const links = [];
 		const variableNodes = [];
 
+		/**
+		 * First make two blank tables
+		 */
 		for (let i = 0; i < M; i++) {
 			checkNodes[i] = {
 				links: []
@@ -134,6 +137,11 @@ class LdpcDecoder {
 				ci: 0
 			};
 		}
+
+		/**
+		 * Then interconnect then with link records,
+		 * using the sparse array information from H
+		 */
 		for (let i = 0 ; i < M; i++) {
 			const row = H[i];
 			const cnode = checkNodes[i];
@@ -149,9 +157,12 @@ class LdpcDecoder {
 				};
 				cnode.links.push(link);
 				vnode.links.push(link);
-				links.push(link);
 			}
 		}
+
+		/**
+		 * Attach to this instance
+		 */
 		this.checkNodes = checkNodes;
 		this.variableNodes = variableNodes;
 	}
@@ -192,7 +203,7 @@ class LdpcDecoder {
 			const Lci = inBits[i] * weight;
 			vnode.ci = Lci;
 			const links = vnode.links;
-			const llen = links.len;
+			const llen = links.length;
 			for (let j = 0; j < llen ; j++) {
 				const link = links[j];
 				link.r = 0;				
@@ -206,6 +217,7 @@ class LdpcDecoder {
 			/**
 			 * Step 2. update r(ji)
 			 */
+			debugger;
 			for (let m = 0; m < M; m++) {
 				const checkNode = checkNodes[m];
 				const links = checkNode.links;
@@ -229,8 +241,8 @@ class LdpcDecoder {
 							const link3 = links[v2];
 							const qb = link3.q;
 							const beta = Math.abs(qb);
-							const phi = calcPhi(beta);
-							phiSum += phi;
+							const phiBeta = calcPhi(beta);
+							phiSum += phiBeta;
 						}
 						const phiPhiSum = calcPhi(phiSum);
 						prod *= (alpha * phiPhiSum);
