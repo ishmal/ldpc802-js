@@ -233,7 +233,7 @@ class LdpcDecoder {
 							phiSum += phi;
 						}
 						const phiPhiSum = calcPhi(phiSum);
-						prod *= alpha * phiPhiSum;
+						prod *= (alpha * phiPhiSum);
 					}
 					link.r = prod;
 				}
