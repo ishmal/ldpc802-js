@@ -220,7 +220,7 @@ class LdpcDecoder {
 						}
 						const link2 = links[v];
 						const q = link2.q;
-						const alpha = Math.sign(q);
+						const alpha = q < 0 ? -1 : 1;
 						let phiSum = 0;
 						for (let v2 = 0; v2 < llen; v2++) {
 							if (v2 === i) {
