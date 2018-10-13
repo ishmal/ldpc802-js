@@ -108,7 +108,7 @@ describe("LDPC Decoder", () => {
 		const codeword = enc.encode(msg);
 		expect(codeword.length).toEqual(code.N);
 		const signal = makeSignal(codeword);
-		const received = addNoise(signal, 0.1); //here we go
+		const received = addNoise(signal, 0.1);
 		const dec = new LdpcDecoder(code);
 		const res = dec.decode(received);
 		expect(res).toEqual(msg);
@@ -121,9 +121,9 @@ describe("LDPC Decoder", () => {
 		const enc = new LdpcEncoder(code);
 		const codeword = enc.encode(msg);
 		expect(codeword.length).toEqual(code.N);
-		const withErrors = addErrors(codeword, 4);
+		const withErrors = addErrors(codeword, 8);
 		const signal = makeSignal(withErrors);
-		const received = addNoise(signal, 0.1); //here we go
+		const received = addNoise(signal, 0.1);
 		const dec = new LdpcDecoder(code);
 		const res = dec.decode(received);
 		expect(res).toEqual(msg);
