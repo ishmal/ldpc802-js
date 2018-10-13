@@ -2,9 +2,6 @@ const Util = require("./util");
 const multiplySparse = Util.multiplySparse;
 const calcPhi = require("./calcphi");
 
-function isZero(arr) {
-	return arr.every(v => v===0);
-}
 
 /**
  * Decoder for LDBC codewords
@@ -242,7 +239,6 @@ class LdpcDecoder {
 						const alpha = q < 0 ? -1 : 1;
 						prod *= alpha;
 					}
-					debugger;
 					const phiSum = calcPhi(sum);
 					rlink.r = prod * phiSum;
 				}
@@ -282,10 +278,6 @@ class LdpcDecoder {
 				}
 				const LQi = vnode.ci + sum;
 				c[i] = LQi < 0 ? 1 : 0;
-			}
-			if (isZero(c)) {
-				console.log("iter:" + iter);
-				return;
 			}
 			if (this.checkFast(c)) {
 				return c.slice(0, this.code.messageBits);

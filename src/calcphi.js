@@ -33,7 +33,7 @@ function calcPhi(x) {
 	return phiTable[idx];
 }
 
-console.log("phi: " + calcPhiSlow(7));
+//console.log("phi: " + calcPhiSlow(7));
 
 
 module.exports = calcPhiSlow;
