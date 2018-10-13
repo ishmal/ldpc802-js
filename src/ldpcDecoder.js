@@ -2,7 +2,9 @@ const Util = require("./util");
 const multiplySparse = Util.multiplySparse;
 const calcPhi = require("./calcphi");
 
-
+function isZero(arr) {
+	return arr.every(v => v===0);
+}
 
 /**
  * Decoder for LDBC codewords
@@ -197,7 +199,7 @@ class LdpcDecoder {
 		 * Step 1.  Initialization of c(ij) and q(ij)
 		 */
 		const variance = LdpcDecoder.calcVariance(inBits);
-		const weight = 1;  //2 / variance;
+		const weight = 2 / variance;
 		for (let i = 0; i < N; i++) {
 			const vnode = variableNodes[i];
 			const Lci = inBits[i] * weight;
@@ -217,37 +219,32 @@ class LdpcDecoder {
 			/**
 			 * Step 2. update r(ji)
 			 */
-			debugger;
 			for (let m = 0; m < M; m++) {
 				const checkNode = checkNodes[m];
 				const links = checkNode.links;
 				const llen = links.length;
 
 				for (let i = 0; i < llen ; i++) {
-					const link = links[i];
+					const rlink = links[i];
+					/**
+					 * Sum and product for links !== i
+					 */
+					let sum = 0;
 					let prod = 1;
 					for (let v = 0; v < llen; v++) {
 						if (v === i) {
 							continue;
 						}
-						const link2 = links[v];
-						const q = link2.q;
+						const q = links[v].q;
+						const beta = Math.abs(q);
+						const phiBeta = calcPhi(beta);
+						sum += phiBeta;
 						const alpha = q < 0 ? -1 : 1;
-						let phiSum = 0;
-						for (let v2 = 0; v2 < llen; v2++) {
-							if (v2 === i) {
-								continue;
-							}
-							const link3 = links[v2];
-							const qb = link3.q;
-							const beta = Math.abs(qb);
-							const phiBeta = calcPhi(beta);
-							phiSum += phiBeta;
-						}
-						const phiPhiSum = calcPhi(phiSum);
-						prod *= (alpha * phiPhiSum);
+						prod *= alpha;
 					}
-					link.r = prod;
+					debugger;
+					const phiSum = calcPhi(sum);
+					rlink.r = prod * phiSum;
 				}
 			}
 
@@ -258,13 +255,12 @@ class LdpcDecoder {
 				const vnode = variableNodes[i];
 				const links = vnode.links;
 				const llen = links.length;
-				for (let c = 0; c < llen; c++) {
-					const link = links[c];
+				for (let k = 0; k < llen; k++) {
+					const link = links[k];
 					let sum = 0;
-					for (let ci = 0; ci < llen; ci++) {
-						if (ci !== c) {
-							const clink = links[ci];
-							sum += clink.r;
+					for (let c = 0; c < llen; c++) {
+						if (c !== k) {
+							sum += links[c].r;
 						}
 					}
 					link.q = vnode.ci + sum;
@@ -272,9 +268,9 @@ class LdpcDecoder {
 			}
 
 			/**
-			 * Step 4.  Update Qi
+			 * Step 4.  Check syndrome
 			 */
-			const Q = [];
+			const c = [];
 			for (let i = 0; i < N ; i++) {
 				const vnode = variableNodes[i];
 				const links = vnode.links;
@@ -284,14 +280,13 @@ class LdpcDecoder {
 					const link = links[v];
 					sum += link.r;
 				}
-				Q[i] = vnode.ci + sum;
+				const LQi = vnode.ci + sum;
+				c[i] = LQi < 0 ? 1 : 0;
 			}
-
-			/**
-			 * Step 5.  Check syndrome
-			 */
-			/* eslint-disable-next-line no-confusing-arrow */
-			const c = Q.map(q => q < 0 ? 1 : 0);
+			if (isZero(c)) {
+				console.log("iter:" + iter);
+				return;
+			}
 			if (this.checkFast(c)) {
 				return c.slice(0, this.code.messageBits);
 			}

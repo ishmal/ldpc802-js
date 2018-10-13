@@ -33,6 +33,10 @@ describe("LDPC Decoder", () => {
 		return msg;
 	}
 
+	function makeSignal(array) {
+		return array.map(x => x < 0.5 ? 1 : -1);
+	}
+
 	function addErrors(message, nrBits) {
 		const len = message.length;
 		for (let i = 0; i < nrBits; i++) {
@@ -89,18 +93,20 @@ describe("LDPC Decoder", () => {
 		const codeword = enc.encode(msg);
 		expect(codeword.length).toEqual(code.N);
 		const dec = new LdpcDecoder(code);
-		const res = dec.decode(codeword);
+		const signal = makeSignal(codeword);
+		const res = dec.decode(signal);
 		expect(res).toEqual(msg);
 	});
 
-	xit("should decode with noise added", () => {
+	it("should decode with noise added", () => {
 		const table = new CodeTable();
 		const code = table.codes["1/2"]["648"];
 		const msg = makeMessage(code.messageBits);
 		const enc = new LdpcEncoder(code);
 		const codeword = enc.encode(msg);
 		expect(codeword.length).toEqual(code.N);
-		const received = addNoise(codeword, 0.1); //here we go
+		const signal = makeSignal(codeword);
+		const received = addNoise(signal, 0.1); //here we go
 		const dec = new LdpcDecoder(code);
 		const res = dec.decode(received);
 		expect(res).toEqual(msg);

@@ -5,8 +5,9 @@
  */
 
 function calcPhiSlow(x) {
+	x = Math.max(x, 1e-10);
 	const expx = Math.exp(x);
-	const v = (x === 0) ? 9 : Math.log((expx + 1) / (expx - 1));
+	const v = Math.log((expx + 1) / (expx - 1));
 	return v;
 }
 
