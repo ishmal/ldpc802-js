@@ -1,5 +1,5 @@
 /* jshint esversion: 6 */
-const codes80211n = require("./c802.11n");
+const codes80211n = require("./ldpc802.11");
 
 class CodeTables {
 	constructor(codes = codes80211n) {
