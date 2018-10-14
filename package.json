@@ -1,7 +1,7 @@
 {
   "name": "ldpc",
-  "version": "1.0.1",
-  "description": "experimentation with ldpc codes",
+  "version": "1.0.2",
+  "description": "Simple LDPC codec using 802.11 codes",
   "main": "index.js",
   "scripts": {
     "test": "jest"
@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/ishmal/ldpc.git"
   },
-  "author": "",
+  "author": "Bob Jamison",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/ishmal/ldpc/issues"
