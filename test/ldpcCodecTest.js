@@ -13,6 +13,10 @@ describe("Ldpc Codec", () => {
 					Only this and nothing more.”
 	`;
 
+	/**
+	 * The binary 1's and 0's live at -1 and 1 in the analog world
+	 * @param {array} array to convert
+	 */
 	function makeSignal(array) {
 		return array.map(x => x < 0.5 ? 1 : -1);
 	}
@@ -22,7 +26,7 @@ describe("Ldpc Codec", () => {
 		const len = arr.length;
 		for (let i = 0; i < nrBits; i++) {
 			let index = (Math.random() * len) | 0; //make sure it is an int
-			arr[i] = arr[index] ^ 1;
+			arr[index] = arr[index] ^ 1;
 		}
 		return arr;
 	}
@@ -43,11 +47,23 @@ describe("Ldpc Codec", () => {
 
 	it("should be able to encode and decode a block of text", () => {
 		const codec = new LdpcCodec();
-		//codec.withCrc = false;
 		codec.setCode("1/2", "648");
 		const messages = codec.encodeText(raven);
 		const analogs = messages.map(m => makeSignal(m));
 		const texts = analogs.map(m => codec.decodeText(m));
+		const wholeText = texts.join("");
+		expect(wholeText).toEqual(raven);
+	});
+
+	it("should be able to encode and decode a block of text in a dirty world", () => {
+		const codec = new LdpcCodec();
+		codec.setCode("1/2", "648");
+		debugger;
+		const messages = codec.encodeText(raven);
+		const withErrors = messages.map(m => addErrors(m, 40));
+		const analogs = withErrors.map(m => makeSignal(m));
+		const noisy = analogs.map(m => addNoise(m, 0.2));
+		const texts = noisy.map(m => codec.decodeText(m));
 		const wholeText = texts.join("");
 		expect(wholeText).toEqual(raven);
 	});
