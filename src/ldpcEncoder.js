@@ -1,6 +1,5 @@
 
 const Util = require("./util");
-
 const multiplySparse = Util.multiplySparse;
 const substituteSparse = Util.substituteSparse;
 
