@@ -1,15 +1,15 @@
 /* jshint esversion: 6 */
 
-const LdpcEncoder = require("./ldpcEncoder");
-const LdpcDecoder = require("./ldpcDecoder");
-const CodeTable = require("./codetable");
-const Util = require("./util");
-const Crc32 = require("./crc32");
+import { CodeTable } from "./codeTable";
+import { Crc32 } from "./crc32";
+import { LdpcDecoder } from "./ldpcDecoder";
+import { LdpcEncoder } from "./ldpcEncoder";
+import { Util } from "./util";
 
 /**
  * Methods supporting the 802.11 data packet
  */
-class Codec {
+export class Codec {
 
 	constructor() {
 		this.codes = new CodeTable().codes;
@@ -190,5 +190,3 @@ class Codec {
 
 }
 
-
-module.exports = Codec;

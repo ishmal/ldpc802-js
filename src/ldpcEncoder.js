@@ -1,5 +1,6 @@
 
-const Util = require("./util");
+import { Util } from "./util";
+
 const multiplySparse = Util.multiplySparse;
 const substituteSparse = Util.substituteSparse;
 
@@ -14,7 +15,7 @@ function add(a, b) {
 /**
  * Encoder for 802.11n/ac QC codes
  */
-class LdpcEncoder {
+export class LdpcEncoder {
 
 	/**
 	 * Constructor
@@ -55,5 +56,3 @@ class LdpcEncoder {
 
 
 }
-
-module.exports = LdpcEncoder;

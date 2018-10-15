@@ -1,8 +1,8 @@
 
-const LdpcDecoder = require("../src/ldpcDecoder");
-const LdpcEncoder = require("../src/ldpcEncoder");
-const CodeTable = require("../src/codetable");
-const math = require("mathjs")
+import * as mathjs from "mathjs";
+import { CodeTable } from "../src/codeTable";
+import { LdpcDecoder } from "../src/ldpcDecoder";
+import { LdpcEncoder } from "../src/ldpcEncoder";
 
 /*
 0 1 0 1 1 0 0 1
@@ -65,7 +65,7 @@ describe("LDPC Decoder", () => {
 		const rawmsg = makeMessage(1000);
 		const msg = addNoise(rawmsg, 0.1);
 		const variance = LdpcDecoder.calcVariance(msg);
-		const exp = math.var(msg);
+		const exp = mathjs.var(msg);
 		expect(variance).toBeCloseTo(exp, 7);
 	});
 

@@ -3,7 +3,7 @@
   they will no add to the memory profile
 */
 
-const rawCodes = {
+export const RawCodes = {
 	"1/2": {
 		"648": [
 			" 0  -  -  -  0  0  -  -  0  -  -  0  1 0 - - - - - - - - - -",
@@ -128,4 +128,3 @@ const rawCodes = {
 	}
 };
 
-module.exports = rawCodes;

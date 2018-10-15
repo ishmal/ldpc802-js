@@ -1,7 +1,7 @@
 /* jshint esversion: 6 */
-const codes80211n = require("./ldpc802.11");
+import { codes80211n } from "./ldpc802.11";
 
-class CodeTables {
+export class CodeTable {
 	constructor(codes = codes80211n) {
 		this.codes = codes;
 		this.makeTables();
@@ -150,4 +150,3 @@ class CodeTables {
 }
 
 
-module.exports = CodeTables;

@@ -5,9 +5,9 @@ expect: false,
 it: false
 */
 
-const Codec = require("../src/codec");
-const Util = require("../src/util");
-const Data = require("./testdata");
+import { Codec } from "../src/codec";
+import { Util } from "../src/util";
+import { Data } from "./testdata";
 
 
 

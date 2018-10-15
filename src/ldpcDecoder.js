@@ -1,13 +1,14 @@
-const Util = require("./util");
+import { calcPhi } from "./calcphi";
+import { Util } from "./util";
+
 const multiplySparse = Util.multiplySparse;
-const calcPhi = require("./calcphi");
 
 
 /**
  * Decoder for LDBC codewords
  * @see "Introduction to LDPC Codes" by William E Ryan
  */
-class LdpcDecoder {
+export class LdpcDecoder {
 
 	/**
 	 * Constructor
@@ -305,5 +306,3 @@ class LdpcDecoder {
 		return bytes;
 	}
 }
-
-module.exports = LdpcDecoder;

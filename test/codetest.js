@@ -1,8 +1,7 @@
 
 
-const CodeTable = require("../src/codetable");
-const math = require("mathjs");
-const rawCodes = require("./rawcodes");
+import { CodeTable } from "../src/codeTable";
+import { RawCodes } from "./rawcodes";
 
 
 describe("LDPC Codes", () => {
@@ -45,7 +44,7 @@ describe("LDPC Codes", () => {
 	function validateHb(code, rate, length) {
 		const arr = [];
 		//console.log("rate: " + rate);
-		const source = rawCodes[rate][length];
+		const source = RawCodes[rate][length];
 		const qcRows = source.length;
 		for (let i = 0; i < qcRows; i++) {
 			const row = [];

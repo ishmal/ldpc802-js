@@ -1,5 +1,5 @@
-const Util = require("../src/util");
-const Data = require("./testdata");
+import { Util } from "../src/util";
+import { Data } from "./testdata";
 
 
 describe("Util", () => {

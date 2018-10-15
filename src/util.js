@@ -4,7 +4,7 @@
 /**
  * Various common utilities we needs among several modules
  */
-class Util {
+export class Util {
 
     /**
      * Convert a string to an array of UTF-8 bytes
@@ -318,5 +318,3 @@ class Util {
 	
 
 }
-
-module.exports = Util;

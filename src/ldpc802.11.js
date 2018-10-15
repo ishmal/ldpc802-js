@@ -7,7 +7,7 @@
  *   2.  both the numerical and text forms of the tables are provided
  *     so that they may be validated.
  */
-const codes = {
+export const codes80211n = {
     "1/2": {
 		"648": {
 			z: 27,
@@ -239,5 +239,3 @@ const codes = {
 		}
 	}
 };
-
-module.exports = codes;

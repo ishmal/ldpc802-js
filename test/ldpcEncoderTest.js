@@ -1,8 +1,8 @@
 
-const Data = require("./testdata");
-const CodeTable = require("../src/codetable");
-const LdpcEncoder = require("../src/ldpcEncoder");
-const Util = require("../src/util");
+import { CodeTable } from "../src/codeTable";
+import { LdpcEncoder } from "../src/ldpcEncoder";
+import { Util } from "../src/util";
+import { Data } from "./testdata";
 
 describe("LDPC Encoder", () => {
 	it("should construct without throwing", () => {

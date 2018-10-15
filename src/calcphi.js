@@ -25,7 +25,7 @@ function makePhiTable(size) {
 
 const phiTable = makePhiTable(1000);
 
-function calcPhi(x) {
+function calcPhiTable(x) {
 	if (x >= 7) {
 		return 0;
 	}
@@ -33,9 +33,5 @@ function calcPhi(x) {
 	return phiTable[idx];
 }
 
-//console.log("phi: " + calcPhiSlow(7));
-
-
-module.exports = calcPhiSlow;
-
+export const calcPhi = calcPhiTable;
 

@@ -5,7 +5,7 @@ expect: false,
 it: false
 */
 
-const Crc32 = require("../src/crc32");
+import { Crc32 } from "../src/crc32";
 
 describe("CRC32 tests", function () {
 

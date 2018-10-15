@@ -1,4 +1,4 @@
-const LdpcCodec = require("../src/ldpcCodec");
+import { LdpcCodec } from "../src/ldpcCodec";
 
 
 

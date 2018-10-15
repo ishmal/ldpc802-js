@@ -17,7 +17,7 @@ const crcTable = createCrcTable();
 /**
  * Calculates a 4-byte CRC32 of a string or byte array
  */
-class Crc32 {
+export class Crc32 {
 
     /**
      * Convert a string to an array of UTF-8 bytes
@@ -122,5 +122,3 @@ class Crc32 {
     }
 
 }
-
-module.exports = Crc32;

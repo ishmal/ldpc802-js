@@ -1,15 +1,15 @@
 
-const LdpcDecoder = require("./ldpcDecoder");
-const LdpcEncoder = require("./ldpcEncoder")
-const CodeTable = require("./codetable");
-const Util = require("./util");
-const Crc32 = require("./crc32");
+import { CodeTable } from "./codeTable";
+import { Crc32 } from "./crc32";
+import { LdpcDecoder } from "./ldpcDecoder";
+import { LdpcEncoder } from "./ldpcEncoder";
+import { Util } from "./util";
 
 
 /**
  * Utility to make coding and decoding easy
  */
-class LdpcCodec {
+export class LdpcCodec {
 	constructor() {
 		this.codes = new CodeTable().codes;
 		this.setCode("1/2", "648");
@@ -136,5 +136,3 @@ class LdpcCodec {
 	}
 
 }
-
-module.exports = LdpcCodec;

@@ -429,7 +429,7 @@ const final1 = [
 
 
 
-module.exports = {
+export const Data = {
     encoded1,
     final1,
     fullText,
