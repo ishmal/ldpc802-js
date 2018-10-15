@@ -7,7 +7,7 @@ for 802.11 n, ac, and h devices.  Why?  Not only because they have of course bee
 tested extensively, but the spec also has test data to validate any new software
 implementation.
 
-The codec uses the Log Likelyhood Sum-Product algorithm, so should prove to
+The codec uses the Log Likelihood Sum-Product algorithm, so should prove to
 be very effective in signal reconstruction and sensitivity.
 
 
