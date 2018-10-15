@@ -94,6 +94,19 @@ class Crc32 {
     }
 
     /**
+     * reconstitute the int from intoToBytes
+     * @param {array} bytes the 4 bytes to decode
+     * @return {number} the original int
+     */
+    static bytesToInt(bytes) {
+		let v = bytes[0];
+		v = v << 8 | bytes[1];
+		v = v << 8 | bytes[2];
+		v = v << 8 | bytes[3];
+		return v >>> 0;
+    }
+
+    /**
      * break a 32-bit crc into 4 bytes, so that they can be sent as payload.
      * @param {number} the crc to break apart
      * @return {array} the 4 bytes

@@ -22,10 +22,19 @@ describe("CRC32 tests", function () {
 	});
 
 	it("should convert int to bytes properly", () => {
-		const val = 0x12345678;
+		const val = 0xcafebabe;
 		const bytes = Crc32.intToBytes(val);
-		const exp = [0x12, 0x34, 0x56, 0x78];
+		const exp = [0xca, 0xfe, 0xba, 0xbe];
 		expect(bytes).toEqual(exp);
 	});
+
+	it("should convert bytes to int properly", () => {
+		const exp = 0x80808080;
+		const bytes = [0x80, 0x80, 0x80, 0x80];
+		debugger;
+		const val = Crc32.bytesToInt(bytes);
+		expect(val).toEqual(exp);
+	});
+
 
 });

@@ -16,6 +16,7 @@ class LdpcDecoder {
 	constructor(code) {
 		this.code = code;
 		this.createSPGraph();
+		this.maxIter = 100;
 	}
 
 	static calcVariance(samples) {
@@ -211,7 +212,7 @@ class LdpcDecoder {
 		}
 
 
-		for (let iter = 0; iter < 100; iter++) {
+		for (let iter = 0; iter < this.maxIter; iter++) {
 
 			/**
 			 * Step 2. update r(ji)

@@ -13,7 +13,6 @@ class LdpcCodec {
 	constructor() {
 		this.codes = new CodeTable().codes;
 		this.setCode("1/2", "648");
-		this.withLength = true;
 		this.withCrc = true;
 	}
 
@@ -73,20 +72,14 @@ class LdpcCodec {
 
 	encode(bytes) {
 		let chunkSize = Math.floor(this.code.messageBits / 8);
-		if (this.withLength) {
-			chunkSize--;
-		}
 		if (this.withCrc) {
 			chunkSize -= 4;
 		}
 		const messages = [];
 		for (let i = 0, len = bytes.length ; i < len ; i  += chunkSize) {
-			let chunk = bytes.slice(i, chunkSize);
-			if (this.withLength) {
-				chunk.unshift(chunk.length)
-			}
+			let chunk = bytes.slice(i, i + chunkSize);
 			if (this.withCrc) {
-				const crc = Crc32.orBytes(chunk);
+				const crc = Crc32.ofBytes(chunk);
 				const crcBytes = Crc32.intToBytes(crc);
 				chunk = chunk.concat(crcBytes);
 			}
@@ -99,8 +92,47 @@ class LdpcCodec {
 		return messages;
 	}
 
-	decode(messages) {
-		
+	encodeText(text) {
+		const bytes = Util.stringToBytes(text);
+		const messages = this.encode(bytes);
+		return messages;
+	}
+
+	decode(message) {
+		const mlen = message.length;
+		const N = this.code.N
+		let pad = N - mlen;
+		if (pad < 0) {
+			throw new Error(`message too long: ${mlen} > ${N}`);
+		}
+		const parityBits = N - this.code.messageBits;
+		const actualBits = mlen - parityBits;
+		const front = message.slice(0, actualBits);
+		const back = message.slice(actualBits);
+		const padBits = new Array(pad).fill(0);
+		const padded = front.concat(padBits).concat(back);
+		const decoded = this.decoder.decode(padded);
+		if (decoded === null) {
+			throw new Error("decode failed");
+		}
+		const final = decoded.slice(0, actualBits);
+		let bytes = Util.bitsToBytesBE(final);
+		if (this.withCrc) {
+			const blen = bytes.length;
+			const crcBytes = bytes.slice(blen - 4);
+			const given = Crc32.bytesToInt(crcBytes);
+			bytes = bytes.slice(0, blen - 4);
+			const crc = Crc32.ofBytes(bytes);
+			if (crc !== given) {
+				throw new Error("crc failed");
+			}
+		}
+		return bytes;
+	}
+
+	decodeText(message) {
+		const bytes = this.decode(message);
+		return Util.bytesToString(bytes);
 	}
 
 }
