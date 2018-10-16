@@ -52,7 +52,7 @@ or
 codec.encodeText(string);
 ```
 
-will break the input data into chunk that fit in codewords,
+will break the input data into chunks that fit in codewords,
 encode each one, are return an array of bit arrays for
 transmitting over an AWGN channel.
 
