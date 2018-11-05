@@ -1,8 +1,10 @@
 
 CC=gcc
+CFLAGS=-Wall -g
+CPP=clang++ -std=c++11 -stdlib=libc++
+CPPFLAGS=-g -O0
 INC=-Iinclude
 LIB=-Lobj
-CFLAGS=-Wall -arch x86_64
 
 OBJ=\
 	obj/ldpc802.o \
@@ -19,14 +21,16 @@ obj/libldpc802.a: $(OBJ)
 	$(AR) rcs $@ $(OBJ)
 
 obj/ldpc802.o: $(DEPS)
-	$(CC) $(CFLAGS) $(INC) -c -o $@ src/ldpc802.C
+	$(CC) $(CFLAGS) $(INC) -c -o $@ src/ldpc802.c
 
 obj/crc32.o: $(DEPS)
-	$(CC) $(CFLAGS) $(INC) -c -o $@ src/crc32.C
+	$(CC) $(CFLAGS) $(INC) -c -o $@ src/crc32.c
 
-tester:
-	$(CC) $(INC) test/*.c $(LIB) -lldpc802 -lc -o test/runner
+tests: test/crctest
+
+test/crctest:
+	$(CPP) $(CPPFLAGS) $(INC) test/crctest.cpp $(LIB) -o $@ -lldpc802 -lstdc++ -lgtest
 
 clean:
-	$(RM) obj/* test/runner test/*.o
+	$(RM) obj/* test/runner test/*.o test/crctest
 
