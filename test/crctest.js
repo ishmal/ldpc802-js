@@ -31,7 +31,6 @@ describe("CRC32 tests", function () {
 	it("should convert bytes to int properly", () => {
 		const exp = 0x80808080;
 		const bytes = [0x80, 0x80, 0x80, 0x80];
-		debugger;
 		const val = Crc32.bytesToInt(bytes);
 		expect(val).toEqual(exp);
 	});
