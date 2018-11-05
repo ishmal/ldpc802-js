@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdint.h>
 #include <gtest/gtest.h>
 
@@ -5,14 +6,11 @@
 
 // Tests that the Foo::Bar() method does Abc.
 TEST(Crc32Test, CorrectValue) {
-	uint8_t bytes[] = { 
-		0x74, 0x68, 0x65, 0x20, 0x71, 0x75, 
-		0x69, 0x63, 0x6b, 0x20, 0x62, 0x72, 
-		0x6f, 0x77, 0x6e, 0x20, 0x66, 0x6f, 
-		0x78
-	};
-    uint32_t res = Crc32ofBytes(bytes, 19);
-	ASSERT_EQ(res, 0xdb0aca52) << "crc should be equal";
+	const char *str = "The quick brown fox jumps over the lazy dog";
+	int len = strlen(str);
+	uint8_t * bytes = (uint8_t *) str;
+    uint32_t res = Crc32ofBytes(bytes, len);
+	ASSERT_EQ(res, 0x414fa339) << "crc should be equal";
 }
 
 

@@ -10,9 +10,9 @@ import { Crc32 } from "../src/crc32";
 describe("CRC32 tests", function () {
 
 	it("should produce a correct value for a string", () => {
-		const str = "the quick brown fox";
+		const str = "The quick brown fox jumps over the lazy dog";
 		const res = Crc32.ofString(str)
-		expect(res).toEqual(0x91C102CA);
+		expect(res).toEqual(0x414fa339);
 	});
 
 	it("should produce a correct value for an array of bytes", () => {

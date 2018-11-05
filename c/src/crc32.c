@@ -48,15 +48,14 @@ const uint32_t crcTable[] = {
 
 /**
  * Calculate the crc32 checksum for an array of bytes
- * @param {ubyte *} bytes array of bytes
+ * @param {ubyte *} p array of bytes
  * @param {int} len number of bytes in array
  * @return {uint32_t} the crc
  */
-uint32_t Crc32ofBytes(uint8_t* bytes, int len) {
-	uint32_t crc = 0 ^ (-1);
-	uint8_t * b = bytes;
+uint32_t Crc32ofBytes(uint8_t* p, int len) {
+	uint32_t crc = 0xffffffff;
 	while (len--) {
-		crc = (crc >> 8) ^ crcTable[(crc ^ *b++) & 0xff];
+		crc =  crcTable[((uint8_t)crc ^ *(p++))] ^ (crc >> 8);
 	}
-	return (crc ^ (-1)) & 0xffffffff;
+	return (crc ^ 0xffffffff);
 }
