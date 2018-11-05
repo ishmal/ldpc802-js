@@ -2,6 +2,9 @@
   "name": "ldpc",
   "version": "1.0.2",
   "description": "Simple LDPC codec using 802.11 codes",
+  "keywords": [
+	"ldpc", "fec", "communications"
+  ],
   "main": "index.js",
   "scripts": {
     "test": "jest",
