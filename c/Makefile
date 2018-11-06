@@ -1,8 +1,6 @@
 
 CC=gcc
 CFLAGS=-Wall -g
-CPP=clang++ -std=c++11 -stdlib=libc++
-CPPFLAGS=-g -O0
 INC=-Iinclude
 LIB=-Lobj
 
@@ -26,11 +24,7 @@ obj/ldpc802.o: $(DEPS)
 obj/crc32.o: $(DEPS)
 	$(CC) $(CFLAGS) $(INC) -c -o $@ src/crc32.c
 
-tests: test/crctest
-
-test/crctest:
-	$(CPP) $(CPPFLAGS) $(INC) test/crctest.cpp $(LIB) -o $@ -lldpc802 -lstdc++ -lgtest
 
 clean:
-	$(RM) obj/* test/runner test/*.o test/crctest
+	$(RM) obj/*
 
