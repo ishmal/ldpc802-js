@@ -170,21 +170,18 @@ export class LdpcDecoder {
 
 	/**
 	 * Decode codeword bits to message bits
-	 * @param {array} inBits message array of 1's and 0's
-	 * @return decoded array of 1's and zeroes
+	 * @param {array} inBits message array of data from -1 -> 1
+	 * @return decoded array of real -1's and 1's
 	 */
 	decode(inBits) {
-		//if (this.checkFast(inBits)) {
-		//	return inBits.slice(0, this.code.messageBits);
-		//s}
 		const result = this.decodeSumProduct(inBits);
 		return result;
 	}
 
 	/**
 	 * Decode codeword bits to message bits
-	 * @param {array} inBits message array of 1's and 0's
-	 * @return decoded array of 1's and zeroes
+	 * @param {array} message array of data from -1 -> 1
+	 * @return decoded array of message array of data from -1 -> 1
 	 */
 	/* eslint-disable max-lines-per-function */
 	decodeSumProduct(inBits) {

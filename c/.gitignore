@@ -3,4 +3,5 @@ build/
 *.a
 *.o
 googletest/
-
+*.plist
+**/*.dSYM/
