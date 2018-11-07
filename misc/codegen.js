@@ -32,6 +32,19 @@ typedef struct
 	int **H;
 } Code;
 
+Code R12_648;
+Code R12_1296;
+Code R12_1944;
+Code R23_648;
+Code R23_1296;
+Code R23_1944;
+Code R34_648;
+Code R34_1296;
+Code R34_1944;
+Code R56_648;
+Code R56_1296;
+Code R56_1944;
+
 #endif
 
 `;
@@ -79,7 +92,7 @@ class CodeGen {
 			buf += "\n";
 		});
 		buf += "};\n\n";
-		let bufhead = `int ${name}_${tname}[${table.length}][${maxrow}] = {\n`;
+		let bufhead = `static int ${name}_${tname}[${table.length}][${maxrow}] = {\n`;
 		buf = bufhead + buf;
 		return buf;
 	}

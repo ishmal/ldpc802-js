@@ -27,5 +27,18 @@ typedef struct
 	int **H;
 } Code;
 
+Code R12_648;
+Code R12_1296;
+Code R12_1944;
+Code R23_648;
+Code R23_1296;
+Code R23_1944;
+Code R34_648;
+Code R34_1296;
+Code R34_1944;
+Code R56_648;
+Code R56_1296;
+Code R56_1944;
+
 #endif
 
