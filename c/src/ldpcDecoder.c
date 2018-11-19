@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "ldpcDecoder.h"
 
@@ -35,20 +36,28 @@ static int check(codeword) {
 }
 
 typedef struct {
+	float r;
+	float q;
+	QRNode *next;
+} QRNode;
 
+typedef struct {
+	QRNode *qr;
+	LinkNode *next;
+} LinkNode;
+
+typedef struct {
+	QRNode *qrNodes;
 } CheckNode;
 
 typedef struct {
-
+	fload ci;
+	LinkNode *qrNodes;
 } VariableNode;
 
-typedef struct {
-	float r;
-	float q;
-} Link;
 
 /**
- * Create an empty
+ * Create an empty Sum Product tanner graph
  */
 static createSPGraph(LdpcDecoder *dec) {
 	Code *code = dec->code;
@@ -58,40 +67,53 @@ static createSPGraph(LdpcDecoder *dec) {
 
 	CheckNode *checkNodes = (CheckNode *) malloc(M * sizeof(CheckNode));
 	VariableNode *variableNodes = (VariableNode *) malloc(N * sizeof(VariableNode));
-	LinkNode *linkNodes = (LinkNode *)malloc(N * sizeof(LinkNode));
 
 	/**
-		* First make two blank tables
-		*/
+	 * First make two blank tables
+	 */
 	for (int i = 0; i < M; i++) {
-		checkNodes[i] = {
-			links: []
-		};
+		CheckNode cn = checkNodes[i];
+		cn.qrNodes = (QRNode *)0;
 	}
 	for (int i = 0; i < N; i++) {
-		variableNodes[i] = {
-			links: [],
-			ci: 0
-		};
+		VariableNode vn = variableNodes[i];
+		vn.ci = 0.0;
+		vn.linkNodes = (LinkNode *)0;
 	}
 
 	/**
-		* Then interconnect then with link records,
-		* using the sparse array information from H
-		*/
+	 * Set up QR records, and link to them from both sides
+	 * using the sparse array information from H
+	 */
 	for (int i = 0 ; i < M; i++) {
-		const row = H[i];
-		const cnode = checkNodes[i];
-		const rlen = row.length;
+		int *row = H[i];
+		CheckNode cnode = checkNodes[i];
+		int rlen = row.length; 
+		QRNode *prevQr = (QRNode *)0;
+		Link *prevLink = (LinkNode *)0;
 		for (int j = 0; j < rlen; j++) {
-			const idx = row[j];
-			const vnode = variableNodes[idx];
-			const link = {
-				q: 0,
-				r: 0,
-			};
-			cnode.links.push(link);
-			vnode.links.push(link);
+			int idx = row[j];
+			VariableNode *vnode = variableNodes[idx];
+			QRNode *qr = (QRNode *)malloc(sizeof(QRNode));
+			qr->q = 0.0;
+			qr->r = 0.0;
+			qr->next = (QRNode *)0;
+			if (!prevQr) {
+				cnode->qrNodes = qr;
+				prevQr = qr;
+			} else {
+				prevQr->next = qr;
+			}
+			LinkNode *link = (LinkNode *)malloc(sizeof(LinkNode));
+			link->QRNode = qr;
+			link->next = (LinkNode *)0;
+			if (!prevLink) {
+				vnode.linkNodes = link;
+			} else {
+				prevLink->next = link;
+			}
+			prevQr = qr;
+			prevLink = link;
 		}
 	}
 
@@ -99,7 +121,6 @@ static createSPGraph(LdpcDecoder *dec) {
 	 * Attach to this instance
 	 */
 	dec->checkNodes = checkNodes;
-	dec->variableNodes = variableNodes;
 	dec->variableNodes = variableNodes;
 }
 
@@ -125,46 +146,52 @@ ldpcDecodeSumProduct(LdpcDecoder *dec, float *inBits, int nrBits) {
 		VariableNode *vnode = variableNodes[i];
 		float Lci = inBits[i] * weight;
 		vnode.ci = Lci;
-		const links = vnode.links;
-		const llen = links.length;
-		for (int j = 0; j < llen ; j++) {
-			const link = links[j];
-			link.r = 0;				
-			link.q = Lci;				
+		LinkNode *link = vnode->links;
+		while (link) {
+			QRNode *qr = link->qr;
+			qr->r = 0.0;
+			qr->q = Lci;
+			link = link->next;
 		}
 	}
 
 
-	for (let iter = 0; iter < this.maxIter; iter++) {
+	for (int iter = 0; iter < dec->maxIter; iter++) {
 
 		/**
-			* Step 2. update r(ji)
-			*/
-		for (let m = 0; m < M; m++) {
-			const checkNode = checkNodes[m];
-			const links = checkNode.links;
-			const llen = links.length;
-
-			for (let i = 0; i < llen ; i++) {
-				const rlink = links[i];
+		 * Step 2. update r(ji)
+		 */
+		for (int m = 0; m < M; m++) {
+			CheckNode *checkNode = checkNodes[m];
+			QRNode *qr = checkNode->qrNodes;
+			while (qr) {
 				/**
-					* Sum and product for links !== i
-					*/
-				let sum = 0;
-				let prod = 1;
-				for (let v = 0; v < llen; v++) {
-					if (v === i) {
+				 * Sum and product for links !== i
+				 */
+				float sum = 0.0;
+				float prod = 1.0;
+				QRNode *v = checkNode->qrNodes;
+				while (v) {
+					if (v === qr) {
 						continue;
 					}
-					const q = links[v].q;
-					const beta = Math.abs(q);
-					const phiBeta = calcPhi(beta);
+					float q = v->q;
+					float beta = fabs(q);
+					float phiBeta = calcPhi(beta);
 					sum += phiBeta;
-					const alpha = q < 0 ? -1 : 1;
+					float alpha = q < 0 ? -1 : 1;
 					prod *= alpha;
+
+					v = v->next;
 				}
 				const phiSum = calcPhi(sum);
 				rlink.r = prod * phiSum;
+
+				qr = qr->next;
+			}
+
+			for (let i = 0; i < llen ; i++) {
+				const rlink = links[i];
 			}
 		}
 
@@ -227,6 +254,8 @@ LdpcDecoder *ldpcDecoderCreate(Code *code) {
 	}
 
 	dec->code = code;
+	dec->maxIter = 100;
+	createSPGraph(dec);
 
 
 	return dec;
@@ -239,6 +268,39 @@ void ldpcDecoderDestroy(LdpcDecoder *dec) {
 	if (!dec) {
 		return;
 	}
+	int M = dec->code->M;
+	int N = dec->code->N;
+
+	/**
+	 * Check Nodes
+	 */
+	CheckNode *checkNodes = dec->checkNodes;
+	for (int i = 0 ; i < M; i++ ) {
+		CheckNode *cn = checkNodes[i];
+		QRNode *qr = cn->qrNodes;
+		while (qr) {
+			QRCode *next = qr->next;
+			free(qr);
+			qr = next;
+		}		
+	}
+	free(checkNodes);
+
+	/**
+	 * Variable Nodes
+	 */
+	VariableNode *variableNodes = dec->variableNodes;
+	for (int i = 0; i < N; i++) {
+		VariableNode *vn = variableNodes[i];
+		LinkNode *link = vn->linkNodes;
+		while (link) {
+			LinkNode *next = link->next;
+			free(link);
+			link = next;
+		}
+	}
+	free(variableNodes);
+
 	free(dec);
 }
 
