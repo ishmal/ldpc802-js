@@ -104,7 +104,7 @@ LdpcEncoder *ldpcEncoderCreate(codeId) {
 	return enc;
 }
 
-void ldpcEncodetDestroy(LdpcEncoder *enc) {
+void ldpcEncoderDestroy(LdpcEncoder *enc) {
 	if (!enc) {
 		return;
 	}
