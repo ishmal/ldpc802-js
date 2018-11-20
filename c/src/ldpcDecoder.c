@@ -4,6 +4,8 @@
 #include <math.h>
 
 #include "ldpcDecoder.h"
+#include "util.h"
+
 
 
 static float calcVariance(float *samples, int n) {
@@ -25,35 +27,18 @@ static float calcVariance(float *samples, int n) {
  * @param {array} codeword the word to check
  * @return {boolean} true if passes 
  */
-static int check(codeword) {
-	const checkVal = multiplySparse(code.H, codeword);
-	for (int i = 0, len = this.code.messageBits; i < len; i++) {
-		if (checkVal[i]) {
-			return false;
+static int check(LdpcDecoder *dec, int *codeword) {
+	Code *code = dec->code;
+	int N = code->N;
+	uint8_t *c = dec->syndrome;
+	multiplySparse(c, code->H, code->Hlen, codeword);
+	for (int i = 0; i < N; i++) {
+		if (c[i]) {
+			return 0;
 		}
 	}
-	return true;
+	return 1;
 }
-
-typedef struct {
-	float r;
-	float q;
-	QRNode *next;
-} QRNode;
-
-typedef struct {
-	QRNode *qr;
-	LinkNode *next;
-} LinkNode;
-
-typedef struct {
-	QRNode *qrNodes;
-} CheckNode;
-
-typedef struct {
-	fload ci;
-	LinkNode *qrNodes;
-} VariableNode;
 
 
 /**
@@ -67,6 +52,7 @@ static createSPGraph(LdpcDecoder *dec) {
 
 	CheckNode *checkNodes = (CheckNode *) malloc(M * sizeof(CheckNode));
 	VariableNode *variableNodes = (VariableNode *) malloc(N * sizeof(VariableNode));
+	uint8_t *syndrome = (uint8_t *) malloc(N * sizeof(uint8_t));
 
 	/**
 	 * First make two blank tables
@@ -78,7 +64,7 @@ static createSPGraph(LdpcDecoder *dec) {
 	for (int i = 0; i < N; i++) {
 		VariableNode vn = variableNodes[i];
 		vn.ci = 0.0;
-		vn.linkNodes = (LinkNode *)0;
+		vn.links = (LinkNode *)0;
 	}
 
 	/**
@@ -88,27 +74,26 @@ static createSPGraph(LdpcDecoder *dec) {
 	for (int i = 0 ; i < M; i++) {
 		int *row = H[i];
 		CheckNode cnode = checkNodes[i];
-		int rlen = row.length; 
+		int rlen = row[0];
 		QRNode *prevQr = (QRNode *)0;
-		Link *prevLink = (LinkNode *)0;
-		for (int j = 0; j < rlen; j++) {
+		LinkNode *prevLink = (LinkNode *)0;
+		for (int j = 1; j <= rlen; j++) {
 			int idx = row[j];
-			VariableNode *vnode = variableNodes[idx];
+			VariableNode vnode = variableNodes[idx];
 			QRNode *qr = (QRNode *)malloc(sizeof(QRNode));
 			qr->q = 0.0;
 			qr->r = 0.0;
 			qr->next = (QRNode *)0;
 			if (!prevQr) {
-				cnode->qrNodes = qr;
-				prevQr = qr;
+				cnode.qrNodes = qr;
 			} else {
 				prevQr->next = qr;
 			}
 			LinkNode *link = (LinkNode *)malloc(sizeof(LinkNode));
-			link->QRNode = qr;
+			link->qr = qr;
 			link->next = (LinkNode *)0;
 			if (!prevLink) {
-				vnode.linkNodes = link;
+				vnode.links = link;
 			} else {
 				prevLink->next = link;
 			}
@@ -122,6 +107,7 @@ static createSPGraph(LdpcDecoder *dec) {
 	 */
 	dec->checkNodes = checkNodes;
 	dec->variableNodes = variableNodes;
+	dec->syndrome = syndrome;
 }
 
 
@@ -130,7 +116,7 @@ static createSPGraph(LdpcDecoder *dec) {
  * @param {array} message array of data from -1 -> 1
  * @return decoded array of message array of data from -1 -> 1
  */
-ldpcDecodeSumProduct(LdpcDecoder *dec, float *inBits, int nrBits) {
+int *ldpcDecodeSumProduct(LdpcDecoder *dec, float *inBits, int nrBits, int maxIter) {
 	// localize some values
 	int M = dec->code->M;
 	int N = dec->code->N;
@@ -140,39 +126,36 @@ ldpcDecodeSumProduct(LdpcDecoder *dec, float *inBits, int nrBits) {
 	/**
 	 * Step 1.  Initialization of c(ij) and q(ij)
 	 */
-	float variance = calcVariance(inBits);
+	float variance = calcVariance(inBits, nrBits);
 	float weight = 2 / variance;
-	for (let i = 0; i < N; i++) {
-		VariableNode *vnode = variableNodes[i];
+	VariableNode *vnode = variableNodes;
+	for (int i = 0; i < N; i++) {
 		float Lci = inBits[i] * weight;
-		vnode.ci = Lci;
-		LinkNode *link = vnode->links;
-		while (link) {
+		vnode->ci = Lci;
+		for (LinkNode *link = vnode->links; link; link = link->next) {
 			QRNode *qr = link->qr;
 			qr->r = 0.0;
 			qr->q = Lci;
-			link = link->next;
 		}
+		vnode++;
 	}
 
 
-	for (int iter = 0; iter < dec->maxIter; iter++) {
+	for (int iter = 0; iter < maxIter; iter++) {
 
 		/**
 		 * Step 2. update r(ji)
 		 */
+		CheckNode *checkNode = checkNodes;
 		for (int m = 0; m < M; m++) {
-			CheckNode *checkNode = checkNodes[m];
-			QRNode *qr = checkNode->qrNodes;
-			while (qr) {
+			for (QRNode *qr = checkNode->qrNodes; qr; qr = qr->next) {
 				/**
 				 * Sum and product for links !== i
 				 */
 				float sum = 0.0;
-				float prod = 1.0;
-				QRNode *v = checkNode->qrNodes;
-				while (v) {
-					if (v === qr) {
+				float prod = 1.0;				
+				for (QRNode *v = checkNode->qrNodes; v; v = v->next) {
+					if (v == qr) {
 						continue;
 					}
 					float q = v->q;
@@ -181,63 +164,52 @@ ldpcDecodeSumProduct(LdpcDecoder *dec, float *inBits, int nrBits) {
 					sum += phiBeta;
 					float alpha = q < 0 ? -1 : 1;
 					prod *= alpha;
-
-					v = v->next;
 				}
 				const phiSum = calcPhi(sum);
-				rlink.r = prod * phiSum;
-
-				qr = qr->next;
+				qr->r = prod * phiSum;
 			}
-
-			for (let i = 0; i < llen ; i++) {
-				const rlink = links[i];
-			}
+			checkNode++;
 		}
 
 		/**
-			* Step 3.  Update qij
-			*/
-		for (let i = 0; i < N; i++) {
-			const vnode = variableNodes[i];
-			const links = vnode.links;
-			const llen = links.length;
-			for (let k = 0; k < llen; k++) {
-				const link = links[k];
-				let sum = 0;
-				for (let c = 0; c < llen; c++) {
-					if (c !== k) {
-						sum += links[c].r;
+		 * Step 3.  Update qij
+		 */
+		VariableNode *vnode = variableNodes;
+		for (int i = 0; i < N; i++) {
+			for (LinkNode *link = vnode->links; link; link = link->next) {
+				float sum = 0.0;
+				for (LinkNode *c = vnode->links; c; c = c->next) {
+					if (c != link) {
+						sum += c->qr->r;
 					}
 				}
-				link.q = vnode.ci + sum;
+				link->qr->q = vnode->ci + sum;
 			}
+			vnode++;
 		}
 
 		/**
-			* Step 4.  Check syndrome
-			*/
-		const c = [];
-		for (let i = 0; i < N ; i++) {
-			const vnode = variableNodes[i];
-			const links = vnode.links;
-			const llen = links.length;
-			let sum = 0;
-			for (let v = 0 ; v < llen ; v++) {
-				const link = links[v];
-				sum += link.r;
+		 * Step 4.  Check syndrome
+		 */
+		int *c = dec->syndrome;
+		VariableNode *vnode = variableNodes;
+		for (int i = 0; i < N ; i++) {
+			float sum = 0.0;
+			for (LinkNode *link = vnode->links; link; link = link->next) {
+				sum += link->qr->r;
 			}
-			const LQi = vnode.ci + sum;
+			float LQi = vnode->ci + sum;
 			c[i] = LQi < 0 ? 1 : 0;
+			vnode++;
 		}
-		if (this.checkFast(c)) {
-			return c.slice(0, this.code.messageBits);
+		if (checkFast(c)) {
+			return c;
 		}
 
 
 	} // for iter
 
-	return null;
+	return (int *)0;
 }
 
 
@@ -254,7 +226,6 @@ LdpcDecoder *ldpcDecoderCreate(Code *code) {
 	}
 
 	dec->code = code;
-	dec->maxIter = 100;
 	createSPGraph(dec);
 
 
@@ -274,32 +245,34 @@ void ldpcDecoderDestroy(LdpcDecoder *dec) {
 	/**
 	 * Check Nodes
 	 */
-	CheckNode *checkNodes = dec->checkNodes;
+	CheckNode *cn = dec->checkNodes;
 	for (int i = 0 ; i < M; i++ ) {
-		CheckNode *cn = checkNodes[i];
 		QRNode *qr = cn->qrNodes;
 		while (qr) {
-			QRCode *next = qr->next;
+			QRNode *next = qr->next;
 			free(qr);
 			qr = next;
-		}		
+		}
+		cn++;
 	}
-	free(checkNodes);
+	free(dec->checkNodes);
 
 	/**
 	 * Variable Nodes
 	 */
-	VariableNode *variableNodes = dec->variableNodes;
+	VariableNode *vn = dec->variableNodes;
 	for (int i = 0; i < N; i++) {
-		VariableNode *vn = variableNodes[i];
-		LinkNode *link = vn->linkNodes;
+		LinkNode *link = vn->links;
 		while (link) {
 			LinkNode *next = link->next;
 			free(link);
 			link = next;
 		}
+		vn++;
 	}
-	free(variableNodes);
+	free(dec->variableNodes);
+
+	free(dec->syndrome);
 
 	free(dec);
 }
