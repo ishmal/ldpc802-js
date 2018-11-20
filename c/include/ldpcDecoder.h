@@ -5,16 +5,18 @@
 
 #include "codes.h"
 
-typedef struct {
+struct QRNode_def {
 	float r;
 	float q;
-	QRNode *next;
-} QRNode;
+	struct QRNode_def *next;
+};
+typedef struct QRNode_def QRNode;
 
-typedef struct {
+struct LinkNode_def {
 	QRNode *qr;
-	LinkNode *next;
-} LinkNode;
+	struct LinkNode_def *next;
+};
+typedef struct LinkNode_def LinkNode;
 
 typedef struct {
 	QRNode *qrNodes;
@@ -31,6 +33,26 @@ typedef struct {
 	VariableNode *variableNodes;
 	uint8_t *syndrome;
 } LdpcDecoder;
+
+
+/**
+ * Create a new decoder context
+ * @param code the code around which to configure this decoder
+ * @return a new decoder if successful, else null
+ */
+LdpcDecoder *ldpcDecoderCreate(Code *code);
+
+/**
+ * Clean up a decoder context
+ */
+void ldpcDecoderDestroy(LdpcDecoder *dec);
+
+/**
+ * Decode codeword bits to message bits
+ * @param {array} message array of data from -1 -> 1
+ * @return decoded array of message array of data from -1 -> 1
+ */
+uint8_t *ldpcDecode(LdpcDecoder *dec, float *inBits, int nrBits, int maxIter);
 
 
 #endif

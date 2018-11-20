@@ -21,19 +21,24 @@ static float calcVariance(float *samples, int n) {
 }
 	
 
-
 /**
- * Check is the codeword passes check.
+ * Check is the codeword passes check.  Fails early
+ * for speed.
+ * @param {int **} H sparse matrix
+ * @param {int} len sparse matrix length
  * @param {array} codeword the word to check
  * @return {boolean} true if passes 
  */
-static int check(LdpcDecoder *dec, int *codeword) {
-	Code *code = dec->code;
-	int N = code->N;
-	uint8_t *c = dec->syndrome;
-	multiplySparse(c, code->H, code->Hlen, codeword);
-	for (int i = 0; i < N; i++) {
-		if (c[i]) {
+static int checkFast(int **matrix, int len, uint8_t *codeword) {
+
+	for (int i = 0; i < len; i++) {
+		int *row = matrix[i];
+		int rlen = row[0];
+		int sum = 0;
+		for (int j = 1; j <= rlen; j++) {
+			sum ^= codeword[row[j]];
+		}
+		if (sum) {
 			return 0;
 		}
 	}
@@ -44,11 +49,11 @@ static int check(LdpcDecoder *dec, int *codeword) {
 /**
  * Create an empty Sum Product tanner graph
  */
-static createSPGraph(LdpcDecoder *dec) {
+static void createSPGraph(LdpcDecoder *dec) {
 	Code *code = dec->code;
 	int M = code->M;
 	int N = code->N;
-	float **H = code->H;
+	int **H = code->H;
 
 	CheckNode *checkNodes = (CheckNode *) malloc(M * sizeof(CheckNode));
 	VariableNode *variableNodes = (VariableNode *) malloc(N * sizeof(VariableNode));
@@ -57,35 +62,34 @@ static createSPGraph(LdpcDecoder *dec) {
 	/**
 	 * First make two blank tables
 	 */
-	for (int i = 0; i < M; i++) {
-		CheckNode cn = checkNodes[i];
-		cn.qrNodes = (QRNode *)0;
+	CheckNode *cn = checkNodes;
+	for (int i = 0; i < M; i++, cn++) {
+		cn->qrNodes = (QRNode *)0;
 	}
-	for (int i = 0; i < N; i++) {
-		VariableNode vn = variableNodes[i];
-		vn.ci = 0.0;
-		vn.links = (LinkNode *)0;
+	VariableNode *vn = variableNodes;
+	for (int i = 0; i < N; i++, vn++) {
+		vn->ci = 0.0;
+		vn->links = (LinkNode *)0;
 	}
 
 	/**
 	 * Set up QR records, and link to them from both sides
 	 * using the sparse array information from H
 	 */
-	for (int i = 0 ; i < M; i++) {
+	CheckNode *cnode = checkNodes;
+	for (int i = 0 ; i < M; i++, cnode++) {
 		int *row = H[i];
-		CheckNode cnode = checkNodes[i];
 		int rlen = row[0];
 		QRNode *prevQr = (QRNode *)0;
 		LinkNode *prevLink = (LinkNode *)0;
 		for (int j = 1; j <= rlen; j++) {
-			int idx = row[j];
-			VariableNode vnode = variableNodes[idx];
+			VariableNode *vnode = variableNodes + row[j];
 			QRNode *qr = (QRNode *)malloc(sizeof(QRNode));
 			qr->q = 0.0;
 			qr->r = 0.0;
 			qr->next = (QRNode *)0;
 			if (!prevQr) {
-				cnode.qrNodes = qr;
+				cnode->qrNodes = qr;
 			} else {
 				prevQr->next = qr;
 			}
@@ -93,7 +97,7 @@ static createSPGraph(LdpcDecoder *dec) {
 			link->qr = qr;
 			link->next = (LinkNode *)0;
 			if (!prevLink) {
-				vnode.links = link;
+				vnode->links = link;
 			} else {
 				prevLink->next = link;
 			}
@@ -116,10 +120,12 @@ static createSPGraph(LdpcDecoder *dec) {
  * @param {array} message array of data from -1 -> 1
  * @return decoded array of message array of data from -1 -> 1
  */
-int *ldpcDecodeSumProduct(LdpcDecoder *dec, float *inBits, int nrBits, int maxIter) {
+uint8_t *ldpcDecode(LdpcDecoder *dec, float *inBits, int nrBits, int maxIter) {
 	// localize some values
-	int M = dec->code->M;
-	int N = dec->code->N;
+	Code *code = dec->code;
+	int M = code->M;
+	int N = code->N;
+	int **H = code->H;
 	CheckNode *checkNodes = dec->checkNodes;
 	VariableNode *variableNodes = dec->variableNodes;
 
@@ -165,7 +171,7 @@ int *ldpcDecodeSumProduct(LdpcDecoder *dec, float *inBits, int nrBits, int maxIt
 					float alpha = q < 0 ? -1 : 1;
 					prod *= alpha;
 				}
-				const phiSum = calcPhi(sum);
+				double phiSum = calcPhi(sum);
 				qr->r = prod * phiSum;
 			}
 			checkNode++;
@@ -191,8 +197,8 @@ int *ldpcDecodeSumProduct(LdpcDecoder *dec, float *inBits, int nrBits, int maxIt
 		/**
 		 * Step 4.  Check syndrome
 		 */
-		int *c = dec->syndrome;
-		VariableNode *vnode = variableNodes;
+		uint8_t *c = dec->syndrome;
+		vnode = variableNodes;
 		for (int i = 0; i < N ; i++) {
 			float sum = 0.0;
 			for (LinkNode *link = vnode->links; link; link = link->next) {
@@ -202,14 +208,13 @@ int *ldpcDecodeSumProduct(LdpcDecoder *dec, float *inBits, int nrBits, int maxIt
 			c[i] = LQi < 0 ? 1 : 0;
 			vnode++;
 		}
-		if (checkFast(c)) {
+		if (checkFast(H, M, c)) {
 			return c;
 		}
 
-
 	} // for iter
 
-	return (int *)0;
+	return (uint8_t *)0;
 }
 
 

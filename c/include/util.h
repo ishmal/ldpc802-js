@@ -24,5 +24,13 @@ void multiplySparse(uint8_t *out, int *sparseMatrix[],  int len,  uint8_t *arr);
  */
 void substituteSparse(uint8_t y[], int *sparseArr[],  int slen, uint8_t *arr);
 
+/**
+ * Calculate the "phi" function over the range 0-7
+ * @param x the input value
+ * @return estimated phi value for x
+ */
+double calcPhi(double x);
+
+
 
 #endif
