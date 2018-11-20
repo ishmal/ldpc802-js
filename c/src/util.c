@@ -9,7 +9,7 @@
  * sparse row vector
  * @param {array} arr column vector 
  */
-void multiplySparse(uint8_t *out, int *sparseMatrix[],  int len,  uint8_t *arr) {
+void multiplySparse(uint8_t *out, int **sparseMatrix,  int len,  uint8_t *arr) {
 	uint8_t *p = out;
 	for (int i = 0; i < len; i++) {
 		int *row = sparseMatrix[i];
@@ -30,11 +30,11 @@ void multiplySparse(uint8_t *out, int *sparseMatrix[],  int len,  uint8_t *arr) 
  * sparse row vector
  * @param {array} arr column vector 
  */
-void substituteSparse(uint8_t *out, int *sparseArr[],  int slen, uint8_t *arr) {
+void substituteSparse(uint8_t *out, int **sparseMatrix, int len, uint8_t *arr) {
 	uint8_t *y = out;
 	y[0] = arr[0];
-	for (int i = 1; i < slen; i++) {
-		int *row = sparseArr[i];
+	for (int i = 1; i < len; i++) {
+		int *row = sparseMatrix[i];
 		int sum = 0;
 		int rlen = row[0];
 		for (int j = 1; j <= rlen ; j++) {
@@ -43,6 +43,49 @@ void substituteSparse(uint8_t *out, int *sparseArr[],  int slen, uint8_t *arr) {
 		y[i] = sum ^ arr[i];
 	}
 }
+
+/**
+ * Convert an array of bytes to an array of bits. Bigendian.
+ * The output array is 8x the size of the input, each element a 1 or 0
+ * @param {uint8_t *} bits output buffer for bits
+ * @param {uint8_t *} bytes array of bytes
+ * @param {int} len number of bytes
+ */
+void bytesToBitsBE(uint8_t *bits, uint8_t *bytes, int len) {
+	while (len--) {
+		uint8_t b = *bytes++;
+		*bits++ = ((b >> 7) & 1);
+		*bits++ = ((b >> 6) & 1);
+		*bits++ = ((b >> 5) & 1);
+		*bits++ = ((b >> 4) & 1);
+		*bits++ = ((b >> 3) & 1);
+		*bits++ = ((b >> 2) & 1);
+		*bits++ = ((b >> 1) & 1);
+		*bits++ = ((b) & 1);
+	}
+}
+
+/** 
+ * Assumes bits length is multiple of 8
+ * @param {uint8_t *} output buffer for bytes
+ * @param {uint8_t *} bits array of bits
+ * @param {int} len number of bits
+ */
+void bitsToBytesBE(uint8_t *bytes, uint8_t *bits, int len) {
+	while (len--) {
+		uint8_t b = (*bits++);
+		b = (b << 1) + (*bits++);
+		b = (b << 1) + (*bits++);
+		b = (b << 1) + (*bits++);
+		b = (b << 1) + (*bits++);
+		b = (b << 1) + (*bits++);
+		b = (b << 1) + (*bits++);
+		b = (b << 1) + (*bits++);
+		*bytes++ = b;
+	}
+}
+
+
 
 
 

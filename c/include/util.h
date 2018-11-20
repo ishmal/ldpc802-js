@@ -4,7 +4,9 @@
 
 #include <stdint.h>
 
-#include "util.h"
+#ifdef __cplusplus  
+extern "C" {
+#endif  
 
 /**
  * Multiply a sparse binary matrix with a normal binary array
@@ -25,12 +27,32 @@ void multiplySparse(uint8_t *out, int *sparseMatrix[],  int len,  uint8_t *arr);
 void substituteSparse(uint8_t y[], int *sparseArr[],  int slen, uint8_t *arr);
 
 /**
+ * Convert an array of bytes to an array of bits. Bigendian.
+ * The output array is 8x the size of the input, each element a 1 or 0
+ * @param {uint8_t *} bits output buffer for bits
+ * @param {uint8_t *} bytes array of bytes
+ * @param {int} len number of bytes
+ */
+void bytesToBitsBE(uint8_t *bits, uint8_t *bytes, int len);
+
+/** 
+ * Assumes bits length is multiple of 8
+ * @param {uint8_t *} output buffer for bytes
+ * @param {uint8_t *} bits array of bits
+ * @param {int} len number of bits
+ */
+void bitsToBytesBE(uint8_t *bytes, uint8_t *bits, int len);
+
+/**
  * Calculate the "phi" function over the range 0-7
  * @param x the input value
  * @return estimated phi value for x
  */
 double calcPhi(double x);
 
+#ifdef __cplusplus  
+}  
+#endif  
 
 
 #endif

@@ -78,7 +78,7 @@ class CodeGen {
 			if (len !== "0") {
 				len += ", ";
 			}
-			buf += `    { ${len}`;
+			buf += `    (int []) { ${len}`;
 			r.forEach((c, j) => {
 				buf += `${c}`;
 				if (j < r.length -1) {
@@ -92,7 +92,7 @@ class CodeGen {
 			buf += "\n";
 		});
 		buf += "};\n\n";
-		let bufhead = `static int ${name}_${tname}[${table.length}][${maxrow}] = {\n`;
+		let bufhead = `static int *${name}_${tname}[${table.length}] = {\n`;
 		buf = bufhead + buf;
 		return buf;
 	}

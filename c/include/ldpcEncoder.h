@@ -17,18 +17,38 @@ typedef struct {
 	uint8_t *x;
 } LdpcEncoder;
 
-#define CODE_UNKNOWN 0
-#define CODE_12_648 1
-#define CODE_12_1296 2
-#define CODE_12_1944 3
-#define CODE_23_648 4
-#define CODE_23_1296 5
-#define CODE_23_1944 6
-#define CODE_34_648 7
-#define CODE_34_1296 8
-#define CODE_34_1944 9
-#define CODE_56_648 10
-#define CODE_56_1296 11
-#define CODE_56_1944 12
+
+#ifdef __cplusplus  
+extern "C" {
+#endif  
+  
+
+/**
+ * Create a new encoder context configured for the given code
+ */
+LdpcEncoder *ldpcEncoderCreate(Code *code);
+
+/**
+ *
+ */
+void ldpcEncoderDestroy(LdpcEncoder *enc);
+
+/**
+ * @param {array} s array of bits, size code->messageBits
+ * @return {array} array of encoded bits, size N
+ */
+uint8_t *ldpcEncode(LdpcEncoder *enc, uint8_t *s, int len);
+
+/**
+ * Encode a message array of bytes
+ * @param {array} bytes an array of bytes to encode 
+ */
+uint8_t *ldpcEncodeBytes(LdpcEncoder *enc, uint8_t *bytes, int nrBytes);
+
+#ifdef __cplusplus  
+}  
+#endif  
+
+
 
 #endif

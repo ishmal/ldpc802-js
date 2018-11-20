@@ -5,3 +5,6 @@ build/
 googletest/
 *.plist
 **/*.dSYM/
+test/*test
+test/*test
+

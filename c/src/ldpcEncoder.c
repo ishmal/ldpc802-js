@@ -15,34 +15,10 @@ void add(uint8_t *out, uint8_t *a, uint8_t *b, int len) {
 }
 
 
-static Code *CodeLookup[] = {
-	(Code *)0,
-	&R12_648,
-	&R12_1296,
-	&R12_1944,
-	&R23_648,
-	&R23_1296,
-	&R23_1944,
-	&R34_648,
-	&R34_1296,
-	&R34_1944,
-	&R56_648,
-	&R56_1296,
-	&R56_1944
-};
-
-
 /**
  * Create a new encoder context configured for the given code
  */
-LdpcEncoder *ldpcEncoderCreate(int codeId) {
-
-	if (codeId <= CODE_UNKNOWN || codeId > CODE_56_1944) {
-		printf("Invalid code: %d\n", codeId);
-		return (LdpcEncoder *) 0;
-	}
-
-	Code *code = CodeLookup[codeId];
+LdpcEncoder *ldpcEncoderCreate(Code *code) {
 
 	LdpcEncoder *enc = (LdpcEncoder *) malloc(sizeof(LdpcEncoder));
 	if (!enc) {
@@ -152,23 +128,12 @@ uint8_t *ldpcEncode(LdpcEncoder *enc, uint8_t *s, int len) {
  */
 uint8_t *ldpcEncodeBytes(LdpcEncoder *enc, uint8_t *bytes, int nrBytes) {
 	int len = nrBytes * 8;
-	if (len > enc->code->messageBits) {
+	if (len > enc->code->messageBits + 8) {
 		printf("message size too large: %d > %d", len, 
 			enc->code->messageBits);
 		return (uint8_t *)0;
 	}
-	uint8_t *p = enc->x;
-	uint8_t *src = bytes;
-	while (nrBytes--) {
-		*p++ = (*src >> 7) & 1;
-		*p++ = (*src >> 6) & 1;
-		*p++ = (*src >> 5) & 1;
-		*p++ = (*src >> 4) & 1;
-		*p++ = (*src >> 3) & 1;
-		*p++ = (*src >> 2) & 1;
-		*p++ = (*src >> 1) & 1;
-		*p++ = (*src++) & 1;
-	}
+	bytesToBitsBE(enc->x, bytes, nrBytes);
 	return doEncode(enc);
 }
 
