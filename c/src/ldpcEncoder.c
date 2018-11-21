@@ -55,12 +55,12 @@ static uint8_t *doEncode(LdpcEncoder *enc) {
 	substituteSparse(enc->p2, code->T, code->Tlen, enc->AstBp1);
 	// step 5
 	uint8_t *dest = enc->x + code->messageBits;
-	int len = code->Alen;
+	int len = code->Elen;
 	uint8_t *src = enc->p1;
 	while (len--) {
 		*dest++ = *src++;
 	}
-	len = code->Alen;
+	len = code->Tlen;
 	src = enc->p2;
 	while (len--) {
 		*dest++ = *src++;

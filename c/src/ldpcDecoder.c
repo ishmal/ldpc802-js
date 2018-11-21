@@ -57,7 +57,6 @@ static void createSPGraph(LdpcDecoder *dec) {
 
 	CheckNode *checkNodes = (CheckNode *) malloc(M * sizeof(CheckNode));
 	VariableNode *variableNodes = (VariableNode *) malloc(N * sizeof(VariableNode));
-	uint8_t *syndrome = (uint8_t *) malloc(N * sizeof(uint8_t));
 
 	/**
 	 * First make two blank tables
@@ -111,14 +110,81 @@ static void createSPGraph(LdpcDecoder *dec) {
 	 */
 	dec->checkNodes = checkNodes;
 	dec->variableNodes = variableNodes;
-	dec->syndrome = syndrome;
 }
+
+
+
+/**
+ * Create a new decoder context
+ * @param code the code around which to configure this decoder
+ * @return a new decoder if successful, else null
+ */
+LdpcDecoder *ldpcDecoderCreate(Code *code) {
+	LdpcDecoder *dec = (LdpcDecoder *) malloc(sizeof(LdpcDecoder));
+
+	if (!dec) {
+		return dec;
+	}
+
+	dec->code = code;
+	createSPGraph(dec);
+	return dec;
+}
+
+/**
+ * Clean up a decoder context
+ */
+void ldpcDecoderDestroy(LdpcDecoder *dec) {
+	if (!dec) {
+		return;
+	}
+	int M = dec->code->M;
+	int N = dec->code->N;
+
+	/**
+	 * Check Nodes
+	 */
+	CheckNode *cn = dec->checkNodes;
+	for (int i = 0 ; i < M; i++ ) {
+		QRNode *qr = cn->qrNodes;
+		while (qr) {
+			QRNode *next = qr->next;
+			free(qr);
+			qr = next;
+		}
+		cn++;
+	}
+	free(dec->checkNodes);
+
+	/**
+	 * Variable Nodes
+	 */
+	VariableNode *vn = dec->variableNodes;
+	for (int i = 0; i < N; i++) {
+		LinkNode *link = vn->links;
+		while (link) {
+			LinkNode *next = link->next;
+			free(link);
+			link = next;
+		}
+		vn++;
+	}
+	free(dec->variableNodes);
+
+	free(dec->syndrome);
+
+	free(dec);
+}
+
 
 
 /**
  * Decode codeword bits to message bits
- * @param {array} message array of data from -1 -> 1
- * @return decoded array of message array of data from -1 -> 1
+ * @param {LdpcDecoder *} dec the decoder context
+ * @param {float *} inBits message array of data from -1 -> 1
+ * @param {int} nrBits the number of values in the array
+ * @param {int} maxIter the maximum number of iterations before failing
+ * @return decoded array of bits if successful, else null
  */
 uint8_t *ldpcDecode(LdpcDecoder *dec, float *inBits, int nrBits, int maxIter) {
 	// localize some values
@@ -217,68 +283,20 @@ uint8_t *ldpcDecode(LdpcDecoder *dec, float *inBits, int nrBits, int maxIter) {
 	return (uint8_t *)0;
 }
 
-
 /**
- * Create a new decoder context
- * @param code the code around which to configure this decoder
- * @return a new decoder if successful, else null
+ * Decode codeword bits into bytes. Assumes that codeword length is a multiple of 8
+ * @param {LdpcDecoder} dec the decoder context
+ * @param {float *} inBits pointer to an array of codeword bits, -1 to 1
+ * @param {int} nrBits the length of the bits array
+ * @param {int} maxiter the maximum number of iterations before failing
+ * @return pointer to bytes if successful, else null
  */
-LdpcDecoder *ldpcDecoderCreate(Code *code) {
-	LdpcDecoder *dec = (LdpcDecoder *) malloc(sizeof(LdpcDecoder));
-
-	if (!dec) {
-		return dec;
+uint8_t *ldpcDecodeBytes(LdpcDecoder *dec, float *inBits, int nrBits, int maxIter) {
+	uint8_t *bits = ldpcDecode(dec, inBits, nrBits, maxIter);
+	if (!bits) {
+		return (uint8_t *)0;
 	}
-
-	dec->code = code;
-	createSPGraph(dec);
-
-
-	return dec;
-}
-
-/**
- * Clean up a decoder context
- */
-void ldpcDecoderDestroy(LdpcDecoder *dec) {
-	if (!dec) {
-		return;
-	}
-	int M = dec->code->M;
-	int N = dec->code->N;
-
-	/**
-	 * Check Nodes
-	 */
-	CheckNode *cn = dec->checkNodes;
-	for (int i = 0 ; i < M; i++ ) {
-		QRNode *qr = cn->qrNodes;
-		while (qr) {
-			QRNode *next = qr->next;
-			free(qr);
-			qr = next;
-		}
-		cn++;
-	}
-	free(dec->checkNodes);
-
-	/**
-	 * Variable Nodes
-	 */
-	VariableNode *vn = dec->variableNodes;
-	for (int i = 0; i < N; i++) {
-		LinkNode *link = vn->links;
-		while (link) {
-			LinkNode *next = link->next;
-			free(link);
-			link = next;
-		}
-		vn++;
-	}
-	free(dec->variableNodes);
-
-	free(dec->syndrome);
-
-	free(dec);
+	bitsToBytesBE(dec->outBytes, bits, dec->code->N);
+	return dec->outBytes;
 }
 
