@@ -3,18 +3,21 @@
 
 #include "codes.h"
 
+#define MAX_BITS 1944
+
 typedef struct {
 	int msgLen;
 	Code *code;
-	uint8_t *Ast;
-	uint8_t *Cst;
-	uint8_t *TinvAst;
-	uint8_t *ETinvAst;
-	uint8_t *p1;
-	uint8_t *Bp1;
-	uint8_t *AstBp1;
-	uint8_t *p2;
-	uint8_t *x;
+	// TODO: get the max sizes for these
+	uint8_t Ast[MAX_BITS];
+	uint8_t Cst[MAX_BITS];
+	uint8_t TinvAst[MAX_BITS];
+	uint8_t ETinvAst[MAX_BITS];
+	uint8_t p1[MAX_BITS];
+	uint8_t Bp1[MAX_BITS];
+	uint8_t AstBp1[MAX_BITS];
+	uint8_t p2[MAX_BITS];
+	uint8_t x[MAX_BITS];
 } LdpcEncoder;
 
 

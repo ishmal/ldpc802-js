@@ -27,49 +27,12 @@ LdpcEncoder *ldpcEncoderCreate(Code *code) {
 
 	enc->msgLen = 0;
 	enc->code = code;
-	enc->Ast = (uint8_t *) malloc(code->Alen * sizeof(uint8_t));
-	enc->Cst = (uint8_t *) malloc(code->Clen * sizeof(uint8_t));
-	enc->TinvAst = (uint8_t *) malloc(code->Tlen * sizeof(uint8_t));
-	enc->ETinvAst = (uint8_t *) malloc(code->Elen * sizeof(uint8_t));
-	enc->p1 = (uint8_t *) malloc(code->Clen * sizeof(uint8_t));
-	enc->Bp1 = (uint8_t *) malloc(code->Blen * sizeof(uint8_t));
-	enc->AstBp1 = (uint8_t *) malloc(code->Alen * sizeof(uint8_t));
-	enc->p2 = (uint8_t *) malloc(code->Tlen * sizeof(uint8_t));
-	enc->x = (uint8_t *) malloc(code->N * sizeof(uint8_t));
-
 	return enc;
 }
 
 void ldpcEncoderDestroy(LdpcEncoder *enc) {
 	if (!enc) {
 		return;
-	}
-	if (enc->Ast) {
-		free(enc->Ast);
-	}
-	if (enc->Cst) {
-		free(enc->Cst);
-	}
-	if (enc->TinvAst) {
-		free(enc->TinvAst);
-	}
-	if (enc->ETinvAst) {
-		free(enc->ETinvAst);
-	}
-	if (enc->p1) {
-		free(enc->p1);
-	}
-	if (enc->Bp1) {
-		free(enc->Bp1);
-	}
-	if (enc->AstBp1) {
-		free(enc->AstBp1);
-	}
-	if (enc->p2) {
-		free(enc->p2);
-	}
-	if (enc->x) {
-		free(enc->x);
 	}
 	free(enc);
 }
