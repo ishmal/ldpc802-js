@@ -180,17 +180,22 @@ static uint8_t encoded1[] = {
 };
 
 
-// Tests that the Foo::Bar() method does Abc.
+/**
+ * Test that encoding "shortened1" becomes "encoded1"
+ */
 TEST(LdpcEncoderTest, CorrectValue) {
 	LdpcEncoder *enc = ldpcEncoderCreate(&R34_1944);
 	uint8_t *x = ldpcEncodeBytes(enc, shortened1, 183);
-	uint8_t outBytes[243];
+	uint8_t *outBytes = (uint8_t *) malloc(243 * sizeof(uint8_t));
 	bitsToBytesBE(outBytes, x, 1944);
 	for (int i=0; i < 243; i++) {
-		printf("x:%d e:%d\n", outBytes[i], encoded1[i]);
-		//ASSERT_EQ(x[i], encoded1[i]) << "should equal output buffer";
+		int exp = encoded1[i];
+		int res = outBytes[i];
+		// printf("%d  x:%d e:%d\n", i, outBytes[i], encoded1[i]);
+		ASSERT_EQ(res, exp) << "should equal output buffer";
 	}
 	ldpcEncoderDestroy(enc);
+	free(outBytes);
 }
 
 
