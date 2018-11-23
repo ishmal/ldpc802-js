@@ -36,8 +36,8 @@ uint8_t *makeMessageBits(int len) {
 
 void addErrors(uint8_t *msg, int len, int nrBitsToFlip) {
 	for (int i = 0; i < nrBitsToFlip; i++) {
-		int index = (int)(frand() * len); //make sure it is an int
-		msg[index] = msg[index] ^ 1;
+		int index = (int)(frand() * (float)len); //make sure it is an int
+		msg[index] = (msg[index]) ? 0 : 1;
 	}
 }
 
@@ -48,7 +48,7 @@ void addErrors(uint8_t *msg, int len, int nrBitsToFlip) {
 float *makeSignal(uint8_t *x, int len) {
 	float *msg = (float *)malloc(len * sizeof(float));
 	for (int i = 0; i < len; i++) {
-		msg[i] = (x[i] == 0) ? 1.0 : -1.0;
+		msg[i] = (x[i]) ? -1.0 : 1.0;
 	}
 	return msg;
 }
@@ -59,6 +59,7 @@ void addNoise(float *message, int len, float level) {
 		message[i] = message[i] + noise;
 	}
 }
+
 
 TEST(LdcpDecoder, should_decode_what_the_encoder_encodes) {
 	LdpcEncoder *enc = ldpcEncoderCreate(&R12_648);
@@ -80,14 +81,15 @@ TEST(LdcpDecoder, should_decode_what_the_encoder_encodes) {
 	free(message);
 }
 
+
 TEST(LdcpDecoder, should_handle_errors) {
 	LdpcEncoder *enc = ldpcEncoderCreate(&R12_648);
 	LdpcDecoder *dec = ldpcDecoderCreate(&R12_648);
 	uint8_t *message = makeMessageBits(324);
 	uint8_t *x = ldpcEncode(enc, message, 324);
-	addErrors(x, 648, 0);
+	addErrors(x, 648, 5);
 	float *signalBits = makeSignal(x, 648);
-	uint8_t *result = ldpcDecode(dec, signalBits, 648, 100);
+	uint8_t *result = ldpcDecode(dec, signalBits, 648, 500);
 	ASSERT_NE(result, (uint8_t *)0);
 	for (int i = 0; i < 324; i++) {
 		int exp = message[i];

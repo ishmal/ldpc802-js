@@ -84,15 +84,15 @@ static int createSPGraph(LdpcDecoder *dec) {
 		cnode->qrNodes = qrNodes;
 		QRNode *qr = qrNodes;
 		for (int j = 1; j <= rlen; j++) {
-			VariableNode *vnode = variableNodes + row[j];
 			qr->q = 0.0;
 			qr->r = 0.0;
+			VariableNode *vnode = variableNodes + row[j];
 			int nrLinks = vnode->linkLen;
-			vnode->links[nrLinks++] = qr;
-			if (nrLinks > linkMax) {
-				printf("TOO MANY LINKS!!\n");
+			if (nrLinks >= linkMax) {
+				printf("too many QR links: %d > %d\n", nrLinks, linkMax);
 				return 0;
 			}
+			vnode->links[nrLinks++] = qr;
 			vnode->linkLen = nrLinks;
 			max = (nrLinks > max) ? nrLinks : max;
 		}
