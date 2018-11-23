@@ -32,6 +32,10 @@ void multiplySparse(uint8_t *out, int **sparseMatrix,  int len,  uint8_t *arr) {
  */
 void substituteSparse(uint8_t *out, int **sparseMatrix, int len, uint8_t *arr) {
 	uint8_t *y = out;
+	/**
+	 * Note that although this looks very similar to the multiplication above,
+	 * each iteration depends upon the results of the previous iteration
+	 */
 	y[0] = arr[0];
 	for (int i = 1; i < len; i++) {
 		int *row = sparseMatrix[i];
@@ -48,7 +52,7 @@ void substituteSparse(uint8_t *out, int **sparseMatrix, int len, uint8_t *arr) {
  * Convert an array of bytes to an array of bits. Bigendian.
  * The output array is 8x the size of the input, each element a 1 or 0
  * @param {uint8_t *} bits output buffer for bits
- * @param {uint8_t *} bytes array of bytes
+ * @param {uint8_t *} bytes inpuyt array of bytes
  * @param {int} len number of bytes
  */
 void bytesToBitsBE(uint8_t *bits, uint8_t *bytes, int len) {
@@ -72,16 +76,18 @@ void bytesToBitsBE(uint8_t *bits, uint8_t *bytes, int len) {
  * @param {int} len number of bits
  */
 void bitsToBytesBE(uint8_t *bytes, uint8_t *bits, int len) {
+	uint8_t b = 0;
+	int column = 0;
 	while (len--) {
-		uint8_t b = (*bits++);
 		b = (b << 1) + (*bits++);
-		b = (b << 1) + (*bits++);
-		b = (b << 1) + (*bits++);
-		b = (b << 1) + (*bits++);
-		b = (b << 1) + (*bits++);
-		b = (b << 1) + (*bits++);
-		b = (b << 1) + (*bits++);
-		*bytes++ = b;
+		if (++column >= 8) {
+			*bytes++ = b;
+			b = 0;
+			column = 0;
+		}
+	}
+	if (column) {
+		*bytes = b;
 	}
 }
 

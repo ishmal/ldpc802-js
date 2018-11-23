@@ -5,26 +5,20 @@
 
 #include "codes.h"
 
-struct QRNode_def {
+typedef struct {
 	float r;
 	float q;
-	struct QRNode_def *next;
-};
-typedef struct QRNode_def QRNode;
-
-struct LinkNode_def {
-	QRNode *qr;
-	struct LinkNode_def *next;
-};
-typedef struct LinkNode_def LinkNode;
+} QRNode;
 
 typedef struct {
+	uint8_t qrLen;
 	QRNode *qrNodes;
 } CheckNode;
 
 typedef struct {
 	float ci;
-	LinkNode *links;
+	uint8_t linkLen;
+	QRNode **links;
 } VariableNode;
 
 //max M is 972
@@ -38,6 +32,10 @@ typedef struct {
 } LdpcDecoder;
 
 
+#ifdef __cplusplus  
+extern "C" {
+#endif  
+  
 /**
  * Create a new decoder context
  * @param {Code *} code the code around which to configure this decoder
@@ -71,5 +69,10 @@ uint8_t *ldpcDecode(LdpcDecoder *dec, float *inBits, int nrBits, int maxIter);
  */
 uint8_t *ldpcDecodeBytes(LdpcDecoder *dec, float *bits, int nrBits, int maxIter);
 
+
+
+#ifdef __cplusplus  
+}  
+#endif  
 
 #endif

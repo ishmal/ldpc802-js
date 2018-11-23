@@ -49,67 +49,62 @@ static int checkFast(int **matrix, int len, uint8_t *codeword) {
 /**
  * Create an empty Sum Product tanner graph
  */
-static void createSPGraph(LdpcDecoder *dec) {
+static int createSPGraph(LdpcDecoder *dec) {
 	Code *code = dec->code;
 	int M = code->M;
 	int N = code->N;
 	int **H = code->H;
 
-	CheckNode *checkNodes = (CheckNode *) malloc(M * sizeof(CheckNode));
-	VariableNode *variableNodes = (VariableNode *) malloc(N * sizeof(VariableNode));
+	int linkMax = M / 27; // M / QC's dimension
 
 	/**
 	 * First make two blank tables
 	 */
-	CheckNode *cn = checkNodes;
-	for (int i = 0; i < M; i++, cn++) {
-		cn->qrNodes = (QRNode *)0;
-	}
+	CheckNode *checkNodes = (CheckNode *) malloc(M * sizeof(CheckNode));
+
+	VariableNode *variableNodes = (VariableNode *) malloc(N * sizeof(VariableNode));
 	VariableNode *vn = variableNodes;
 	for (int i = 0; i < N; i++, vn++) {
 		vn->ci = 0.0;
-		vn->links = (LinkNode *)0;
+		vn->linkLen = 0;
+		vn->links = (QRNode **) malloc(linkMax * sizeof(QRNode *));
 	}
 
 	/**
 	 * Set up QR records, and link to them from both sides
 	 * using the sparse array information from H
 	 */
+	int max = 0;
 	CheckNode *cnode = checkNodes;
 	for (int i = 0 ; i < M; i++, cnode++) {
 		int *row = H[i];
 		int rlen = row[0];
-		QRNode *prevQr = (QRNode *)0;
-		LinkNode *prevLink = (LinkNode *)0;
+		QRNode *qrNodes = (QRNode *) malloc(rlen * sizeof(QRNode));
+		cnode->qrLen = rlen;
+		cnode->qrNodes = qrNodes;
+		QRNode *qr = qrNodes;
 		for (int j = 1; j <= rlen; j++) {
 			VariableNode *vnode = variableNodes + row[j];
-			QRNode *qr = (QRNode *)malloc(sizeof(QRNode));
 			qr->q = 0.0;
 			qr->r = 0.0;
-			qr->next = (QRNode *)0;
-			if (!prevQr) {
-				cnode->qrNodes = qr;
-			} else {
-				prevQr->next = qr;
+			int nrLinks = vnode->linkLen;
+			vnode->links[nrLinks++] = qr;
+			if (nrLinks > linkMax) {
+				printf("TOO MANY LINKS!!\n");
+				return 0;
 			}
-			LinkNode *link = (LinkNode *)malloc(sizeof(LinkNode));
-			link->qr = qr;
-			link->next = (LinkNode *)0;
-			if (!prevLink) {
-				vnode->links = link;
-			} else {
-				prevLink->next = link;
-			}
-			prevQr = qr;
-			prevLink = link;
+			vnode->linkLen = nrLinks;
+			max = (nrLinks > max) ? nrLinks : max;
 		}
 	}
+	//printf("M:%d max: %d\n", M, max);
 
 	/**
 	 * Attach to this instance
 	 */
 	dec->checkNodes = checkNodes;
 	dec->variableNodes = variableNodes;
+	return 1;
 }
 
 
@@ -127,7 +122,10 @@ LdpcDecoder *ldpcDecoderCreate(Code *code) {
 	}
 
 	dec->code = code;
-	createSPGraph(dec);
+	if (!createSPGraph(dec)) {
+		free(dec);
+		return (LdpcDecoder *)0;
+	}
 	return dec;
 }
 
@@ -145,14 +143,8 @@ void ldpcDecoderDestroy(LdpcDecoder *dec) {
 	 * Check Nodes
 	 */
 	CheckNode *cn = dec->checkNodes;
-	for (int i = 0 ; i < M; i++ ) {
-		QRNode *qr = cn->qrNodes;
-		while (qr) {
-			QRNode *next = qr->next;
-			free(qr);
-			qr = next;
-		}
-		cn++;
+	for (int i = 0 ; i < M; i++, cn++) {
+		free(cn->qrNodes);
 	}
 	free(dec->checkNodes);
 
@@ -160,18 +152,10 @@ void ldpcDecoderDestroy(LdpcDecoder *dec) {
 	 * Variable Nodes
 	 */
 	VariableNode *vn = dec->variableNodes;
-	for (int i = 0; i < N; i++) {
-		LinkNode *link = vn->links;
-		while (link) {
-			LinkNode *next = link->next;
-			free(link);
-			link = next;
-		}
-		vn++;
+	for (int i = 0; i < N; i++, vn++) {
+		free(vn->links);
 	}
 	free(dec->variableNodes);
-
-	free(dec->syndrome);
 
 	free(dec);
 }
@@ -204,8 +188,9 @@ uint8_t *ldpcDecode(LdpcDecoder *dec, float *inBits, int nrBits, int maxIter) {
 	for (int i = 0; i < N; i++) {
 		float Lci = inBits[i] * weight;
 		vnode->ci = Lci;
-		for (LinkNode *link = vnode->links; link; link = link->next) {
-			QRNode *qr = link->qr;
+		QRNode **links = vnode->links;
+		for (int j = 0; j < vnode->linkLen; j++) {
+			QRNode *qr = *links++;
 			qr->r = 0.0;
 			qr->q = Lci;
 		}
@@ -220,13 +205,17 @@ uint8_t *ldpcDecode(LdpcDecoder *dec, float *inBits, int nrBits, int maxIter) {
 		 */
 		CheckNode *checkNode = checkNodes;
 		for (int m = 0; m < M; m++) {
-			for (QRNode *qr = checkNode->qrNodes; qr; qr = qr->next) {
+			int qrLen = checkNode->qrLen;
+			QRNode *qrNodes = checkNode->qrNodes;
+			QRNode *qr = qrNodes;
+			for (int i = 0; i < qrLen ; i++, qr++) {
 				/**
 				 * Sum and product for links !== i
 				 */
 				float sum = 0.0;
-				float prod = 1.0;				
-				for (QRNode *v = checkNode->qrNodes; v; v = v->next) {
+				float prod = 1.0;	
+				QRNode *v = qrNodes;			
+				for (int j = 0; j < qrLen ; j++, v++) {
 					if (v == qr) {
 						continue;
 					}
@@ -247,17 +236,20 @@ uint8_t *ldpcDecode(LdpcDecoder *dec, float *inBits, int nrBits, int maxIter) {
 		 * Step 3.  Update qij
 		 */
 		VariableNode *vnode = variableNodes;
-		for (int i = 0; i < N; i++) {
-			for (LinkNode *link = vnode->links; link; link = link->next) {
+		for (int i = 0; i < N; i++, vnode++) {
+			int linkLen = vnode->linkLen;
+			QRNode **links = vnode->links;
+			QRNode **link = links;
+			for (int j = 0; j < linkLen ; j++, link++) {
 				float sum = 0.0;
-				for (LinkNode *c = vnode->links; c; c = c->next) {
+				QRNode **c = links;
+				for (int k = 0; k < linkLen; k++, c++) {
 					if (c != link) {
-						sum += c->qr->r;
+						sum += (*c)->r;
 					}
 				}
-				link->qr->q = vnode->ci + sum;
+				(*link)->q = vnode->ci + sum;
 			}
-			vnode++;
 		}
 
 		/**
@@ -265,14 +257,15 @@ uint8_t *ldpcDecode(LdpcDecoder *dec, float *inBits, int nrBits, int maxIter) {
 		 */
 		uint8_t *c = dec->syndrome;
 		vnode = variableNodes;
-		for (int i = 0; i < N ; i++) {
+		for (int i = 0; i < N ; i++, vnode++) {
 			float sum = 0.0;
-			for (LinkNode *link = vnode->links; link; link = link->next) {
-				sum += link->qr->r;
+			int linkLen = vnode->linkLen;
+			QRNode **link = vnode->links;
+			for (int j = 0; j < linkLen; j++, link++) {
+				sum += (*link)->r;
 			}
 			float LQi = vnode->ci + sum;
 			c[i] = LQi < 0 ? 1 : 0;
-			vnode++;
 		}
 		if (checkFast(H, M, c)) {
 			return c;
