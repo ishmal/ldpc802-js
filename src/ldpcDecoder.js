@@ -269,9 +269,8 @@ export class LdpcDecoder {
 			for (let i = 0; i < N ; i++) {
 				const vnode = variableNodes[i];
 				const links = vnode.links;
-				const llen = links.length;
 				let sum = 0;
-				for (let v = 0 ; v < llen ; v++) {
+				for (let v = 0, llen = links.length ; v < llen ; v++) {
 					const link = links[v];
 					sum += link.r;
 				}

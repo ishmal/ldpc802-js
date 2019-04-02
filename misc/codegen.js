@@ -71,29 +71,39 @@ class CodeGen {
 
 	tableOut(name, tname, table) {
 		let buf = "";
-		let maxrow = 0;
+
+		let rowNames = [];
+
+		const fullName = name + "_" + tname;
+
 		table.forEach((r, i) => {
-			let len = r.length.toString();
-			maxrow = Math.max(maxrow, r.length + 1);
-			if (len !== "0") {
-				len += ", ";
-			}
-			buf += `    (int []) { ${len}`;
-			r.forEach((c, j) => {
-				buf += `${c}`;
-				if (j < r.length -1) {
-					buf += ", ";
-				}
+			let len = r.length;
+
+			const rowName = fullName + "_" + i;
+			rowNames.push(rowName);
+			buf += `static int ${rowName}[${len + 1}] = { ${len}`;
+			r.forEach(c => {
+				buf += `, ${c}`;
 			});
-			buf += ` }`;
-			if (i < table.length -1) {
+			buf += ` };\n`;
+		});
+
+		buf += `static int *${fullName}[${table.length}] = {\n`;
+		buf += "\t";
+		let col = 0;
+		rowNames.forEach((name, i) => {
+			buf += name;
+			if (i < rowNames.length - 1) {
 				buf += ", ";
 			}
-			buf += "\n";
+
+			if (++col >= 10) {
+				col = 0;
+				buf += "\n\t";
+			}
 		});
-		buf += "};\n\n";
-		let bufhead = `static int *${name}_${tname}[${table.length}] = {\n`;
-		buf = bufhead + buf;
+		buf += "\n};\n\n";
+
 		return buf;
 	}
 
