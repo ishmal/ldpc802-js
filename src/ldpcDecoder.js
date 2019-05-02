@@ -16,7 +16,7 @@ export class LdpcDecoder {
 	 */
 	constructor(code) {
 		this.code = code;
-		this.createSPGraph();
+		this.createTanner();
 		this.maxIter = 100;
 	}
 
@@ -116,7 +116,7 @@ export class LdpcDecoder {
 	/**
 	 * Create an empty
 	 */
-	createSPGraph() {
+	createTanner() {
 		const code = this.code;
 		const M = code.M;
 		const N = code.N;
@@ -174,7 +174,7 @@ export class LdpcDecoder {
 	 * @return decoded array of real -1's and 1's
 	 */
 	decode(inBits) {
-		const result = this.decodeSumProduct(inBits);
+		const result = this.decodeSP(inBits);
 		return result;
 	}
 
@@ -184,7 +184,7 @@ export class LdpcDecoder {
 	 * @return decoded array of message array of data from -1 -> 1
 	 */
 	/* eslint-disable max-lines-per-function */
-	decodeSumProduct(inBits) {
+	decodeSP(inBits) {
 		// localize some values
 		const M = this.code.M;
 		const N = this.code.N;
@@ -194,15 +194,15 @@ export class LdpcDecoder {
 		/**
 		 * Step 1.  Initialization of c(ij) and q(ij)
 		 */
-		const variance = LdpcDecoder.calcVariance(inBits);
-		const weight = 2 / variance;
+		//const variance = LdpcDecoder.calcVariance(inBits);
+		//const weight = 2 / variance;
+		const weight = 1.0;
 		for (let i = 0; i < N; i++) {
 			const vnode = variableNodes[i];
 			const Lci = inBits[i] * weight;
 			vnode.ci = Lci;
 			const links = vnode.links;
-			const llen = links.length;
-			for (let j = 0; j < llen ; j++) {
+			for (let j = 0, llen = links.length; j < llen ; j++) {
 				const link = links[j];
 				link.r = 0;				
 				link.q = Lci;				
@@ -218,28 +218,24 @@ export class LdpcDecoder {
 			for (let m = 0; m < M; m++) {
 				const checkNode = checkNodes[m];
 				const links = checkNode.links;
-				const llen = links.length;
 
-				for (let i = 0; i < llen ; i++) {
+				for (let i = 0, llen = links.length; i < llen ; i++) {
 					const rlink = links[i];
 					/**
-					 * Sum and product for links !== i
+					 * Product for links != v
 					 */
-					let sum = 0;
 					let prod = 1;
 					for (let v = 0; v < llen; v++) {
 						if (v === i) {
 							continue;
 						}
 						const q = links[v].q;
-						const beta = Math.abs(q);
-						const phiBeta = calcPhi(beta);
-						sum += phiBeta;
-						const alpha = q < 0 ? -1 : 1;
-						prod *= alpha;
+						const tanh = Math.tanh(0.5 * q);
+						prod *= tanh;
 					}
-					const phiSum = calcPhi(sum);
-					rlink.r = prod * phiSum;
+					const all = prod;
+					const atanh = Math.log( (1 + all) / (1 - all) );
+					rlink.r = atanh;
 				}
 			}
 
@@ -249,8 +245,7 @@ export class LdpcDecoder {
 			for (let i = 0; i < N; i++) {
 				const vnode = variableNodes[i];
 				const links = vnode.links;
-				const llen = links.length;
-				for (let k = 0; k < llen; k++) {
+				for (let k = 0, llen = links.length; k < llen; k++) {
 					const link = links[k];
 					let sum = 0;
 					for (let c = 0; c < llen; c++) {
@@ -286,6 +281,119 @@ export class LdpcDecoder {
 
 		return null;
 	}
+
+	/**
+	 * Decode codeword bits to message bits
+	 * @param {array} message array of data from -1 -> 1
+	 * @return decoded array of message array of data from -1 -> 1
+	 */
+	/* eslint-disable max-lines-per-function */
+	decodeMS(inBits) {
+		// localize some values
+		const M = this.code.M;
+		const N = this.code.N;
+		const checkNodes = this.checkNodes;
+		const variableNodes = this.variableNodes;
+
+		/**
+		 * Step 1.  Initialization of c(ij) and q(ij)
+		 */
+		//const variance = LdpcDecoder.calcVariance(inBits);
+		//const weight = 2 / variance;
+		const weight = 1;
+		for (let i = 0; i < N; i++) {
+			const vnode = variableNodes[i];
+			const Lci = inBits[i] * weight;
+			vnode.ci = Lci;
+			const links = vnode.links;
+			for (let j = 0, llen = links.length; j < llen ; j++) {
+				const link = links[j];
+				link.r = 0;				
+				link.q = Lci;				
+			}
+		}
+
+
+		for (let iter = 0; iter < this.maxIter; iter++) {
+
+			/**
+			 * Step 2. update r(ji)
+			 */
+			for (let m = 0; m < M; m++) {
+				const checkNode = checkNodes[m];
+				const links = checkNode.links;
+
+				for (let i = 0, llen = links.length; i < llen ; i++) {
+					const rlink = links[i];
+					/**
+					 * prod starts high, grows low
+					 */
+					let prod = 1000.0
+					for (let v = 0; v < llen; v++) {
+						if (v === i) {
+							continue;
+						}
+						const q = links[v].q;
+						const absProd = Math.abs(prod);
+						const absQ = Math.abs(q);
+						const sgnQ = q < 0 ? -1 : 1;
+						const sgnProd = prod < 0 ? -1 : 1;
+						const min = absQ < absProd ? absQ : absProd;
+						prod = sgnQ * sgnProd * min
+
+					}
+					rlink.r = prod;
+				}
+			}
+
+			/**
+			 * Step 3.  Update qij
+			 */
+			for (let i = 0; i < N; i++) {
+				const vnode = variableNodes[i];
+				const links = vnode.links;
+				for (let k = 0, llen = links.length; k < llen; k++) {
+					const link = links[k];
+					let sum = 0;
+					for (let c = 0; c < llen; c++) {
+						if (c !== k) {
+							sum += links[c].r;
+						}
+					}
+					link.q = vnode.ci + sum;
+				}
+			}
+
+			/**
+			 * Step 4.  Check syndrome
+			 */
+			const c = [];
+			for (let i = 0; i < N ; i++) {
+				const vnode = variableNodes[i];
+				const links = vnode.links;
+				let sum = 0;
+				for (let v = 0, llen = links.length ; v < llen ; v++) {
+					const link = links[v];
+					sum += link.r;
+				}
+				const LQi = vnode.ci + sum;
+				c[i] = LQi < 0 ? 1 : 0;
+			}
+			if (this.checkFast(c)) {
+				// console.log(`iter: ${iter}`)
+				return c.slice(0, this.code.messageBits);
+			}
+
+
+		} // for iter
+
+		return null;
+	}
+
+	decode(inbits) {
+		return this.decodeMS(inbits);
+	}
+
 	/* eslint-enable */
 
 	/**
