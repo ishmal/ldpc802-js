@@ -69,78 +69,57 @@ class CodeGen {
 		this.codes = table.codes;
 	}
 
-	tableOut(name, tname, table) {
-		let buf = "";
-
-		let rowNames = [];
-
-		const fullName = name + "_" + tname;
+	tableOut(name, tableName, table) {
+		let buf = `static int *${name}_${tableName}[${table.length}] = {\n`;
 
 		table.forEach((r, i) => {
 			let len = r.length;
 
-			const rowName = fullName + "_" + i;
-			rowNames.push(rowName);
-			buf += `static int ${rowName}[${len + 1}] = { ${len}`;
+			buf += `\t(int []){ ${len}`;
 			r.forEach(c => {
 				buf += `, ${c}`;
 			});
-			buf += ` };\n`;
+			buf += ` },\n`;
 		});
 
-		buf += `static int *${fullName}[${table.length}] = {\n`;
-		buf += "\t";
-		let col = 0;
-		rowNames.forEach((name, i) => {
-			buf += name;
-			if (i < rowNames.length - 1) {
-				buf += ", ";
-			}
-
-			if (++col >= 10) {
-				col = 0;
-				buf += "\n\t";
-			}
-		});
-		buf += "\n};\n\n";
-
+		buf += "};";
 		return buf;
 	}
 
 
 	codeOut(name, rate, length) {
-		let buf = "";
-		buf += "/* ############################################################\n";
-		buf += "### " + name + "\n";
-		buf += "############################################################ */\n\n";
 		const code = this.codes[rate][length];
-		buf += this.tableOut(name, "A", code.A);
-		buf += this.tableOut(name, "B", code.B);
-		buf += this.tableOut(name, "C", code.C);
-		buf += this.tableOut(name, "D", code.D);
-		buf += this.tableOut(name, "E", code.E);
-		buf += this.tableOut(name, "T", code.T);
-		buf += this.tableOut(name, "H", code.H);
-		buf += "\n";
-		buf += `
+		const buf = `
+/* ############################################################
+### ${name}
+############################################################ */
+
+${this.tableOut(name, "A", code.A)}
+${this.tableOut(name, "B", code.B)}
+${this.tableOut(name, "C", code.C)}
+${this.tableOut(name, "D", code.D)}
+${this.tableOut(name, "E", code.E)}
+${this.tableOut(name, "T", code.T)}
+${this.tableOut(name, "H", code.H)}
+
 Code ${name} = {
 	${code.M}, // M
 	${code.N}, // N
 	${code.messageBits}, // messageBits
-	${code.A.length},
-	(int **)${name}_A,
-	${code.B.length},
-	(int **)${name}_B,
-	${code.C.length},
-	(int **)${name}_C,
-	${code.D.length},
-	(int **)${name}_D,
-	${code.E.length},
-	(int **)${name}_E,
-	${code.T.length},
-	(int **)${name}_T,
-	${code.H.length},
-	(int **)${name}_H
+	${code.A.length}, // A
+	(int **)&${name}_A,
+	${code.B.length}, // B
+	(int **)&${name}_B,
+	${code.C.length}, // C
+	(int **)&${name}_C,
+	${code.D.length}, // D
+	(int **)&${name}_D,
+	${code.E.length}, // E
+	(int **)&${name}_E,
+	${code.T.length}, // T
+	(int **)&${name}_T,
+	${code.H.length}, // H
+	(int **)&${name}_H
 };
 
 
